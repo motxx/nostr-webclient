@@ -5,15 +5,15 @@ import replyData from '../../data/dummy-reply-data';
 import meImage from '../../assets/images/example/me.png';
 import Post from '../Post/Post';
 import { PostType } from '../../global/types';
-import './RepliesModal.css';
+import './RepliesThreadModal.css';
 
-interface RepliesModalProps {
+interface RepliesThreadModalProps {
   originalPost: PostType;
   onClose: () => void;
   showModal: boolean;
 }
 
-const RepliesModal: React.FC<RepliesModalProps> = ({ originalPost, onClose, showModal }) => {
+const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({ originalPost, onClose, showModal }) => {
   const [newReply, setNewReply] = useState('');
 
   const frameRef = React.useRef<HTMLDivElement>(null);
@@ -32,6 +32,7 @@ const RepliesModal: React.FC<RepliesModalProps> = ({ originalPost, onClose, show
         timestamp: 'just now',
         userId: "riel.pages.dev",
         verified: false,
+        replies: 0,
         likes: 0,
         reposts: 0,
         zaps: 0,
@@ -68,9 +69,10 @@ const RepliesModal: React.FC<RepliesModalProps> = ({ originalPost, onClose, show
                 userName={originalPost.userName}
                 verified={originalPost.verified}
                 content={originalPost.content}
-                likes={originalPost.likes} 
-                reposts={originalPost.reposts} 
-                zaps={originalPost.zaps} 
+                replies={originalPost.replies}
+                likes={originalPost.likes}
+                reposts={originalPost.reposts}
+                zaps={originalPost.zaps}
                 userImage={originalPost.userImage}
                 timestamp={originalPost.timestamp}
                 following={originalPost.following}
@@ -90,7 +92,7 @@ const RepliesModal: React.FC<RepliesModalProps> = ({ originalPost, onClose, show
                 onClick={handleNewReplySubmit}
               >
                 <FiSend className="mr-2" />
-                投稿
+                返信
               </button>
             </div>
 
@@ -104,9 +106,10 @@ const RepliesModal: React.FC<RepliesModalProps> = ({ originalPost, onClose, show
                     userName={reply.userName}
                     verified={reply.verified}
                     content={reply.content}
-                    likes={reply.likes} 
-                    reposts={reply.reposts} 
-                    zaps={reply.zaps} 
+                    replies={reply.replies}
+                    likes={reply.likes}
+                    reposts={reply.reposts}
+                    zaps={reply.zaps}
                     userImage={reply.userImage}
                     timestamp={reply.timestamp}
                     following={reply.following}
@@ -122,4 +125,4 @@ const RepliesModal: React.FC<RepliesModalProps> = ({ originalPost, onClose, show
   );
 };
 
-export default RepliesModal;
+export default RepliesThreadModal;

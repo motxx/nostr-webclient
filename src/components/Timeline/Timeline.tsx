@@ -61,6 +61,7 @@ const Timeline: React.FC<TimelineProps> = ({ onScrollUp, onScrollDown }) => {
                 userName={post.userName}
                 verified={post.verified}
                 content={post.content}
+                replies={post.replies}
                 likes={post.likes}
                 zaps={post.zaps}
                 reposts={post.reposts}

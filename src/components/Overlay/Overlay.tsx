@@ -1,16 +1,18 @@
 import React from 'react';
 import MediaContent from './MediaContent';
 import OverlayActions from './OverlayActions';
-import Replies from './Replies';
+import RepliesThread from './RepliesThread';
 import { PostType } from '../../global/types';
+import { PostActionType } from '../Post/Post';
 
 interface OverlayProps {
   isOpen: boolean;
   onClose: () => void;
   originalPost: PostType;
+  onClickAction: (type: PostActionType) => void;
 }
 
-const Overlay: React.FC<OverlayProps> = ({ isOpen, onClose, originalPost }) => {
+const Overlay: React.FC<OverlayProps> = ({ isOpen, onClose, originalPost, onClickAction }) => {
   if (!isOpen) return null;
 
   const handleBackgroundClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -31,10 +33,10 @@ const Overlay: React.FC<OverlayProps> = ({ isOpen, onClose, originalPost }) => {
       <div className="relative w-full h-full flex overflow-hidden">
         <div className="relative flex-1 h-full" onClick={handleBackgroundClick}>
           {originalPost.mediaUrl && originalPost.mediaType && <MediaContent mediaUrl={originalPost.mediaUrl} mediaType={originalPost.mediaType} onBackgroundClick={handleBackgroundClick} />}
-          <OverlayActions replies={0} reposts={originalPost.reposts} likes={originalPost.likes} zaps={originalPost.zaps} onBackgroundClick={handleBackgroundClick} />
+          <OverlayActions originalPost={originalPost} onBackgroundClick={handleBackgroundClick} onClickAction={onClickAction} />
         </div>
         <div className="hidden md:block w-80 h-full">
-          <Replies originalPost={originalPost} />
+          <RepliesThread originalPost={originalPost} />
         </div>
       </div>
     </div>

@@ -5,11 +5,11 @@ import meImage from '../../assets/images/example/me.png';
 import Post from '../Post/Post';
 import { PostType } from '../../global/types';
 
-interface RepliesProps {
+interface RepliesThreadProps {
   originalPost: PostType;
 }
 
-const Replies: React.FC<RepliesProps> = ({ originalPost }) => {
+const RepliesThread: React.FC<RepliesThreadProps> = ({ originalPost }) => {
   const [newReply, setNewReply] = useState('');
 
   const handleNewReplyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -26,6 +26,7 @@ const Replies: React.FC<RepliesProps> = ({ originalPost }) => {
         timestamp: 'just now',
         userId: "riel.pages.dev",
         verified: false,
+        replies: 0,
         likes: 0,
         reposts: 0,
         zaps: 0,
@@ -43,6 +44,7 @@ const Replies: React.FC<RepliesProps> = ({ originalPost }) => {
           userName={originalPost.userName}
           verified={originalPost.verified}
           content={originalPost.content}
+          replies={originalPost.replies}
           likes={originalPost.likes} 
           reposts={originalPost.reposts} 
           zaps={originalPost.zaps} 
@@ -55,7 +57,7 @@ const Replies: React.FC<RepliesProps> = ({ originalPost }) => {
 
       <div className="mb-6">
         <textarea
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent"
           placeholder="リプライを入力..."
           value={newReply}
           onChange={handleNewReplyChange}
@@ -65,7 +67,7 @@ const Replies: React.FC<RepliesProps> = ({ originalPost }) => {
           onClick={handleNewReplySubmit}
         >
           <FiSend className="mr-2" />
-          投稿
+          返信
         </button>
       </div>
 
@@ -77,6 +79,7 @@ const Replies: React.FC<RepliesProps> = ({ originalPost }) => {
               userName={reply.userName}
               verified={reply.verified}
               content={reply.content}
+              replies={reply.replies}
               likes={reply.likes} 
               reposts={reply.reposts} 
               zaps={reply.zaps} 
@@ -92,4 +95,4 @@ const Replies: React.FC<RepliesProps> = ({ originalPost }) => {
   );
 };
 
-export default Replies;
+export default RepliesThread;

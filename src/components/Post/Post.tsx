@@ -8,18 +8,20 @@ import PostMedia from './PostMedia';
 import PostActions from './PostActions';
 import { PostType } from '../../global/types';
 import toast, { Toaster } from 'react-hot-toast';
-import RepliesModal from '../Overlay/RepliesModal';
+import RepliesThreadModal from '../Overlay/RepliesThreadModal';
 
 type PostProps = PostType & {
   onToggleFollow: () => boolean;
 };
+
+export type PostActionType = "reply" | "repost" | "like" | "zap";
 
 const Post: React.FC<PostProps> = ({ userName, userId, verified, content, likes, reposts, zaps, userImage, timestamp, mediaUrl, mediaType, following, onToggleFollow }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [isFollowing, setIsFollowing] = useState(following);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const [isRepliesModalOpen, setIsRepliesModalOpen] = useState(false);
+  const [isRepliesThreadModalOpen, setIsRepliesThreadModalOpen] = useState(false);
   const youtubeIFrameRef = useRef<HTMLIFrameElement>(null);
 
   const openMenu = () => setShowMenu(true);
@@ -27,15 +29,23 @@ const Post: React.FC<PostProps> = ({ userName, userId, verified, content, likes,
 
   const openOverlay = () => setIsOverlayOpen(true);
   const closeOverlay = () => setIsOverlayOpen(false);
-  const openRepliesModal = () => setIsRepliesModalOpen(true);
-  const closeRepliesModal = () => setIsRepliesModalOpen(false);
+  const openRepliesThreadModal = () => setIsRepliesThreadModalOpen(true);
+  const closeRepliesThreadModal = () => setIsRepliesThreadModalOpen(false);
 
   const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
-  const openPostDetails = () => {
-    if (isMobile()) {
-      openRepliesModal();
+
+  const onClickAction = (type: PostActionType) => {
+    if (type === "reply") {
+      if (isMobile()) {
+        openRepliesThreadModal();
+      } else {
+        openOverlay();
+      }
+    } else if (type === "repost") {
+    } else if (type === "like") {
+    } else if (type === "zap") {
     } else {
-      openOverlay();
+      throw new Error(`Unsupported type: ${type}`);
     }
   };
 
@@ -115,9 +125,9 @@ const Post: React.FC<PostProps> = ({ userName, userId, verified, content, likes,
           </span>
         )}
       </div>
-      <PostActions replies={0} reposts={reposts} likes={likes} zaps={zaps} openPostDetails={openPostDetails} />
-      <Overlay isOpen={isOverlayOpen} onClose={closeOverlay} originalPost={{ userId, userName, verified, content, likes, reposts, zaps, userImage, timestamp, mediaUrl, mediaType, following: isFollowing }} />
-      <RepliesModal onClose={closeRepliesModal} showModal={isRepliesModalOpen} originalPost={{ userId, userName, verified, content, likes, reposts, zaps, userImage, timestamp, mediaUrl, mediaType, following: isFollowing }} />
+      <PostActions replies={0} reposts={reposts} likes={likes} zaps={zaps} onClickAction={onClickAction} />
+      <Overlay isOpen={isOverlayOpen} onClose={closeOverlay} originalPost={{ userId, userName, verified, content, replies: 0, likes, reposts, zaps, userImage, timestamp, mediaUrl, mediaType, following: isFollowing }} onClickAction={onClickAction} />
+      <RepliesThreadModal onClose={closeRepliesThreadModal} showModal={isRepliesThreadModalOpen} originalPost={{ userId, userName, verified, content, replies: 0, likes, reposts, zaps, userImage, timestamp, mediaUrl, mediaType, following: isFollowing }} />
       <Toaster />
     </div>
   );

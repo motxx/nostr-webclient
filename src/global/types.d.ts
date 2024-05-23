@@ -3,6 +3,7 @@ export type PostType = {
   userName: string;
   verified: boolean;
   content: string;
+  replies: number;
   likes: number;
   reposts: number;
   zaps: number;
