@@ -4,12 +4,33 @@ import Timeline from './components/Timeline/Timeline'
 import Trends from './components/Widgets/Trends'
 import RecommendedUsers from './components/Widgets/RecommendedUsers'
 import RecommendedRelays from './components/Widgets/RecommendedRelays'
+import toast, { Toaster } from 'react-hot-toast'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
     useState<boolean>(false)
   const focusBottomTab = () => setShouldFocusBottomTab(false)
   const unfocusBottomTab = () => setShouldFocusBottomTab(true)
+
+  // ユーザデータのモック
+  const [following, setFollowing] = useState<boolean>(false)
+
+  const toggleFollow = (userId: string) => {
+    setFollowing(!following)
+    toast(
+      `@${userId}さん${following ? 'をフォローしました' : 'のフォローを解除しました'}`,
+      {
+        position: 'bottom-center',
+        duration: 2000,
+        style: {
+          borderRadius: '40px',
+          background: '#1d4ed8',
+          color: '#fff',
+        },
+      }
+    )
+    return true
+  }
 
   return (
     <div className="bg-white dark:bg-black min-h-screen flex">
@@ -23,6 +44,7 @@ const App: React.FC = () => {
             <Timeline
               onScrollUp={focusBottomTab}
               onScrollDown={unfocusBottomTab}
+              onToggleFollow={toggleFollow}
             />
           </div>
           <div
@@ -34,6 +56,7 @@ const App: React.FC = () => {
             <RecommendedUsers />
           </div>
         </div>
+        <Toaster />
       </div>
     </div>
   )

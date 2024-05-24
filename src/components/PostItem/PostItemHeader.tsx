@@ -2,58 +2,44 @@ import { FiMoreHorizontal } from 'react-icons/fi'
 import { RiVerifiedBadgeFill } from 'react-icons/ri'
 import PostItemMenu from './PostItemMenu'
 import { useState } from 'react'
+import { PostItemType } from '../../global/types'
 
 interface PostItemHeaderProps {
-  userName: string
-  userId: string
-  userImage: string
-  verified: boolean
-  timestamp: string
-  isFollowing: boolean
-  toggleFollow: () => void
+  post: PostItemType
+  onToggleFollow: (userId: string) => boolean
 }
 
 const PostItemHeader: React.FC<PostItemHeaderProps> = ({
-  userName,
-  userId,
-  userImage,
-  verified,
-  timestamp,
-  isFollowing,
-  toggleFollow,
+  post,
+  onToggleFollow,
 }) => {
   const [showMenu, setShowMenu] = useState(false)
   const openMenu = () => setShowMenu(true)
   const closeMenu = () => setShowMenu(false)
-
-  const handleToggleFollow = () => {
-    toggleFollow()
-    closeMenu()
-  }
 
   return (
     <>
       <div className="flex justify-between items-center font-noto-sans">
         <div className="flex items-center space-x-3">
           <img
-            src={userImage}
-            alt={`${userName}'s profile`}
+            src={post.userImage}
+            alt={`${post.userName}'s profile`}
             className="w-8 h-8 ml-1 rounded-full"
           />
           <div>
             <div className="flex items-center">
               <div className="font-semibold text-xs text-gray-700 dark:text-gray-300">
-                {userName}
+                {post.userName}
               </div>
-              {verified && (
+              {post.verified && (
                 <RiVerifiedBadgeFill className="mt-1 ml-1 fill-blue-500" />
               )}
               <div className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                {timestamp}
+                {post.timestamp}
               </div>
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              @{userId}
+              @{post.userId}
             </div>
           </div>
         </div>
@@ -64,9 +50,9 @@ const PostItemHeader: React.FC<PostItemHeaderProps> = ({
       </div>
       {showMenu && (
         <PostItemMenu
-          userId={userId}
-          isFollowing={isFollowing}
-          onToggleFollow={handleToggleFollow}
+          userId={post.userId}
+          following={post.following}
+          onToggleFollow={onToggleFollow}
           onClose={closeMenu}
         />
       )}

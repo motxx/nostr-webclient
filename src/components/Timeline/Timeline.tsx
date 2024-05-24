@@ -5,9 +5,14 @@ import { posts } from '../../data/dummy-posts'
 interface TimelineProps {
   onScrollUp: () => void
   onScrollDown: () => void
+  onToggleFollow: (userId: string) => boolean
 }
 
-const Timeline: React.FC<TimelineProps> = ({ onScrollUp, onScrollDown }) => {
+const Timeline: React.FC<TimelineProps> = ({
+  onScrollUp,
+  onScrollDown,
+  onToggleFollow,
+}) => {
   const [activeTab, setActiveTab] = useState('フォロー中')
   const timelineRef = useRef<HTMLDivElement>(null)
   const tabRef = useRef<HTMLDivElement>(null)
@@ -64,26 +69,7 @@ const Timeline: React.FC<TimelineProps> = ({ onScrollUp, onScrollDown }) => {
         <div className="sm:pl-6 sm:pr-6 pt-4 sm:pt-8 mb-20 max-w-xl">
           {posts.map((post) => (
             <div key={post.id} className="mb-8 sm:mb-10">
-              <PostItem
-                userId={post.userId}
-                userName={post.userName}
-                verified={post.verified}
-                content={post.content}
-                replies={post.replies}
-                likes={post.likes}
-                zaps={post.zaps}
-                reposts={post.reposts}
-                userImage={post.userImage}
-                timestamp={post.timestamp}
-                mediaUrl={post.mediaUrl}
-                mediaType={post.mediaType}
-                following={post.following}
-                onToggleFollow={() => {
-                  post.following = !post.following
-                  console.log(`Follow toggle: ${post.userId} ${post.following}`)
-                  return true
-                }}
-              />
+              <PostItem post={post} onToggleFollow={onToggleFollow} />
             </div>
           ))}
         </div>

@@ -10,6 +10,7 @@ interface PostDetailsProps {
   onClose: () => void
   originalPost: PostItemType
   onClickAction: (type: PostActionType) => void
+  onToggleFollow: (userId: string) => boolean
 }
 
 const PostDetails: React.FC<PostDetailsProps> = ({
@@ -17,6 +18,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
   onClose,
   originalPost,
   onClickAction,
+  onToggleFollow,
 }) => {
   if (!isOpen) return null
 
@@ -51,10 +53,14 @@ const PostDetails: React.FC<PostDetailsProps> = ({
             originalPost={originalPost}
             onBackgroundClick={handleBackgroundClick}
             onClickAction={onClickAction}
+            onToggleFollow={onToggleFollow}
           />
         </div>
         <div className="hidden md:block w-80 h-full">
-          <RepliesThread originalPost={originalPost} />
+          <RepliesThread
+            originalPost={originalPost}
+            onToggleFollow={onToggleFollow}
+          />
         </div>
       </div>
     </div>

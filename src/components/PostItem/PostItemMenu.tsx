@@ -4,20 +4,25 @@ import { useClickAway } from 'react-use'
 
 interface PostItemMenuProps {
   userId: string
-  isFollowing: boolean
-  onToggleFollow: () => void
+  following: boolean
+  onToggleFollow: (userId: string) => boolean
   onClose: () => void
 }
 
 const PostItemMenu: React.FC<PostItemMenuProps> = ({
   userId,
-  isFollowing,
+  following,
   onToggleFollow,
   onClose,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
 
   useClickAway(ref, onClose)
+
+  const handleClickToggleFollow = () => {
+    onToggleFollow(userId)
+    onClose()
+  }
 
   return (
     <div
@@ -26,14 +31,14 @@ const PostItemMenu: React.FC<PostItemMenuProps> = ({
     >
       <div
         className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-800 dark:text-gray-300"
-        onClick={onToggleFollow}
+        onClick={handleClickToggleFollow}
       >
-        {isFollowing ? (
+        {following ? (
           <FiUserX className="w-5 h-5 mt-1 mr-2" />
         ) : (
           <FiUserPlus className="w-5 h-5 mt-1 mr-2" />
         )}
-        {isFollowing
+        {following
           ? `@${userId}さんのフォローを解除`
           : `@${userId}さんをフォロー`}
       </div>

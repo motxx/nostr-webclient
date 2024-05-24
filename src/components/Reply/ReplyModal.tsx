@@ -4,10 +4,11 @@ import { PostItemType } from '../../global/types'
 import PostItem from '../PostItem/PostItem'
 
 interface ReplyModalProps {
+  originalPost: PostItemType
   isOpen: boolean
   onClose: () => void
-  originalPost: PostItemType
   onSubmit: (replyContent: string) => void
+  onToggleFollow: (userId: string) => boolean
 }
 
 const ReplyModal: React.FC<ReplyModalProps> = ({
@@ -15,6 +16,7 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
   onClose,
   originalPost,
   onSubmit,
+  onToggleFollow,
 }) => {
   const [replyContent, setReplyContent] = useState('')
 
@@ -41,23 +43,7 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
       onClick={handleBackgroundClick}
     >
       <div className="bg-white dark:bg-black p-4 rounded-md shadow-md w-80">
-        <PostItem
-          userId={originalPost.userId}
-          userName={originalPost.userName}
-          verified={originalPost.verified}
-          content={originalPost.content}
-          replies={originalPost.replies}
-          likes={originalPost.likes}
-          reposts={originalPost.reposts}
-          zaps={originalPost.zaps}
-          userImage={originalPost.userImage}
-          timestamp={originalPost.timestamp}
-          following={originalPost.following}
-          onToggleFollow={() => {
-            console.log('not implemented')
-            return true
-          }}
-        />
+        <PostItem post={originalPost} onToggleFollow={onToggleFollow} />
         <textarea
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent mt-4"
           placeholder="返信内容を入力..."

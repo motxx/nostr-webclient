@@ -7,9 +7,13 @@ import { PostItemType } from '../../global/types'
 
 interface RepliesThreadProps {
   originalPost: PostItemType
+  onToggleFollow: (userId: string) => boolean
 }
 
-const RepliesThread: React.FC<RepliesThreadProps> = ({ originalPost }) => {
+const RepliesThread: React.FC<RepliesThreadProps> = ({
+  originalPost,
+  onToggleFollow,
+}) => {
   const [newReply, setNewReply] = useState('')
 
   const handleNewReplyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -44,21 +48,12 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({ originalPost }) => {
     <div className="h-full p-4 overflow-y-auto bg-white dark:bg-black border-gray-200 dark:border-gray-700 border-l">
       <div className="mb-6">
         <PostItem
-          userId={originalPost.userId}
-          userName={originalPost.userName}
-          verified={originalPost.verified}
-          content={originalPost.content}
-          replies={originalPost.replies}
-          likes={originalPost.likes}
-          reposts={originalPost.reposts}
-          zaps={originalPost.zaps}
-          userImage={originalPost.userImage}
-          timestamp={originalPost.timestamp}
-          following={originalPost.following}
-          onToggleFollow={() => {
-            console.log('not implemented')
-            return true
+          post={{
+            ...originalPost,
+            mediaType: undefined,
+            mediaUrl: undefined,
           }}
+          onToggleFollow={onToggleFollow}
           onReply={handleReplyToReply}
         />
       </div>
@@ -83,21 +78,8 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({ originalPost }) => {
         {replyData.map((reply, index) => (
           <div key={index} className="mb-4">
             <PostItem
-              userId={reply.userId}
-              userName={reply.userName}
-              verified={reply.verified}
-              content={reply.content}
-              replies={reply.replies}
-              likes={reply.likes}
-              reposts={reply.reposts}
-              zaps={reply.zaps}
-              userImage={reply.userImage}
-              timestamp={reply.timestamp}
-              following={reply.following}
-              onToggleFollow={() => {
-                console.log('not implemented')
-                return true
-              }}
+              post={reply}
+              onToggleFollow={onToggleFollow}
               onReply={handleReplyToReply}
             />
           </div>

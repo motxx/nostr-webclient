@@ -1,26 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSpring, animated } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
 import { FiMessageCircle } from 'react-icons/fi'
 import replyData from '../../data/dummy-reply-data'
-import meImage from '../../assets/images/example/me.png'
 import PostItem from '../PostItem/PostItem'
 import { PostItemType } from '../../global/types'
+import { createDummyNewReply } from '../../utils/mock'
 import './RepliesThreadModal.css'
 
 interface RepliesThreadModalProps {
   originalPost: PostItemType
-  onClose: () => void
   showModal: boolean
+  onClose: () => void
+  onToggleFollow: (userId: string) => boolean
 }
 
 const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   originalPost,
   onClose,
   showModal,
+  onToggleFollow,
 }) => {
   const [newReply, setNewReply] = useState('')
-  const frameRef = useRef<HTMLDivElement>(null)
 
   const handleNewReplyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewReply(e.target.value)
@@ -29,20 +30,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   const handleNewReplySubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (newReply.trim()) {
-      replyData.push({
-        id: '109',
-        userName: 'moti',
-        content: newReply,
-        userImage: meImage,
-        timestamp: 'just now',
-        userId: 'riel.pages.dev',
-        verified: false,
-        replies: 0,
-        likes: 0,
-        reposts: 0,
-        zaps: 0,
-        following: true,
-      })
+      replyData.push(createDummyNewReply(newReply))
       setNewReply('')
     }
   }
@@ -51,7 +39,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
     setNewReply(`@${userId} `)
   }
 
-  const handleClickContent = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClickFrame = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
   }
 
@@ -69,11 +57,11 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   }))
 
   const bind = useDrag(
-    ({ down, movement: [, my], direction: [, dy], cancel }) => {
+    ({ down, movement: [, my], memo = y.get(), event }) => {
       if (down) {
         api.start({
           y: my > 0 ? my : 0,
-          config: { tension: 300, friction: 30 },
+          immediate: true,
         })
       } else if (my > 100) {
         api.start({
@@ -84,6 +72,8 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
       } else {
         api.start({ y: 0, config: { tension: 300, friction: 30 } })
       }
+
+      return memo
     },
     { from: () => [0, y.get()], bounds: { top: 0 }, filterTaps: true }
   )
@@ -95,20 +85,6 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
       api.start({ y: (window.innerHeight * 4) / 5 })
     }
   }, [showModal, api])
-
-  useEffect(() => {
-    const preventScroll = (e: TouchEvent) => {
-      if (frameRef.current && frameRef.current.contains(e.target as Node)) {
-        e.preventDefault()
-      }
-    }
-
-    document.addEventListener('touchmove', preventScroll, { passive: false })
-
-    return () => {
-      document.removeEventListener('touchmove', preventScroll)
-    }
-  }, [])
 
   return (
     <>
@@ -125,29 +101,19 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
           style={{ y }}
         >
           <animated.div
-            ref={frameRef}
             className="bg-gray-50 dark:bg-gray-900 rounded-t-lg w-full max-w-md h-4/5 flex flex-col"
-            onClick={handleClickContent}
+            onClick={handleClickFrame}
             {...bind()}
           >
             <div className="overflow-y-auto p-4 flex-grow">
               <div className="mb-6">
                 <PostItem
-                  userId={originalPost.userId}
-                  userName={originalPost.userName}
-                  verified={originalPost.verified}
-                  content={originalPost.content}
-                  replies={originalPost.replies}
-                  likes={originalPost.likes}
-                  reposts={originalPost.reposts}
-                  zaps={originalPost.zaps}
-                  userImage={originalPost.userImage}
-                  timestamp={originalPost.timestamp}
-                  following={originalPost.following}
-                  onToggleFollow={() => {
-                    console.log('not implemented')
-                    return true
+                  post={{
+                    ...originalPost,
+                    mediaType: undefined,
+                    mediaUrl: undefined,
                   }}
+                  onToggleFollow={onToggleFollow}
                   onReply={handleReplyToReply}
                 />
               </div>
@@ -158,21 +124,8 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
                 {replyData.map((reply, index) => (
                   <div key={index} className="mb-4">
                     <PostItem
-                      userId={reply.userId}
-                      userName={reply.userName}
-                      verified={reply.verified}
-                      content={reply.content}
-                      replies={reply.replies}
-                      likes={reply.likes}
-                      reposts={reply.reposts}
-                      zaps={reply.zaps}
-                      userImage={reply.userImage}
-                      timestamp={reply.timestamp}
-                      following={reply.following}
-                      onToggleFollow={() => {
-                        console.log('not implemented')
-                        return true
-                      }}
+                      post={reply}
+                      onToggleFollow={onToggleFollow}
                       onReply={handleReplyToReply}
                     />
                   </div>

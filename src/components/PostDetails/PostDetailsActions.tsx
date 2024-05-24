@@ -7,15 +7,17 @@ import { PostItemType } from '../../global/types'
 import RepliesThreadModal from '../Reply/RepliesThreadModal'
 
 interface PostDetailsActionsProps {
+  originalPost: PostItemType
   onBackgroundClick?: (event: React.MouseEvent<HTMLDivElement>) => void
   onClickAction: (type: PostActionType) => void
-  originalPost: PostItemType
+  onToggleFollow: (userId: string) => boolean
 }
 
 const PostDetails: React.FC<PostDetailsActionsProps> = ({
   onBackgroundClick,
   onClickAction,
   originalPost,
+  onToggleFollow,
 }) => {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false)
   const [isRepliesThreadModalOpen, setIsRepliesThreadModalOpen] =
@@ -97,15 +99,17 @@ const PostDetails: React.FC<PostDetailsActionsProps> = ({
         </div>
       </div>
       <ReplyModal
+        originalPost={originalPost}
         isOpen={isReplyModalOpen}
         onClose={() => setIsReplyModalOpen(false)}
-        originalPost={originalPost}
         onSubmit={handleReplySubmit}
+        onToggleFollow={onToggleFollow}
       />
       <RepliesThreadModal
+        originalPost={originalPost}
         onClose={() => setIsRepliesThreadModalOpen(false)}
         showModal={isRepliesThreadModalOpen}
-        originalPost={originalPost}
+        onToggleFollow={onToggleFollow}
       />
     </div>
   )
