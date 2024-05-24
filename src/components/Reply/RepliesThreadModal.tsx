@@ -122,7 +122,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
         >
           <animated.div
             ref={frameRef}
-            className="bg-gray-50 dark:bg-gray-900 rounded-t-lg w-full max-w-md mx-2 p-4 h-4/5 overflow-y-auto"
+            className="bg-gray-50 dark:bg-gray-900 rounded-t-lg w-full max-w-md p-4 h-4/5 overflow-y-auto"
             onClick={handleClickContent}
             {...bind()}
           >
