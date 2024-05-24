@@ -30,13 +30,13 @@ const PostItem: React.FC<PostItemProps> = ({
   onToggleFollow,
 }) => {
   const [isFollowing, setIsFollowing] = useState(following)
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isRepliesThreadModalOpen, setIsRepliesThreadModalOpen] =
     useState(false)
   const youtubeIFrameRef = useRef<HTMLIFrameElement>(null)
 
-  const openOverlay = () => setIsOverlayOpen(true)
-  const closeOverlay = () => setIsOverlayOpen(false)
+  const openDetails = () => setIsDetailsOpen(true)
+  const closeDetails = () => setIsDetailsOpen(false)
   const openRepliesThreadModal = () => setIsRepliesThreadModalOpen(true)
   const closeRepliesThreadModal = () => setIsRepliesThreadModalOpen(false)
 
@@ -47,7 +47,7 @@ const PostItem: React.FC<PostItemProps> = ({
       if (isMobile()) {
         openRepliesThreadModal()
       } else {
-        openOverlay()
+        openDetails()
       }
     } else if (type === 'repost') {
     } else if (type === 'like') {
@@ -126,7 +126,7 @@ const PostItem: React.FC<PostItemProps> = ({
             mediaType={mediaType}
             mediaUrl={mediaUrl}
             content={content}
-            openOverlay={openOverlay}
+            openDetails={openDetails}
             youtubeIFrameRef={youtubeIFrameRef}
           />
         </div>
@@ -143,8 +143,8 @@ const PostItem: React.FC<PostItemProps> = ({
       </div>
 
       <PostDetails
-        isOpen={isOverlayOpen}
-        onClose={closeOverlay}
+        isOpen={isDetailsOpen}
+        onClose={closeDetails}
         originalPost={{
           userId,
           userName,

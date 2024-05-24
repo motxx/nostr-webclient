@@ -5,7 +5,7 @@ interface PostItemMediaProps {
   mediaType: string
   mediaUrl: string
   content: string
-  openOverlay: () => void
+  openDetails: () => void
   youtubeIFrameRef?: React.RefObject<HTMLIFrameElement>
 }
 
@@ -13,12 +13,18 @@ const PostItemMedia: React.FC<PostItemMediaProps> = ({
   mediaType,
   mediaUrl,
   content,
-  openOverlay,
+  openDetails,
   youtubeIFrameRef,
 }) => {
   const isMobile = () => window.matchMedia('(max-width: 640px)').matches
   const embedUrl =
     mediaType === 'video-youtube' ? convertToEmbedUrl(mediaUrl) : mediaUrl
+
+  const handleOnClick = () => {
+    if (!isMobile()) {
+      openDetails()
+    }
+  }
 
   return (
     <div>
@@ -27,7 +33,7 @@ const PostItemMedia: React.FC<PostItemMediaProps> = ({
           src={mediaUrl}
           alt="Post media"
           className={`w-full ${isMobile() ? 'h-full' : 'max-h-[500px]'} object-cover sm:rounded sm:border border-gray-200 dark:border-gray-700 cursor-pointer`}
-          onClick={openOverlay}
+          onClick={handleOnClick}
         />
       )}
       {mediaType === 'video-file' && (
