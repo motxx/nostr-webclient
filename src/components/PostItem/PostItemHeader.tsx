@@ -33,7 +33,7 @@ const PostItemHeader: React.FC<PostItemHeaderProps> = ({
 
   return (
     <>
-      <div className="flex justify-between items-center mb-2 font-noto-sans">
+      <div className="flex justify-between items-center font-noto-sans">
         <div className="flex items-center space-x-3">
           <img
             src={userImage}

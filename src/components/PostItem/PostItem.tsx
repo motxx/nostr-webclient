@@ -108,8 +108,8 @@ const PostItem: React.FC<PostItemProps> = ({
   }, [observer])
 
   return (
-    <div>
-      <div className="px-2 sm:px-0">
+    <div className="relative">
+      <div className="px-2 pb-2 sm:px-0">
         <PostItemHeader
           userId={userId}
           userName={userName}
