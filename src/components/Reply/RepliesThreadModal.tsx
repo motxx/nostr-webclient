@@ -81,7 +81,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
         api.start({ y: 0, config: { tension: 300, friction: 30 } })
       }
     },
-    { from: () => [0, y.get()], bounds: { top: 0 } }
+    { from: () => [0, y.get()], bounds: { top: 0 }, filterTaps: true }
   )
 
   useEffect(() => {
@@ -91,6 +91,20 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
       api.start({ y: (window.innerHeight * 4) / 5 })
     }
   }, [showModal, api])
+
+  useEffect(() => {
+    const preventScroll = (e: TouchEvent) => {
+      if (frameRef.current && frameRef.current.contains(e.target as Node)) {
+        e.preventDefault()
+      }
+    }
+
+    document.addEventListener('touchmove', preventScroll, { passive: false })
+
+    return () => {
+      document.removeEventListener('touchmove', preventScroll)
+    }
+  }, [])
 
   return (
     <>
