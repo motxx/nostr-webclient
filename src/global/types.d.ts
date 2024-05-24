@@ -11,5 +11,5 @@ export type PostItemType = {
   timestamp: string
   mediaUrl?: string
   mediaType?: 'image' | 'video-file' | 'video-youtube'
-  following: boolean
+  following: boolean // TODO: ユーザデータなので消す
 }
