@@ -19,7 +19,7 @@ const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
   return (
     <>
       <div
-        className="absolute bottom-24 right-10 p-3 z-20 bg-blue-500 active:bg-blue-600 rounded-full drop-shadow-[0_2px_2px_rgba(0,0,0,0.25)]"
+        className={`absolute bottom-24 right-10 p-3 z-20 bg-blue-500 active:bg-blue-600 rounded-full drop-shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-opacity duration-200 ${shouldFocusBottomTab ? 'opacity-50' : 'opacity-100'}`}
         onClick={() => onNavigate('post')}
       >
         <PiNotePencil className="text-white text-center text-2xl" />
