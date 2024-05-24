@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { FiSend } from 'react-icons/fi'
 import { useSpring, animated } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
@@ -21,7 +21,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
 }) => {
   const [newReply, setNewReply] = useState('')
 
-  const frameRef = React.useRef<HTMLDivElement>(null)
+  const frameRef = useRef<HTMLDivElement>(null)
 
   const handleNewReplyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewReply(e.target.value)
@@ -51,10 +51,9 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
     e.stopPropagation()
   }
 
-  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation()
+  const handleClose = () => {
     api.start({
-      y: (window.innerHeight * 2) / 5,
+      y: (window.innerHeight * 4) / 5,
       config: { duration: 200 },
       onRest: onClose,
     })
@@ -74,7 +73,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
         })
       } else if (my > 100) {
         api.start({
-          y: (window.innerHeight * 2) / 5,
+          y: (window.innerHeight * 4) / 5,
           config: { duration: 200 },
           onRest: onClose,
         })
@@ -89,7 +88,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
     if (showModal) {
       api.start({ y: 0 })
     } else {
-      api.start({ y: (window.innerHeight * 2) / 5 })
+      api.start({ y: (window.innerHeight * 4) / 5 })
     }
   }, [showModal, api])
 
@@ -111,7 +110,6 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
             ref={frameRef}
             className="bg-gray-50 dark:bg-gray-900 rounded-t-lg w-full max-w-md mx-2 p-4 h-4/5 overflow-y-auto"
             onClick={handleClickContent}
-            style={{ y }}
             {...bind()}
           >
             <div className="mb-6">
