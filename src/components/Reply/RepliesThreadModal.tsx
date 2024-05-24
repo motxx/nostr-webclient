@@ -15,6 +15,8 @@ interface RepliesThreadModalProps {
   onToggleFollow: (userId: string) => boolean
 }
 
+const frameHeight = (window.innerHeight * 4) / 5
+
 const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   originalPost,
   onClose,
@@ -45,7 +47,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
 
   const handleClose = () => {
     api.start({
-      y: (window.innerHeight * 4) / 5,
+      y: frameHeight,
       config: { duration: 200 },
       onRest: onClose,
     })
@@ -65,7 +67,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
         })
       } else if (my > 100) {
         api.start({
-          y: (window.innerHeight * 4) / 5,
+          y: frameHeight,
           config: { duration: 200 },
           onRest: onClose,
         })
@@ -82,7 +84,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
     if (showModal) {
       api.start({ y: 0 })
     } else {
-      api.start({ y: (window.innerHeight * 4) / 5 })
+      api.start({ y: frameHeight })
     }
   }, [showModal, api])
 
