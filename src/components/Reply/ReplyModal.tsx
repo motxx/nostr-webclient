@@ -1,39 +1,47 @@
-import React, { useState } from 'react';
-import { FiSend } from 'react-icons/fi';
-import { PostType } from '../../global/types';
-import Post from '../Post/Post';
+import React, { useState } from 'react'
+import { FiSend } from 'react-icons/fi'
+import { PostItemType } from '../../global/types'
+import PostItem from '../PostItem/PostItem'
 
 interface ReplyModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  originalPost: PostType;
-  onSubmit: (replyContent: string) => void;
+  isOpen: boolean
+  onClose: () => void
+  originalPost: PostItemType
+  onSubmit: (replyContent: string) => void
 }
 
-const ReplyModal: React.FC<ReplyModalProps> = ({ isOpen, onClose, originalPost, onSubmit }) => {
-  const [replyContent, setReplyContent] = useState('');
+const ReplyModal: React.FC<ReplyModalProps> = ({
+  isOpen,
+  onClose,
+  originalPost,
+  onSubmit,
+}) => {
+  const [replyContent, setReplyContent] = useState('')
 
   const handleBackgroundClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation();
+    event.stopPropagation()
     if (event.target === event.currentTarget) {
-      onClose();
+      onClose()
     }
-  };
+  }
 
   const handleSubmit = () => {
     if (replyContent.trim()) {
-      onSubmit(replyContent);
-      setReplyContent('');
-      onClose();
+      onSubmit(replyContent)
+      setReplyContent('')
+      onClose()
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75" onClick={handleBackgroundClick}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+      onClick={handleBackgroundClick}
+    >
       <div className="bg-white dark:bg-black p-4 rounded-md shadow-md w-80">
-        <Post
+        <PostItem
           userId={originalPost.userId}
           userName={originalPost.userName}
           verified={originalPost.verified}
@@ -45,7 +53,10 @@ const ReplyModal: React.FC<ReplyModalProps> = ({ isOpen, onClose, originalPost, 
           userImage={originalPost.userImage}
           timestamp={originalPost.timestamp}
           following={originalPost.following}
-          onToggleFollow={() => { console.log('not implemented'); return true; }}
+          onToggleFollow={() => {
+            console.log('not implemented')
+            return true
+          }}
         />
         <textarea
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent mt-4"
@@ -62,7 +73,7 @@ const ReplyModal: React.FC<ReplyModalProps> = ({ isOpen, onClose, originalPost, 
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ReplyModal;
+export default ReplyModal

@@ -1,8 +1,8 @@
 import user1Image from '../assets/images/example/waifu.png'
 import user2Image from '../assets/images/example/man.jpg'
-import { PostType } from '../global/types'
+import { PostItemType } from '../global/types'
 
-type PostTypeWithId = PostType & { id: string }
+type PostTypeWithId = PostItemType & { id: string }
 const replyData: PostTypeWithId[] = [
   {
     id: '101',
