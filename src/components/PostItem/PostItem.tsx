@@ -10,6 +10,7 @@ import PostItemText from './PostItemText'
 
 type PostItemProps = PostItemType & {
   onToggleFollow: () => boolean
+  onReply?: (userId: string) => void
 }
 
 export type PostActionType = 'reply' | 'repost' | 'like' | 'zap'
@@ -28,6 +29,7 @@ const PostItem: React.FC<PostItemProps> = ({
   mediaType,
   following,
   onToggleFollow,
+  onReply,
 }) => {
   const [isFollowing, setIsFollowing] = useState(following)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
@@ -44,14 +46,19 @@ const PostItem: React.FC<PostItemProps> = ({
 
   const onClickAction = (type: PostActionType) => {
     if (type === 'reply') {
-      if (isMobile()) {
+      if (onReply) {
+        onReply(userId)
+      } else if (isMobile()) {
         openRepliesThreadModal()
       } else {
         openDetails()
       }
     } else if (type === 'repost') {
+      // handle repost action
     } else if (type === 'like') {
+      // handle like action
     } else if (type === 'zap') {
+      // handle zap action
     } else {
       throw new Error(`Unsupported type: ${type}`)
     }

@@ -20,7 +20,6 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   showModal,
 }) => {
   const [newReply, setNewReply] = useState('')
-
   const frameRef = useRef<HTMLDivElement>(null)
 
   const handleNewReplyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +45,10 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
       })
       setNewReply('')
     }
+  }
+
+  const handleReplyToReply = (userId: string) => {
+    setNewReply(`@${userId} `)
   }
 
   const handleClickContent = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -145,6 +148,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
                     console.log('not implemented')
                     return true
                   }}
+                  onReply={handleReplyToReply}
                 />
               </div>
 
@@ -169,6 +173,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
                         console.log('not implemented')
                         return true
                       }}
+                      onReply={handleReplyToReply}
                     />
                   </div>
                 ))}

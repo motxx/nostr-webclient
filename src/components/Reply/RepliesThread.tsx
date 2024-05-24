@@ -16,6 +16,10 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({ originalPost }) => {
     setNewReply(e.target.value)
   }
 
+  const handleReplyToReply = (userId: string) => {
+    setNewReply(`@${userId} `)
+  }
+
   const handleNewReplySubmit = () => {
     if (newReply.trim()) {
       replyData.push({
@@ -55,6 +59,7 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({ originalPost }) => {
             console.log('not implemented')
             return true
           }}
+          onReply={handleReplyToReply}
         />
       </div>
 
@@ -93,6 +98,7 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({ originalPost }) => {
                 console.log('not implemented')
                 return true
               }}
+              onReply={handleReplyToReply}
             />
           </div>
         ))}
