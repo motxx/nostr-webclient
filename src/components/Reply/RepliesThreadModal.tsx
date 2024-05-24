@@ -72,16 +72,14 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
           y: my > 0 ? my : 0,
           config: { tension: 300, friction: 30 },
         })
+      } else if (my > 100) {
+        api.start({
+          y: (window.innerHeight * 2) / 5,
+          config: { duration: 200 },
+          onRest: onClose,
+        })
       } else {
-        if (my > 100) {
-          api.start({
-            y: (window.innerHeight * 2) / 5,
-            config: { duration: 200 },
-            onRest: onClose,
-          })
-        } else {
-          api.start({ y: 0, config: { tension: 300, friction: 30 } })
-        }
+        api.start({ y: 0, config: { tension: 300, friction: 30 } })
       }
     },
     { from: () => [0, y.get()], bounds: { top: 0 } }
@@ -90,6 +88,8 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   useEffect(() => {
     if (showModal) {
       api.start({ y: 0 })
+    } else {
+      api.start({ y: (window.innerHeight * 2) / 5 })
     }
   }, [showModal, api])
 
