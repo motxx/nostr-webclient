@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FiSend } from 'react-icons/fi'
-import { CSSTransition } from 'react-transition-group'
+import { useSpring, animated } from 'react-spring'
+import { useDrag } from 'react-use-gesture'
 import replyData from '../../data/dummy-reply-data'
 import meImage from '../../assets/images/example/me.png'
 import PostItem from '../PostItem/PostItem'
@@ -49,10 +50,48 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   const handleClickContent = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
   }
+
   const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
-    onClose()
+    api.start({
+      y: (window.innerHeight * 2) / 5,
+      config: { duration: 200 },
+      onRest: onClose,
+    })
   }
+
+  const [{ y }, api] = useSpring(() => ({
+    y: 0,
+    config: { tension: 300, friction: 30 },
+  }))
+
+  const bind = useDrag(
+    ({ down, movement: [, my], direction: [, dy], cancel }) => {
+      if (down) {
+        api.start({
+          y: my > 0 ? my : 0,
+          config: { tension: 300, friction: 30 },
+        })
+      } else {
+        if (my > 100) {
+          api.start({
+            y: (window.innerHeight * 2) / 5,
+            config: { duration: 200 },
+            onRest: onClose,
+          })
+        } else {
+          api.start({ y: 0, config: { tension: 300, friction: 30 } })
+        }
+      }
+    },
+    { from: () => [0, y.get()], bounds: { top: 0 } }
+  )
+
+  useEffect(() => {
+    if (showModal) {
+      api.start({ y: 0 })
+    }
+  }, [showModal, api])
 
   return (
     <>
@@ -62,20 +101,18 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
           onClick={handleClose}
         ></div>
       )}
-      <CSSTransition
-        in={showModal}
-        timeout={300}
-        classNames="modal"
-        unmountOnExit
-      >
-        <div
+      {showModal && (
+        <animated.div
           className="fixed inset-0 flex items-end justify-center z-50"
           onClick={handleClose}
+          style={{ y }}
         >
-          <div
+          <animated.div
             ref={frameRef}
             className="bg-gray-50 dark:bg-gray-900 rounded-t-lg w-full max-w-md mx-2 p-4 h-4/5 overflow-y-auto"
             onClick={handleClickContent}
+            style={{ y }}
+            {...bind()}
           >
             <div className="mb-6">
               <PostItem
@@ -138,9 +175,9 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </CSSTransition>
+          </animated.div>
+        </animated.div>
+      )}
     </>
   )
 }
