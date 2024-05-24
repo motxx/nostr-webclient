@@ -38,11 +38,11 @@ const PostItemHeader: React.FC<PostItemHeaderProps> = ({
           <img
             src={userImage}
             alt={`${userName}'s profile`}
-            className="w-9 h-9 ml-1 rounded-full"
+            className="w-8 h-8 ml-1 rounded-full"
           />
           <div>
             <div className="flex items-center">
-              <div className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+              <div className="font-semibold text-xs text-gray-700 dark:text-gray-300">
                 {userName}
               </div>
               {verified && (
