@@ -43,7 +43,14 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
       onClick={handleBackgroundClick}
     >
       <div className="bg-white dark:bg-black p-4 rounded-md shadow-md w-80">
-        <PostItem post={originalPost} onToggleFollow={onToggleFollow} />
+        <PostItem
+          post={{
+            ...originalPost,
+            mediaType: undefined,
+            mediaUrl: undefined,
+          }}
+          onToggleFollow={onToggleFollow}
+        />
         <textarea
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent mt-4"
           placeholder="返信内容を入力..."
