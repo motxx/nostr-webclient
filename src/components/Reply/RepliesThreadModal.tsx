@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { FiSend } from 'react-icons/fi'
 import { useSpring, animated } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
+import { FiMessageCircle } from 'react-icons/fi'
 import replyData from '../../data/dummy-reply-data'
 import meImage from '../../assets/images/example/me.png'
 import PostItem from '../PostItem/PostItem'
@@ -23,11 +23,12 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
 
   const frameRef = useRef<HTMLDivElement>(null)
 
-  const handleNewReplyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleNewReplyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewReply(e.target.value)
   }
 
-  const handleNewReplySubmit = () => {
+  const handleNewReplySubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     if (newReply.trim()) {
       replyData.push({
         id: '109',
@@ -122,71 +123,74 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
         >
           <animated.div
             ref={frameRef}
-            className="bg-gray-50 dark:bg-gray-900 rounded-t-lg w-full max-w-md p-4 h-4/5 overflow-y-auto"
+            className="bg-gray-50 dark:bg-gray-900 rounded-t-lg w-full max-w-md h-4/5 flex flex-col"
             onClick={handleClickContent}
             {...bind()}
           >
-            <div className="mb-6">
-              <PostItem
-                userId={originalPost.userId}
-                userName={originalPost.userName}
-                verified={originalPost.verified}
-                content={originalPost.content}
-                replies={originalPost.replies}
-                likes={originalPost.likes}
-                reposts={originalPost.reposts}
-                zaps={originalPost.zaps}
-                userImage={originalPost.userImage}
-                timestamp={originalPost.timestamp}
-                following={originalPost.following}
-                onToggleFollow={() => {
-                  console.log('not implemented')
-                  return true
-                }}
-              />
-            </div>
+            <div className="overflow-y-auto p-4 flex-grow">
+              <div className="mb-6">
+                <PostItem
+                  userId={originalPost.userId}
+                  userName={originalPost.userName}
+                  verified={originalPost.verified}
+                  content={originalPost.content}
+                  replies={originalPost.replies}
+                  likes={originalPost.likes}
+                  reposts={originalPost.reposts}
+                  zaps={originalPost.zaps}
+                  userImage={originalPost.userImage}
+                  timestamp={originalPost.timestamp}
+                  following={originalPost.following}
+                  onToggleFollow={() => {
+                    console.log('not implemented')
+                    return true
+                  }}
+                />
+              </div>
 
-            <div className="mb-6">
-              <textarea
+              <hr className="border-gray-200 dark:border-gray-800 mb-4" />
+
+              <div className="text-gray-700 dark:text-gray-300">
+                {replyData.map((reply, index) => (
+                  <div key={index} className="mb-4">
+                    <PostItem
+                      userId={reply.userId}
+                      userName={reply.userName}
+                      verified={reply.verified}
+                      content={reply.content}
+                      replies={reply.replies}
+                      likes={reply.likes}
+                      reposts={reply.reposts}
+                      zaps={reply.zaps}
+                      userImage={reply.userImage}
+                      timestamp={reply.timestamp}
+                      following={reply.following}
+                      onToggleFollow={() => {
+                        console.log('not implemented')
+                        return true
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <form
+              onSubmit={handleNewReplySubmit}
+              className="p-4 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center"
+            >
+              <input
                 className="w-full p-2 border border-gray-300 bg-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="リプライを入力..."
                 value={newReply}
                 onChange={handleNewReplyChange}
               />
               <button
-                className="mt-2 flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                onClick={handleNewReplySubmit}
+                type="submit"
+                className="ml-2 p-2 bg-blue-500 active:bg-blue-600 rounded"
               >
-                <FiSend className="mr-2" />
-                返信
+                <FiMessageCircle size={24} />
               </button>
-            </div>
-
-            <hr className="border-gray-200 dark:border-gray-800 mb-4" />
-
-            <div className="text-gray-700 dark:text-gray-300">
-              {replyData.map((reply, index) => (
-                <div key={index} className="mb-4">
-                  <PostItem
-                    userId={reply.userId}
-                    userName={reply.userName}
-                    verified={reply.verified}
-                    content={reply.content}
-                    replies={reply.replies}
-                    likes={reply.likes}
-                    reposts={reply.reposts}
-                    zaps={reply.zaps}
-                    userImage={reply.userImage}
-                    timestamp={reply.timestamp}
-                    following={reply.following}
-                    onToggleFollow={() => {
-                      console.log('not implemented')
-                      return true
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
+            </form>
           </animated.div>
         </animated.div>
       )}
