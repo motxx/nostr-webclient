@@ -13,3 +13,19 @@ export type PostItemType = {
   mediaType?: 'image' | 'video-file' | 'video-youtube'
   following: boolean // TODO: ユーザデータなので消す
 }
+
+export interface UserType {
+  npub: string
+  pubkey: string
+  name: string
+  image?: string
+  settings?: UserSettingsType
+}
+
+export interface UserSettingsType {
+  connectionUri?: string
+  walletAuthUri?: string
+  defaultZapAmount?: number
+}
+
+export type LoginStatus = boolean
