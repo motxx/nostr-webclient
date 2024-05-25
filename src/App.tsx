@@ -1,8 +1,14 @@
 import React, { useState } from 'react'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Navigation from './components/Navigation/Navigation'
+import Home from './pages/Home'
+import Search from './pages/Search'
+import Notification from './pages/Notification'
+import PublicChannel from './pages/PublicChannel'
+import DirectMessage from './pages/DirectMessage'
+import Settings from './pages/Settings'
 import toast, { Toaster } from 'react-hot-toast'
 import { User } from './models/user'
-import Home from './pages/Home'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
@@ -38,20 +44,54 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-black min-h-screen flex">
-      <Navigation
-        shouldFocusBottomTab={shouldFocusBottomTab}
-        focusBottomTab={focusBottomTab}
-      />
-      <div className="flex flex-col w-full ml-0 sm:ml-20 lg:ml-60">
-        <Home
+    <Router>
+      <div className="bg-white dark:bg-black min-h-screen flex">
+        <Navigation
+          shouldFocusBottomTab={shouldFocusBottomTab}
           focusBottomTab={focusBottomTab}
-          unfocusBottomTab={unfocusBottomTab}
-          toggleFollow={toggleFollow}
         />
-        <Toaster />
+        <div className="flex flex-col w-full ml-0 sm:ml-20 lg:ml-60">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Home
+                  focusBottomTab={focusBottomTab}
+                  unfocusBottomTab={unfocusBottomTab}
+                  toggleFollow={toggleFollow}
+                />
+              }
+            />
+            <Route
+              path="/home"
+              element={
+                <Home
+                  focusBottomTab={focusBottomTab}
+                  unfocusBottomTab={unfocusBottomTab}
+                  toggleFollow={toggleFollow}
+                />
+              }
+            />
+            <Route path="/search" element={<Search />} />
+            <Route path="/notification" element={<Notification />} />
+            <Route path="/public-channel" element={<PublicChannel />} />
+            <Route path="/message" element={<DirectMessage />} />
+            <Route
+              path="/post"
+              element={
+                <Home
+                  focusBottomTab={focusBottomTab}
+                  unfocusBottomTab={unfocusBottomTab}
+                  toggleFollow={toggleFollow}
+                />
+              }
+            />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+          <Toaster />
+        </div>
       </div>
-    </div>
+    </Router>
   )
 }
 

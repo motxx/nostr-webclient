@@ -1,7 +1,10 @@
 import React from 'react'
 import { NavigationItem } from './Navigation'
 
-type NavigationSidebarItemProps = NavigationItem
+interface NavigationSidebarItemProps extends NavigationItem {
+  onClick: () => void
+}
+
 const NavigationSidebarItem: React.FC<NavigationSidebarItemProps> = ({
   icon: Icon,
   label,

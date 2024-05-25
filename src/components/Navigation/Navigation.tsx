@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { IconType } from 'react-icons'
 import {
   FiHome,
@@ -27,7 +28,6 @@ export type NavigationItem = {
   id: NavigationItemId
   icon: IconType
   label: string
-  onClick: () => void
   hiddenOnMobile?: boolean
 }
 
@@ -38,33 +38,29 @@ const user = {
 }
 
 const navigationItems: NavigationItem[] = [
-  { id: 'home', icon: FiHome, label: 'ホーム', onClick: () => {} },
-  { id: 'search', icon: FiSearch, label: '探索', onClick: () => {} },
-  { id: 'notification', icon: FiBell, label: '通知', onClick: () => {} },
+  { id: 'home', icon: FiHome, label: 'ホーム' },
+  { id: 'search', icon: FiSearch, label: '探索' },
+  { id: 'notification', icon: FiBell, label: '通知' },
   {
     id: 'public-channel',
     icon: FiUsers,
     label: '公開チャンネル',
-    onClick: () => {},
   },
   {
     id: 'message',
     icon: FiMessageSquare,
     label: 'メッセージ',
-    onClick: () => {},
   },
   {
     id: 'post',
     icon: FiPlusCircle,
     label: 'ノートを書く',
-    onClick: () => {},
     hiddenOnMobile: true,
   },
   {
     id: 'settings',
     icon: FiSettings,
     label: '設定',
-    onClick: () => {},
     hiddenOnMobile: true,
   },
 ]
@@ -79,6 +75,7 @@ const Navigation: React.FC<NavigationProps> = ({
   focusBottomTab,
 }) => {
   const [isMobile, setIsMobile] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleResize = () => {
@@ -94,7 +91,7 @@ const Navigation: React.FC<NavigationProps> = ({
     if (isMobile) {
       focusBottomTab()
     }
-    console.log(`${to} clicked`)
+    navigate(`/${to}`)
   }
 
   return isMobile ? (
