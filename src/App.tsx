@@ -1,10 +1,8 @@
 import React, { useState } from 'react'
 import Navigation from './components/Navigation/Navigation'
 import Timeline from './components/Timeline/Timeline'
-import Trends from './components/Widgets/Trends'
-import RecommendedUsers from './components/Widgets/RecommendedUsers'
-import RecommendedRelays from './components/Widgets/RecommendedRelays'
 import toast, { Toaster } from 'react-hot-toast'
+import Widgets from './components/Widgets/Widgets'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
@@ -51,9 +49,7 @@ const App: React.FC = () => {
             className="hidden py-4 lg:flex flex-col w-1/3 min-w-[280px] max-w-[500px] ml-4 space-y-4 overflow-y-auto hide-scrollbar"
             style={{ maxHeight: '100vh' }}
           >
-            <Trends />
-            <RecommendedRelays />
-            <RecommendedUsers />
+            <Widgets />
           </div>
         </div>
         <Toaster />

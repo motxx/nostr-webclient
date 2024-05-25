@@ -6,6 +6,7 @@ import {
   FiBell,
   FiMessageSquare,
   FiPlusCircle,
+  FiUsers,
 } from 'react-icons/fi'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
@@ -16,6 +17,7 @@ export type NavigationItemId =
   | 'home'
   | 'search'
   | 'notification'
+  | 'public-channel'
   | 'message'
   | 'post'
 
@@ -36,6 +38,12 @@ const navigationItems: NavigationItem[] = [
   { id: 'home', icon: FiHome, label: 'ホーム', onClick: () => {} },
   { id: 'search', icon: FiSearch, label: '探索', onClick: () => {} },
   { id: 'notification', icon: FiBell, label: '通知', onClick: () => {} },
+  {
+    id: 'public-channel',
+    icon: FiUsers,
+    label: '公開チャンネル',
+    onClick: () => {},
+  },
   {
     id: 'message',
     icon: FiMessageSquare,
