@@ -7,6 +7,7 @@ import LoginModal from './components/Authentication/LoginModal'
 import { User } from './models/user'
 import { useAtom } from 'jotai'
 import { isLoggedInAtom } from './state/atoms'
+import PrimaryButton from './components/common/PrimaryButton'
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom)
@@ -80,12 +81,12 @@ const App: React.FC = () => {
                     <p>ログインしてNostrを始めよう</p>
                   </div>
                   <div className="pr-2 sm:pr-4">
-                    <button
-                      className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow transition-all duration-300"
+                    <PrimaryButton
+                      className="py-2 px-4"
                       onClick={openLoginModal}
                     >
                       ログイン
-                    </button>
+                    </PrimaryButton>
                   </div>
                 </div>
                 <hr className="border-1 border-gray-200 dark:border-gray-700" />

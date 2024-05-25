@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react'
 import { FiLogIn, FiKey } from 'react-icons/fi'
 import { useClickAway } from 'react-use'
+import PrimaryButton from '../common/PrimaryButton'
+import SecondaryButton from '../common/SecondaryButton'
+import TertiaryButton from '../common/TertiaryButton'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -42,29 +45,29 @@ const LoginModal: React.FC<LoginModalProps> = ({
         Nostragram
       </h1>
 
-      <button
-        className="w-full py-3 pl-8 pr-8 mb-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow transition-all duration-300 flex items-center justify-center"
+      <PrimaryButton
+        className="w-full py-3 pl-8 pr-8 mb-4"
         onClick={onLoginWithNsecApp}
       >
         <FiLogIn className="mr-2" />
         Nsec.appでログイン
-      </button>
+      </PrimaryButton>
 
-      <button
-        className="w-full py-3 pl-8 pr-8 mb-4 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-full shadow transition-all duration-300 flex items-center justify-center"
+      <SecondaryButton
+        className="w-full py-3 pl-8 pr-8 mb-4"
         onClick={onLoginWithExtension}
       >
         <FiLogIn className="mr-2" />
         拡張機能でログイン
-      </button>
+      </SecondaryButton>
 
-      <button
-        className="w-full py-3 pl-8 pr-8 bg-gray-800 dark:bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-full shadow transition-all duration-300 flex items-center justify-center"
+      <TertiaryButton
+        className="w-full py-3 pl-8 pr-8"
         onClick={() => setIsImportingKey(true)}
       >
         <FiKey className="mr-2" />
         秘密鍵をインポート
-      </button>
+      </TertiaryButton>
     </>
   )
 
@@ -77,13 +80,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
         onChange={(e) => setNsecPrivateKey(e.target.value)}
         className="min-w-[300px] w-full py-3 px-4 mb-4 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-600 dark:bg-gray-700 dark:text-white"
       />
-      <button
-        className="w-full max-w-2/3 py-3 pl-8 pr-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow transition-all duration-300 flex items-center justify-center"
+      <PrimaryButton
+        className="w-full max-w-2/3 py-3 pl-8 pr-8"
         onClick={handleLoginWithImportingKeys}
       >
         <FiLogIn className="mr-2" />
         ログイン
-      </button>
+      </PrimaryButton>
     </div>
   )
 

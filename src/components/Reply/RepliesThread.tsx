@@ -4,6 +4,7 @@ import replyData from '../../data/dummy-reply-data'
 import meImage from '../../assets/images/example/me.png'
 import PostItem from '../PostItem/PostItem'
 import { PostItemType } from '../../global/types'
+import PrimaryButton from '../common/PrimaryButton'
 
 interface RepliesThreadProps {
   originalPost: PostItemType
@@ -65,13 +66,13 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
           value={newReply}
           onChange={handleNewReplyChange}
         />
-        <button
-          className="mt-2 flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        <PrimaryButton
+          className="mt-2 px-4 py-2 rounded-md"
           onClick={handleNewReplySubmit}
         >
           <FiSend className="mr-2" />
           返信
-        </button>
+        </PrimaryButton>
       </div>
 
       <div className="text-gray-700 dark:text-gray-300">

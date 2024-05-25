@@ -146,7 +146,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
               />
               <button
                 type="submit"
-                className="ml-2 p-2 bg-blue-500 active:bg-blue-600 rounded"
+                className="ml-2 p-2 bg-blue-500 active:bg-blue-600 dark:bg-blue-600 active:dark:bg-blue-700 text-white rounded"
               >
                 <FiMessageCircle size={24} />
               </button>
