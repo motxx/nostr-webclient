@@ -3,23 +3,15 @@ import Navigation from './components/Navigation/Navigation'
 import Timeline from './components/Timeline/Timeline'
 import toast, { Toaster } from 'react-hot-toast'
 import Widgets from './components/Widgets/Widgets'
-import LoginModal from './components/Authentication/LoginModal'
 import { User } from './models/user'
-import { useAtom } from 'jotai'
-import { isLoggedInAtom } from './state/atoms'
-import PrimaryButton from './components/common/PrimaryButton'
+import LoginPrompt from './components/Timeline/LoginPrompt'
 
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom)
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
     useState<boolean>(false)
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false)
 
   const focusBottomTab = () => setShouldFocusBottomTab(false)
   const unfocusBottomTab = () => setShouldFocusBottomTab(true)
-
-  const openLoginModal = () => setIsLoginModalOpen(true)
-  const closeLoginModal = () => setIsLoginModalOpen(false)
 
   const mockUser = new User({
     npub: 'npub1v20e8yj9y7n58q5kfp0fahea9g4p3pmv2ufjgc6c9mcnugyeemyqu6s59g',
@@ -47,24 +39,6 @@ const App: React.FC = () => {
     return true
   }
 
-  const handleLoginWithNsecApp = () => {
-    // ログイン処理を追加
-    setIsLoggedIn(true)
-    closeLoginModal()
-  }
-
-  const handleLoginWithExtension = () => {
-    // ログイン処理を追加
-    setIsLoggedIn(true)
-    closeLoginModal()
-  }
-
-  const handleLoginWithImportingKeys = (nsecPrivateKey: string) => {
-    // ログイン処理を追加
-    setIsLoggedIn(true)
-    closeLoginModal()
-  }
-
   return (
     <div className="bg-white dark:bg-black min-h-screen flex">
       <Navigation
@@ -74,24 +48,7 @@ const App: React.FC = () => {
       <div className="flex flex-col w-full ml-0 sm:ml-20 lg:ml-60">
         <div className="flex justify-center">
           <div className="flex flex-col w-full max-w-2xl h-screen overflow-y-auto hide-scrollbar">
-            {!isLoggedIn && (
-              <>
-                <div className="flex flex-row items-center justify-between py-4">
-                  <div className="pl-2 sm:pl-4 text-gray-700 dark:text-gray-300 font-semibold font-mplus-2">
-                    <p>ログインしてNostrを始めよう</p>
-                  </div>
-                  <div className="pr-2 sm:pr-4">
-                    <PrimaryButton
-                      className="py-2 px-4"
-                      onClick={openLoginModal}
-                    >
-                      ログイン
-                    </PrimaryButton>
-                  </div>
-                </div>
-                <hr className="border-1 border-gray-200 dark:border-gray-700" />
-              </>
-            )}
+            <LoginPrompt />
             <Timeline
               onScrollUp={focusBottomTab}
               onScrollDown={unfocusBottomTab}
@@ -107,13 +64,6 @@ const App: React.FC = () => {
         </div>
         <Toaster />
       </div>
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={closeLoginModal}
-        onLoginWithNsecApp={handleLoginWithNsecApp}
-        onLoginWithExtension={handleLoginWithExtension}
-        onLoginWithImportingKeys={handleLoginWithImportingKeys}
-      />
     </div>
   )
 }
