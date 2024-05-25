@@ -58,6 +58,12 @@ const App: React.FC = () => {
     closeLoginModal()
   }
 
+  const handleLoginWithImportingKeys = (nsecPrivateKey: string) => {
+    // ログイン処理を追加
+    setIsLoggedIn(true)
+    closeLoginModal()
+  }
+
   return (
     <div className="bg-white dark:bg-black min-h-screen flex">
       <Navigation
@@ -105,6 +111,7 @@ const App: React.FC = () => {
         onClose={closeLoginModal}
         onLoginWithNsecApp={handleLoginWithNsecApp}
         onLoginWithExtension={handleLoginWithExtension}
+        onLoginWithImportingKeys={handleLoginWithImportingKeys}
       />
     </div>
   )
