@@ -1,9 +1,14 @@
 import React from 'react'
+import { User } from '../../models/user'
+import user1Image from '../../assets/images/example/user1.png'
+import user2Image from '../../assets/images/example/user2.png'
+import user3Image from '../../assets/images/example/user3.png'
 
 type Channel = {
   id: number
   name: string
-  description?: string
+  knownUsers: User[]
+  recommendReason?: string
   channeldId: string
 }
 
@@ -12,17 +17,52 @@ const RecommendedPublicChannel: React.FC = () => {
     {
       id: 1,
       name: '何でも質問板@Nostr',
-      description: 'Nostr初心者の質問に玄人が答えます',
+      knownUsers: [
+        new User({
+          npub: 'npubhogefuga',
+          pubkey: 'pubhogefuga',
+          name: 'julia',
+          image: user1Image,
+        }),
+        new User({
+          npub: 'npubhogefuga2',
+          pubkey: 'pubhogefuga2',
+          name: 'kaori',
+          image: user2Image,
+        }),
+        new User({
+          npub: 'npubhogefuga3',
+          pubkey: 'pubhogefuga3',
+          name: 'nostaro',
+          image: user3Image,
+        }),
+      ],
       channeldId: 'https://channel1.example.com',
     },
     {
       id: 2,
       name: '好きなボカロを紹介するスレ',
+      knownUsers: [
+        new User({
+          npub: 'npubhogefuga',
+          pubkey: 'pubhogefuga',
+          name: 'julia',
+          image: user1Image,
+        }),
+        new User({
+          npub: 'npubhogefuga2',
+          pubkey: 'pubhogefuga2',
+          name: 'kaori',
+          image: user2Image,
+        }),
+      ],
       channeldId: 'https://channel2.example.com',
     },
     {
       id: 3,
-      name: '◯◯さん応援スレ',
+      name: 'Bitcoin 101',
+      knownUsers: [],
+      recommendReason: '多数の著名なユーザーが参加しています',
       channeldId: 'https://channel3.example.com',
     },
   ]
@@ -42,14 +82,41 @@ const RecommendedPublicChannel: React.FC = () => {
               <div className="font-medium text-gray-700 dark:text-gray-300">
                 {channel.name}
               </div>
-              {channel.description && (
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {channel.description}
+              {channel.knownUsers.length > 0 && (
+                <div className="flex items-center space-x-2">
+                  <div className="flex -space-x-2 mt-1">
+                    {channel.knownUsers.map((user, index) => (
+                      <div
+                        className="relative group w-[32px]"
+                        key={index}
+                        style={{ zIndex: channel.knownUsers.length - index }}
+                      >
+                        <img
+                          src={user.image}
+                          alt={user.name}
+                          className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 justify-center max-w-[150px] break-words">
+                    <p className="truncate whitespace-pre-wrap line-clamp-2">
+                      {channel.knownUsers.map((user: any, index: number) => {
+                        if (index === 0) {
+                          return `${user.name}さん`
+                        }
+                        return `、${user.name}さん`
+                      })}
+                      が参加しています
+                    </p>
+                  </div>
                 </div>
               )}
-              <div className="text-sm text-blue-500 dark:text-blue-300">
-                {channel.channeldId}
-              </div>
+              {channel.knownUsers.length === 0 && channel.recommendReason && (
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {channel.recommendReason}
+                </div>
+              )}
             </div>
           </div>
           <button className="bg-white text-black text-sm font-noto-sans py-1 px-2 rounded-full min-w-16 hover:bg-gray-50 transition">
