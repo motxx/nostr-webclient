@@ -91,7 +91,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
         ref={modalRef}
-        className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 md:p-16 flex flex-col items-center"
+        className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 md:p-16 flex flex-col items-center justify-center w-full max-w-md mx-0 md:mx-auto min-h-52"
       >
         <div
           className="z-10 absolute top-2 right-2 w-10 h-10 flex items-center justify-center text-black dark:text-white text-xl rounded-full hover:bg-gray-500 cursor-pointer hover:bg-opacity-25"
