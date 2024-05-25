@@ -7,6 +7,7 @@ import {
   FiMessageSquare,
   FiPlusCircle,
   FiUsers,
+  FiSettings,
 } from 'react-icons/fi'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
@@ -20,12 +21,14 @@ export type NavigationItemId =
   | 'public-channel'
   | 'message'
   | 'post'
+  | 'settings'
 
 export type NavigationItem = {
   id: NavigationItemId
   icon: IconType
   label: string
   onClick: () => void
+  hiddenOnMobile?: boolean
 }
 
 const user = {
@@ -50,7 +53,20 @@ const navigationItems: NavigationItem[] = [
     label: 'メッセージ',
     onClick: () => {},
   },
-  { id: 'post', icon: FiPlusCircle, label: 'ノートを書く', onClick: () => {} },
+  {
+    id: 'post',
+    icon: FiPlusCircle,
+    label: 'ノートを書く',
+    onClick: () => {},
+    hiddenOnMobile: true,
+  },
+  {
+    id: 'settings',
+    icon: FiSettings,
+    label: '設定',
+    onClick: () => {},
+    hiddenOnMobile: true,
+  },
 ]
 
 interface NavigationProps {

@@ -28,7 +28,7 @@ const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
         className={`z-20 bg-white dark:bg-black w-full h-20 fixed bottom-0 pb-8 border-t border-gray-200 dark:border-gray-700 flex justify-around items-center px-4 transition-opacity duration-200 ${shouldFocusBottomTab ? 'opacity-50' : 'opacity-100'}`}
       >
         {navigationItems
-          .filter((item) => item.id !== 'post')
+          .filter((item) => !item.hiddenOnMobile)
           .map((item: NavigationItem, index: number) => (
             <NavigationBottomTabItem
               key={index}
