@@ -39,6 +39,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
     onClose()
   }
 
+  const handleClickCloseLoginWithImportingKeys = () => {
+    setIsImportingKey(false)
+  }
+
   const renderLoginButtons = () => (
     <>
       <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-8 font-playlist-script">
@@ -98,7 +102,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
       >
         <div
           className="z-10 absolute top-2 right-2 w-10 h-10 flex items-center justify-center text-black dark:text-white text-xl rounded-full hover:bg-gray-500 cursor-pointer hover:bg-opacity-25"
-          onClick={onClose}
+          onClick={
+            isImportingKey ? handleClickCloseLoginWithImportingKeys : onClose
+          }
         >
           ✕
         </div>
