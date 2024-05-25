@@ -38,7 +38,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
   const renderLoginButtons = () => (
     <>
-      <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 md:mb-8 font-playlist-script">
+      <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-8 font-playlist-script">
         Nostragram
       </h1>
 
@@ -91,10 +91,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
         ref={modalRef}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 md:p-16 flex flex-col items-center"
+        className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 md:p-16 flex flex-col items-center"
       >
         <div
-          className="z-10 absolute top-2 left-2 w-10 h-10 flex items-center justify-center text-black dark:text-white text-xl rounded-full hover:bg-gray-500 cursor-pointer hover:bg-opacity-25"
+          className="z-10 absolute top-2 right-2 w-10 h-10 flex items-center justify-center text-black dark:text-white text-xl rounded-full hover:bg-gray-500 cursor-pointer hover:bg-opacity-25"
           onClick={onClose}
         >
           ✕
