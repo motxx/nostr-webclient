@@ -1,15 +1,15 @@
 import React from 'react'
-import Trends from './Trends'
-import RecommendedUsers from './RecommendedUsers'
-import RecommendedPublicChannel from './RecommendedPublicChannel'
+import WidgetTrends from './WidgetTrends'
+import WidgetRecommendedUsers from './WidgetRecommendedUsers'
+import WidgetRecommendedPublicChannel from './WidgetRecommendedPublicChannel'
 
 const Widgets: React.FC = () => {
   return (
-    <>
-      <Trends />
-      <RecommendedPublicChannel />
-      <RecommendedUsers />
-    </>
+    <div className="w-full px-6 py-2 space-y-10">
+      <WidgetTrends />
+      <WidgetRecommendedPublicChannel />
+      <WidgetRecommendedUsers />
+    </div>
   )
 }
 

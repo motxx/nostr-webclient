@@ -1,6 +1,7 @@
 import React from 'react'
+import Widget from './Widget'
 
-const RecommendedRelays: React.FC = () => {
+const WidgetRecommendedRelays: React.FC = () => {
   const relays = [
     {
       id: 1,
@@ -23,10 +24,7 @@ const RecommendedRelays: React.FC = () => {
   ]
 
   return (
-    <div className="hidden md:block w-full p-6">
-      <div className="font-bold text-xl mb-4 text-gray-700 dark:text-gray-300 font-mplus-2">
-        おすすめのリレー
-      </div>
+    <Widget topic="おすすめのリレー">
       {relays.map((relay) => (
         <div
           key={relay.id}
@@ -53,8 +51,8 @@ const RecommendedRelays: React.FC = () => {
       <div className="text-blue-500 dark:text-blue-300 hover:underline cursor-pointer mt-4">
         さらに表示
       </div>
-    </div>
+    </Widget>
   )
 }
 
-export default RecommendedRelays
+export default WidgetRecommendedRelays

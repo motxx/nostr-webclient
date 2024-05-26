@@ -8,7 +8,7 @@ const SearchBar: React.FC = () => {
       <input
         type="text"
         placeholder="検索"
-        className="bg-transparent outline-none w-full text-gray-700 dark:text-gray-300 text-sm"
+        className="bg-transparent outline-none w-full text-gray-700 dark:text-gray-300"
       />
     </div>
   )

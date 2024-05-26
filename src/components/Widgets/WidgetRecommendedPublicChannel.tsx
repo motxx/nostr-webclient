@@ -3,6 +3,7 @@ import { User } from '../../models/user'
 import user1Image from '../../assets/images/example/user1.png'
 import user2Image from '../../assets/images/example/user2.png'
 import user3Image from '../../assets/images/example/user3.png'
+import Widget from './Widget'
 
 type Channel = {
   id: number
@@ -12,7 +13,7 @@ type Channel = {
   channeldId: string
 }
 
-const RecommendedPublicChannel: React.FC = () => {
+const WidgetRecommendedPublicChannel: React.FC = () => {
   const channels: Channel[] = [
     {
       id: 1,
@@ -68,10 +69,7 @@ const RecommendedPublicChannel: React.FC = () => {
   ]
 
   return (
-    <div className="hidden md:block w-full p-6">
-      <div className="font-bold text-xl mb-4 text-gray-700 dark:text-gray-300 font-mplus-2">
-        おすすめの公開チャンネル
-      </div>
+    <Widget topic="おすすめの公開チャンネル">
       {channels.map((channel) => (
         <div
           key={channel.id}
@@ -127,8 +125,8 @@ const RecommendedPublicChannel: React.FC = () => {
       <div className="text-blue-500 dark:text-blue-300 hover:underline cursor-pointer mt-4">
         さらに表示
       </div>
-    </div>
+    </Widget>
   )
 }
 
-export default RecommendedPublicChannel
+export default WidgetRecommendedPublicChannel

@@ -1,6 +1,7 @@
 import React from 'react'
+import Widget from './Widget'
 
-const RecommendedUsers: React.FC = () => {
+const WidgetRecommendedUsers: React.FC = () => {
   const users = [
     {
       id: 1,
@@ -23,10 +24,7 @@ const RecommendedUsers: React.FC = () => {
   ]
 
   return (
-    <div className="hidden md:block w-full p-6">
-      <div className="font-bold text-xl mb-4 text-gray-700 dark:text-gray-300 font-mplus-2">
-        おすすめユーザー
-      </div>
+    <Widget topic="おすすめユーザー">
       {users.map((user) => (
         <div
           key={user.id}
@@ -55,8 +53,8 @@ const RecommendedUsers: React.FC = () => {
       <div className="text-blue-500 dark:text-blue-300 hover:underline cursor-pointer mt-4">
         さらに表示
       </div>
-    </div>
+    </Widget>
   )
 }
 
-export default RecommendedUsers
+export default WidgetRecommendedUsers
