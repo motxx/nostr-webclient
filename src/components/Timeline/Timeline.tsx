@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
+import TimelineImageGrid from './TimelineImageGrid'
 import { posts } from '../../data/dummy-posts'
 
 interface TimelineProps {
@@ -82,6 +83,18 @@ const Timeline: React.FC<TimelineProps> = ({
     }
   }
 
+  const renderFeed = () => {
+    const activeTab = tabs.find((tab) => tab.id === activeTabId)
+    if (activeTab?.feedType === 'standard') {
+      return <TimelineStandard posts={posts} onToggleFollow={onToggleFollow} />
+    } else if (activeTab?.feedType === 'image-grid') {
+      return <TimelineImageGrid posts={posts} />
+    } else {
+      // 他のフィードタイプのコンポーネントもここに追加できます
+      return null
+    }
+  }
+
   return (
     <div
       ref={timelineRef}
@@ -95,9 +108,7 @@ const Timeline: React.FC<TimelineProps> = ({
         tabs={tabs}
         activeTabId={activeTabId}
       />
-      <div className="flex justify-center w-full">
-        <TimelineStandard posts={posts} onToggleFollow={onToggleFollow} />
-      </div>
+      <div className="flex justify-center w-full">{renderFeed()}</div>
     </div>
   )
 }
