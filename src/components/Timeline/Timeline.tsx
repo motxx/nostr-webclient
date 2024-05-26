@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
+import { posts } from '../../data/dummy-posts'
 
 interface TimelineProps {
   onScrollUp: () => void
@@ -95,7 +96,7 @@ const Timeline: React.FC<TimelineProps> = ({
         activeTabId={activeTabId}
       />
       <div className="flex justify-center w-full">
-        <TimelineStandard onToggleFollow={onToggleFollow} />
+        <TimelineStandard posts={posts} onToggleFollow={onToggleFollow} />
       </div>
     </div>
   )
