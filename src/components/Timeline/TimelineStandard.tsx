@@ -14,9 +14,9 @@ const Timeline: React.FC<TimelineProps> = ({
   onScrollDown,
   onToggleFollow,
 }) => {
+  const [activeTab, setActiveTab] = useState('フォロー中')
   const tabRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
-  const [activeTab, setActiveTab] = useState('フォロー中')
   const [lastScrollTop, setLastScrollTop] = useState(0)
 
   const tabs = ['フォロー中', 'おすすめ', 'イラスト', 'コミック', 'クリップ']
@@ -50,12 +50,13 @@ const Timeline: React.FC<TimelineProps> = ({
       className="w-full max-w-2xl mx-auto overflow-auto"
       style={{ maxHeight: '100vh' }}
     >
-      <TimelineTab
-        ref={tabRef}
-        onTabItemClick={handleTabClick}
-        tabs={tabs}
-        activeTab={activeTab}
-      />
+      <div ref={tabRef}>
+        <TimelineTab
+          onTabItemClick={handleTabClick}
+          tabs={tabs}
+          activeTab={activeTab}
+        />
+      </div>
       <div className="flex justify-center w-full">
         <div className="sm:pl-6 sm:pr-6 pt-4 sm:pt-8 mb-20 max-w-xl">
           {posts.map((post) => (
