@@ -8,6 +8,19 @@ interface TimelineProps {
   onToggleFollow: (userId: string) => boolean
 }
 
+export type TimelineTabId =
+  | 'following'
+  | 'recommended'
+  | 'illusts'
+  | 'comics'
+  | 'clips'
+export type TimelineFeedType = 'standard' | 'image-grid' | 'video-swipe'
+export type TimelineTabType = {
+  id: TimelineTabId
+  feedType: TimelineFeedType
+  name: string
+}
+
 const Timeline: React.FC<TimelineProps> = ({
   onScrollUp,
   onScrollDown,
@@ -15,13 +28,39 @@ const Timeline: React.FC<TimelineProps> = ({
 }) => {
   const tabRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
-  const [activeTab, setActiveTab] = useState('フォロー中')
+  const [activeTabId, setActiveTabId] = useState<TimelineTabId>('following')
   const [lastScrollTop, setLastScrollTop] = useState(0)
 
-  const tabs = ['フォロー中', 'おすすめ', 'イラスト', 'コミック', 'クリップ']
+  const tabs: TimelineTabType[] = [
+    {
+      id: 'following',
+      feedType: 'standard',
+      name: 'フォロー中',
+    },
+    {
+      id: 'recommended',
+      feedType: 'standard',
+      name: 'おすすめ',
+    },
+    {
+      id: 'illusts',
+      feedType: 'image-grid',
+      name: 'イラスト',
+    },
+    {
+      id: 'comics',
+      feedType: 'image-grid',
+      name: 'コミック',
+    },
+    {
+      id: 'clips',
+      feedType: 'video-swipe',
+      name: 'クリップ',
+    },
+  ]
 
-  const handleTabClick = (tabText: string) => {
-    setActiveTab(tabText)
+  const handleTabClick = (tabId: TimelineTabId) => {
+    setActiveTabId(tabId)
     if (timelineRef.current) {
       timelineRef.current.scrollTop = 0
     }
@@ -53,7 +92,7 @@ const Timeline: React.FC<TimelineProps> = ({
         ref={tabRef}
         onTabItemClick={handleTabClick}
         tabs={tabs}
-        activeTab={activeTab}
+        activeTabId={activeTabId}
       />
       <div className="flex justify-center w-full">
         <TimelineStandard onToggleFollow={onToggleFollow} />
