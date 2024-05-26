@@ -12,7 +12,7 @@ const Trends: React.FC = () => {
   )
 
   return (
-    <div className="hidden md:block w-full p-6">
+    <div className="hidden md:block w-full px-6 py-4">
       <div className="font-bold text-xl mb-4 text-gray-700 dark:text-gray-300 font-mplus-2">
         トレンド
       </div>

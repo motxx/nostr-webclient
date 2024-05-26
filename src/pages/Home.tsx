@@ -1,3 +1,4 @@
+import SearchBar from '../components/Search/SearchBar'
 import LoginPrompt from '../components/Timeline/LoginPrompt'
 import Timeline from '../components/Timeline/Timeline'
 import Widgets from '../components/Widgets/Widgets'
@@ -23,11 +24,16 @@ const Home: React.FC<HomeProps> = ({
           onToggleFollow={toggleFollow}
         />
       </div>
-      <div
-        className="hidden py-4 lg:flex flex-col w-1/3 min-w-[280px] max-w-[500px] ml-4 space-y-4 overflow-y-auto hide-scrollbar"
-        style={{ maxHeight: '100vh' }}
-      >
-        <Widgets />
+      <div className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px] ml-4">
+        <div className="hidden lg:block bg-white dark:bg-black z-10 p-4">
+          <SearchBar />
+        </div>
+        <div
+          className="hidden lg:flex flex-col space-y-4 overflow-y-auto hide-scrollbar"
+          style={{ maxHeight: '100vh' }}
+        >
+          <Widgets />
+        </div>
       </div>
     </div>
   )
