@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Navigation from './components/Navigation/Navigation'
-import Home from './pages/Home'
-import Search from './pages/Search'
-import Notification from './pages/Notification'
-import PublicChannel from './pages/PublicChannel'
-import DirectMessage from './pages/DirectMessage'
-import Settings from './pages/Settings'
-import Dashboard from './pages/Dashboard'
+import HomePage from './pages/HomePage'
+import SearchPage from './pages/SearchPage'
+import NotificationPage from './pages/NotificationPage'
+import PublicChannelPage from './pages/PublicChannelPage'
+import DirectMessagePage from './pages/DirectMessagePage'
+import SettingsPage from './pages/SettingsPage'
+import DashboardPage from './pages/DashboardPage'
 import toast, { Toaster } from 'react-hot-toast'
 import { User } from './models/user'
 
@@ -56,7 +56,7 @@ const App: React.FC = () => {
             <Route
               path="/"
               element={
-                <Home
+                <HomePage
                   focusBottomTab={focusBottomTab}
                   unfocusBottomTab={unfocusBottomTab}
                   toggleFollow={toggleFollow}
@@ -66,29 +66,29 @@ const App: React.FC = () => {
             <Route
               path="/home"
               element={
-                <Home
+                <HomePage
                   focusBottomTab={focusBottomTab}
                   unfocusBottomTab={unfocusBottomTab}
                   toggleFollow={toggleFollow}
                 />
               }
             />
-            <Route path="/search" element={<Search />} />
-            <Route path="/notification" element={<Notification />} />
-            <Route path="/public-channel" element={<PublicChannel />} />
-            <Route path="/message" element={<DirectMessage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/notification" element={<NotificationPage />} />
+            <Route path="/public-channel" element={<PublicChannelPage />} />
+            <Route path="/message" element={<DirectMessagePage />} />
             <Route
               path="/post"
               element={
-                <Home
+                <HomePage
                   focusBottomTab={focusBottomTab}
                   unfocusBottomTab={unfocusBottomTab}
                   toggleFollow={toggleFollow}
                 />
               }
             />
-            <Route path="/dashboard" element={<Dashboard />} />{' '}
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/dashboard" element={<DashboardPage />} />{' '}
+            <Route path="/settings" element={<SettingsPage />} />
           </Routes>
           <Toaster />
         </div>
