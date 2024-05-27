@@ -1,0 +1,35 @@
+.recommended-content-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.carousel .slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content-item {
+  width: 90%;
+  max-width: 300px;
+}
+
+@media (max-width: 768px) {
+  .content-item {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-slide {
+    flex-direction: column;
+  }
+
+  .content-item {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 10px;
+  }
+}
