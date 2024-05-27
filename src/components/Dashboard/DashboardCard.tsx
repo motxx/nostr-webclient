@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { useDrag, useDrop } from 'react-dnd'
 import { ItemTypes } from './ItemTypes'
 import { getEmptyImage } from 'react-dnd-html5-backend'
@@ -23,6 +23,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
 }) => {
   const originalIndex = findCard(id).index
   const ref = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState<number | string>('auto')
 
   const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.CARD,
@@ -52,13 +53,29 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
   drag(drop(ref))
   preview(getEmptyImage(), { captureDraggingState: true })
 
+  const handleResize = () => {
+    if (ref.current) {
+      setHeight(ref.current.clientHeight)
+    }
+  }
+
+  useEffect(() => {
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  useEffect(() => {
+    handleResize()
+  }, [children])
+
   const opacity = isDragging ? 0.5 : 1
   return (
     <div
       ref={ref}
-      style={{
-        opacity,
-      }}
+      style={{ opacity, height }}
       className="relative flex items-center justify-center bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-md shadow-md overflow-hidden h-full"
     >
       <div className="flex flex-col w-full h-full max-w-full box-border">

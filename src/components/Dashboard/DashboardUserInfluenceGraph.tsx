@@ -41,11 +41,13 @@ export const DashboardUserInfluenceGraph: React.FC = () => {
   }, [networkData])
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
         ユーザー影響力マップ
       </h3>
-      <div ref={networkContainer} className="w-full aspect-square" />
+      <div className="flex-1">
+        <div ref={networkContainer} className="w-full aspect-square" />
+      </div>
     </div>
   )
 }

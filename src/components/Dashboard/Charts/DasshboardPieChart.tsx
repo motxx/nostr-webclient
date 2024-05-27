@@ -28,12 +28,22 @@ export const DashboardPieChart: React.FC<DashboardPieChartProps> = ({
       return { ...defaultDataset, ...dataset }
     }),
   }
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+  }
+
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
         {caption}
       </h3>
-      <Pie data={data} />
+      <div className="flex-1 flex items-center justify-center">
+        <div className="w-full h-full">
+          <Pie data={data} options={options} />
+        </div>
+      </div>
     </div>
   )
 }
