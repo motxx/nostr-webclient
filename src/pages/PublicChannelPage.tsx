@@ -1,20 +1,29 @@
 import React, { useState } from 'react'
 import PublicChannelList from '../components/PublicChannel/PublicChannelList'
 import PublicChannelChatWindow from '../components/PublicChannel/PublicChannelChatWindow'
+import { PublicChannelType } from '../global/types'
 
-const PublicChannel: React.FC = () => {
-  const [selectedChannel, setSelectedChannel] = useState<string | null>(null)
+export const PublicChannels: PublicChannelType[] = [
+  { id: '1', name: 'General' },
+  { id: '2', name: 'Music' },
+  { id: '3', name: 'Programming' },
+]
 
-  const handleChannelSelect = (channelId: string) => {
-    setSelectedChannel(channelId)
+const PublicChannelPage: React.FC = () => {
+  const [selectedChannel, setSelectedChannel] = useState<PublicChannelType>(
+    PublicChannels[0]
+  )
+
+  const handleChannelSelect = (channel: PublicChannelType) => {
+    setSelectedChannel(channel)
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-screen">
       <PublicChannelList onSelectChannel={handleChannelSelect} />
-      <PublicChannelChatWindow channelId={selectedChannel} />
+      <PublicChannelChatWindow channel={selectedChannel} />
     </div>
   )
 }
 
-export default PublicChannel
+export default PublicChannelPage

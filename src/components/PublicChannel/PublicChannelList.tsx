@@ -1,29 +1,25 @@
 import React from 'react'
+import { PublicChannels } from '../../pages/PublicChannelPage'
+import { PublicChannelType } from '../../global/types'
 
 interface PublicChannelListProps {
-  onSelectChannel: (channelId: string) => void
+  onSelectChannel: (channel: PublicChannelType) => void
 }
-
-const channels = [
-  { id: '1', name: 'General' },
-  { id: '2', name: 'Music' },
-  { id: '3', name: 'Programming' },
-]
 
 const PublicChannelList: React.FC<PublicChannelListProps> = ({
   onSelectChannel,
 }) => {
   return (
-    <div className="w-1/4 bg-gray-200 dark:bg-gray-800 p-4">
-      <h2 className="text-lg font-bold mb-4">Channels</h2>
-      <ul>
-        {channels.map((channel) => (
+    <div className="sticky top-0 bg-gray-200 dark:bg-gray-800 p-4 w-1/4 h-full flex flex-col">
+      <h2 className="text-lg font-bold mb-4">公開チャンネル</h2>
+      <ul className="flex-grow overflow-auto">
+        {PublicChannels.map((channel) => (
           <li
             key={channel.id}
-            onClick={() => onSelectChannel(channel.id)}
+            onClick={() => onSelectChannel(channel)}
             className="cursor-pointer p-2 hover:bg-gray-300 dark:hover:bg-gray-700 rounded"
           >
-            {channel.name}
+            # {channel.name}
           </li>
         ))}
       </ul>
