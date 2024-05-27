@@ -44,12 +44,24 @@ export const DarshboardBarChart: React.FC<DarshboardBarChartProps> = ({
     }),
   }
 
+  const options = {
+    maintainAspectRatio: false,
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  }
+
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
         {caption}
       </h3>
-      <Bar data={data} />
+      <div className="flex-1">
+        <Bar data={data} options={options} />
+      </div>
     </div>
   )
 }

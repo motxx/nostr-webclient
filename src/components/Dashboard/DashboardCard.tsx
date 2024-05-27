@@ -59,9 +59,9 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
       style={{
         opacity,
       }}
-      className="relative flex items-center justify-center bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-md shadow-md overflow-hidden"
+      className="relative flex items-center justify-center bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-md shadow-md overflow-hidden h-full"
     >
-      <div className="flex flex-col w-full max-w-full h-full box-border">
+      <div className="flex flex-col w-full h-full max-w-full box-border">
         {children}
       </div>
       {isDragging && (
