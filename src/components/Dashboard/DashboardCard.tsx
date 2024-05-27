@@ -58,32 +58,14 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
       ref={ref}
       style={{
         opacity,
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
       }}
-      className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-md shadow-md"
+      className="relative flex items-center justify-center bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-md shadow-md overflow-hidden"
     >
-      {children}
+      <div className="flex flex-col w-full max-w-full h-full box-border">
+        {children}
+      </div>
       {isDragging && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '1px solid black',
-            backgroundColor: 'white',
-            zIndex: 1000,
-            opacity: 0.8,
-            pointerEvents: 'none',
-          }}
-        >
+        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center border border-black bg-white z-50 opacity-80 pointer-events-none">
           {children}
         </div>
       )}

@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import update from 'immutability-helper'
-import { DashboardRecommendedContent } from '../components/Dashboard/DashboardRecommendedContent'
 import { DashboardCard } from '../components/Dashboard/DashboardCard'
 import { DashboardTotalEarnings } from '../components/Dashboard/DashboardTotalEarnings'
 import { DarshboardZapEarnings } from '../components/Dashboard/DashboardZapEarnings'
@@ -19,7 +18,6 @@ interface Card {
 
 const Dashboard: React.FC = () => {
   const [cards, setCards] = useState<Card[]>([
-    // { id: 1, content: <DashboardRecommendedContent /> },
     { id: 2, content: <DashboardTotalEarnings /> },
     { id: 3, content: <DarshboardZapEarnings /> },
     { id: 4, content: <DarshboardPaidContentSales /> },
