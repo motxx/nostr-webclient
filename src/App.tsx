@@ -7,7 +7,7 @@ import Notification from './pages/Notification'
 import PublicChannel from './pages/PublicChannel'
 import DirectMessage from './pages/DirectMessage'
 import Settings from './pages/Settings'
-import Dashboard from './pages/Dashboard' // Import the new Dashboard component
+import Dashboard from './pages/Dashboard'
 import toast, { Toaster } from 'react-hot-toast'
 import { User } from './models/user'
 
