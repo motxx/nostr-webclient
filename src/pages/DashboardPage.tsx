@@ -8,7 +8,6 @@ import { DarshboardZapEarnings } from '../components/Dashboard/DashboardZapEarni
 import { DarshboardPaidContentSales } from '../components/Dashboard/DashboardPaidContentSales'
 import { DashboardPostsEngagement } from '../components/Dashboard/DashboardPostsEngagement'
 import { DarshboardUserDemographics } from '../components/Dashboard/DashboardUserDemographics'
-import { DashboardUserInfluenceGraph } from '../components/Dashboard/DashboardUserInfluenceGraph'
 import '../components/Dashboard/Dashboard.css'
 
 interface Card {
@@ -23,7 +22,6 @@ const Dashboard: React.FC = () => {
     { id: 4, content: <DarshboardPaidContentSales /> },
     { id: 5, content: <DashboardPostsEngagement /> },
     { id: 6, content: <DarshboardUserDemographics /> },
-    { id: 7, content: <DashboardUserInfluenceGraph /> },
   ])
 
   const moveCard = (id: number, atIndex: number) => {

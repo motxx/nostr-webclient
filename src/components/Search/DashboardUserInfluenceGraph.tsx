@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Network } from 'vis-network/standalone/esm/vis-network'
 
-export const DashboardUserInfluenceGraph: React.FC = () => {
+export const SearchUserInfluenceGraph: React.FC = () => {
   const networkContainer = useRef<HTMLDivElement>(null)
 
   const [networkData, setNetworkData] = useState<{
