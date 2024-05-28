@@ -6,7 +6,7 @@ export const mockMessages = [
       avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
     },
     content: 'Hello, how are you?',
-    timestamp: '2023-05-27 10:00',
+    timestamp: '2023-05-26 10:00',
   },
   {
     id: '2',
@@ -15,7 +15,7 @@ export const mockMessages = [
       avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
     },
     content: 'I am fine, thank you!',
-    timestamp: '2023-05-27 10:05',
+    timestamp: '2023-05-26 10:05',
   },
   {
     id: '2',
@@ -24,7 +24,7 @@ export const mockMessages = [
       avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
     },
     content: 'I am fine, thank you!',
-    timestamp: '2023-05-27 10:05',
+    timestamp: '2023-05-26 10:05',
   },
   {
     id: '2',

@@ -16,7 +16,6 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
   const [newMessage, setNewMessage] = useState<string>('')
 
   useEffect(() => {
-    // モックデータを使用してメッセージを設定する
     setMessages(mockMessages)
   }, [])
 
@@ -36,24 +35,51 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
     }
   }
 
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp)
+    return date.toLocaleDateString()
+  }
+
+  const isNewDay = (currentMessage: any, previousMessage: any) => {
+    const currentDate = formatDate(currentMessage.timestamp)
+    const previousDate = previousMessage
+      ? formatDate(previousMessage.timestamp)
+      : null
+    return currentDate !== previousDate
+  }
+
   return (
     <div className="w-full flex flex-col h-full relative">
       <div className="flex-grow overflow-auto">
-        <div className="flex">
+        <div className="z-10 flex sticky top-0 w-full bg-white dark:bg-black">
           <button
             onClick={onOpenSidebar}
-            className="md:hidden w-8 h-14 ml-2 px-2 font-bold"
+            className="md:hidden w-8 h-12 px-4 font-bold"
           >
             ←
           </button>
-          <h2 className="text-lg font-bold mb-4 px-2 md:px-4 py-4 h-14">
+          <h2 className="text-lg font-bold mb-4 px-2 md:px-4 py-4 h-12 flex items-center">
             {channel ? `# ${channel.name}` : 'Select a channel'}
           </h2>
         </div>
         {channel && (
           <div className="p-4">
-            {messages.map((message) => (
-              <PublicChannelChatMessage key={message.id} message={message} />
+            {messages.map((message, index) => (
+              <React.Fragment key={message.id}>
+                {isNewDay(message, messages[index - 1]) && (
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+                    </div>
+                    <div className="relative text-center">
+                      <span className="px-2 bg-white dark:bg-black text-gray-500 text-sm font-bold">
+                        {formatDate(message.timestamp)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <PublicChannelChatMessage message={message} />
+              </React.Fragment>
             ))}
           </div>
         )}
