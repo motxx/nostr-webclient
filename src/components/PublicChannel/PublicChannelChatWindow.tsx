@@ -5,10 +5,12 @@ import { PublicChannelType } from '../../global/types'
 
 interface PublicChannelChatWindowProps {
   channel?: PublicChannelType
+  onOpenSidebar: () => void
 }
 
 const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
   channel,
+  onOpenSidebar,
 }) => {
   const [messages, setMessages] = useState(mockMessages)
   const [newMessage, setNewMessage] = useState<string>('')
@@ -35,13 +37,21 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
   }
 
   return (
-    <div className="w-3/4 flex flex-col h-full">
-      <div className="flex-grow overflow-auto p-4">
-        <h2 className="text-lg font-bold mb-4">
-          {channel ? `# ${channel.name}` : 'Select a channel'}
-        </h2>
+    <div className="w-full flex flex-col h-full relative">
+      <div className="flex-grow overflow-auto">
+        <div className="flex">
+          <button
+            onClick={onOpenSidebar}
+            className="md:hidden w-8 h-14 ml-2 px-2 font-bold"
+          >
+            ←
+          </button>
+          <h2 className="text-lg font-bold mb-4 px-2 md:px-4 py-4 h-14">
+            {channel ? `# ${channel.name}` : 'Select a channel'}
+          </h2>
+        </div>
         {channel && (
-          <div>
+          <div className="p-4">
             {messages.map((message) => (
               <PublicChannelChatMessage key={message.id} message={message} />
             ))}
