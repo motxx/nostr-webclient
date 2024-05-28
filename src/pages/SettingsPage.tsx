@@ -1,7 +1,7 @@
 import React from 'react'
 
-const Settings: React.FC = () => {
+const SettingsPage: React.FC = () => {
   return <div>設定ページ</div>
 }
 
-export default Settings
+export default SettingsPage

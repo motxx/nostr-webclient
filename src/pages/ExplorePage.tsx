@@ -1,7 +1,7 @@
 import React from 'react'
 
-const Search: React.FC = () => {
+const ExplorePage: React.FC = () => {
   return <div>探索ページ</div>
 }
 
-export default Search
+export default ExplorePage

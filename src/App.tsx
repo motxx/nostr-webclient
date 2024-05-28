@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Navigation from './components/Navigation/Navigation'
 import HomePage from './pages/HomePage'
-import SearchPage from './pages/SearchPage'
+import ExplorePage from './pages/ExplorePage'
 import NotificationPage from './pages/NotificationPage'
 import PublicChannelPage from './pages/PublicChannelPage'
 import DirectMessagePage from './pages/DirectMessagePage'
@@ -73,7 +73,7 @@ const App: React.FC = () => {
                 />
               }
             />
-            <Route path="/search" element={<SearchPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
             <Route path="/notification" element={<NotificationPage />} />
             <Route path="/public-channel" element={<PublicChannelPage />} />
             <Route path="/message" element={<DirectMessagePage />} />

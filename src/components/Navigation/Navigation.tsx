@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { IconType } from 'react-icons'
 import {
   FiHome,
-  FiSearch,
+  FiCompass,
   FiBell,
   FiMessageSquare,
-  FiPlusCircle,
   FiUsers,
   FiSettings,
   FiPieChart,
@@ -18,7 +17,7 @@ import userImage from '../../assets/images/example/me.png'
 
 export type NavigationItemId =
   | 'home'
-  | 'search'
+  | 'explore'
   | 'notification'
   | 'public-channel'
   | 'message'
@@ -41,7 +40,7 @@ const user = {
 
 const navigationItems: NavigationItem[] = [
   { id: 'home', icon: FiHome, label: 'ホーム' },
-  { id: 'search', icon: FiSearch, label: '探索' },
+  { id: 'explore', icon: FiCompass, label: '探索' },
   { id: 'dashboard', icon: FiPieChart, label: 'ダッシュボード' },
   { id: 'public-channel', icon: FiUsers, label: '公開チャンネル' },
   { id: 'notification', icon: FiBell, label: '通知' },

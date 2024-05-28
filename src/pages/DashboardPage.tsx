@@ -15,7 +15,7 @@ interface Card {
   content: React.ReactNode
 }
 
-const Dashboard: React.FC = () => {
+const DashboardPage: React.FC = () => {
   const [cards, setCards] = useState<Card[]>([
     { id: 2, content: <DashboardTotalEarnings /> },
     { id: 3, content: <DarshboardZapEarnings /> },
@@ -67,4 +67,4 @@ const Dashboard: React.FC = () => {
   )
 }
 
-export default Dashboard
+export default DashboardPage

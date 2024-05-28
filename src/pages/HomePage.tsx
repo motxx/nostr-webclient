@@ -1,4 +1,4 @@
-import SearchBar from '../components/Search/SearchBar'
+import SearchBar from '../components/common/SearchBar'
 import LoginPrompt from '../components/Timeline/LoginPrompt'
 import Timeline from '../components/Timeline/Timeline'
 import Widgets from '../components/Widgets/Widgets'
@@ -9,7 +9,7 @@ interface HomeProps {
   toggleFollow: (userId: string) => boolean
 }
 
-const Home: React.FC<HomeProps> = ({
+const HomePage: React.FC<HomeProps> = ({
   focusBottomTab,
   unfocusBottomTab,
   toggleFollow,
@@ -39,4 +39,4 @@ const Home: React.FC<HomeProps> = ({
   )
 }
 
-export default Home
+export default HomePage
