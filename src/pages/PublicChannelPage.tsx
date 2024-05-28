@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import PublicChannelList from '../components/PublicChannel/PublicChannelList'
 import PublicChannelChatWindow from '../components/PublicChannel/PublicChannelChatWindow'
 import { PublicChannelType } from '../global/types'
@@ -10,14 +11,24 @@ export const PublicChannels: PublicChannelType[] = [
 ]
 
 const PublicChannelPage: React.FC = () => {
+  const { channelId } = useParams()
   const [selectedChannel, setSelectedChannel] = useState<PublicChannelType>(
     PublicChannels[0]
   )
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
+  useEffect(() => {
+    if (channelId) {
+      const channel = PublicChannels.find((ch) => ch.id === channelId)
+      if (channel) {
+        setSelectedChannel(channel)
+      }
+    }
+  }, [channelId])
+
   const handleChannelSelect = (channel: PublicChannelType) => {
     setSelectedChannel(channel)
-    setIsSidebarOpen(false) // チャンネル選択時にサイドバーを閉じる
+    setIsSidebarOpen(false)
   }
 
   return (

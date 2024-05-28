@@ -76,6 +76,10 @@ const App: React.FC = () => {
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/notification" element={<NotificationPage />} />
             <Route path="/public-channel" element={<PublicChannelPage />} />
+            <Route
+              path="/public-channel/:channelId"
+              element={<PublicChannelPage />}
+            />
             <Route path="/message" element={<DirectMessagePage />} />
             <Route
               path="/post"
