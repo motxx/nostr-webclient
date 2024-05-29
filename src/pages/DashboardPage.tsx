@@ -48,7 +48,7 @@ const DashboardPage: React.FC = () => {
     <DndProvider backend={HTML5Backend}>
       <div className="py-6 sm:px-4 bg-white dark:bg-black min-h-screen">
         <h2 className="text-2xl px-2 font-bold mb-4 text-gray-700 dark:text-gray-300">
-          ダッシュボード
+          アナリティクス
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-[80px]">
           {cards.map((card) => (

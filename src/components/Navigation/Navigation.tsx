@@ -8,8 +8,8 @@ import {
   FiMessageSquare,
   FiUsers,
   FiSettings,
-  FiPieChart,
 } from 'react-icons/fi'
+import { TbDeviceDesktopAnalytics } from 'react-icons/tb'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
 
@@ -47,7 +47,7 @@ const navigationItems: NavigationItem[] = [
     icon: FiUsers,
     label: '公開チャンネル',
   },
-  { id: 'dashboard', icon: FiPieChart, label: 'ダッシュボード' },
+  { id: 'dashboard', icon: TbDeviceDesktopAnalytics, label: 'アナリティクス' },
   { id: 'notification', icon: FiBell, label: '通知' },
   {
     id: 'message',
