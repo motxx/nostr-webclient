@@ -18,7 +18,7 @@ export const mockMessages = [
     timestamp: '2023-05-26 10:05',
   },
   {
-    id: '2',
+    id: '3',
     user: {
       name: 'User2',
       avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
@@ -27,7 +27,7 @@ export const mockMessages = [
     timestamp: '2023-05-26 10:05',
   },
   {
-    id: '2',
+    id: '4',
     user: {
       name: 'User2',
       avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
@@ -36,7 +36,7 @@ export const mockMessages = [
     timestamp: '2023-05-27 10:05',
   },
   {
-    id: '2',
+    id: '5',
     user: {
       name: 'User2',
       avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
@@ -45,7 +45,7 @@ export const mockMessages = [
     timestamp: '2023-05-27 10:05',
   },
   {
-    id: '2',
+    id: '6',
     user: {
       name: 'User2',
       avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
@@ -54,52 +54,7 @@ export const mockMessages = [
     timestamp: '2023-05-27 10:05',
   },
   {
-    id: '2',
-    user: {
-      name: 'User2',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    },
-    content: 'I am fine, thank you!',
-    timestamp: '2023-05-27 10:05',
-  },
-  {
-    id: '2',
-    user: {
-      name: 'User2',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    },
-    content: 'I am fine, thank you!',
-    timestamp: '2023-05-27 10:05',
-  },
-  {
-    id: '2',
-    user: {
-      name: 'User2',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    },
-    content: 'I am fine, thank you!',
-    timestamp: '2023-05-27 10:05',
-  },
-  {
-    id: '2',
-    user: {
-      name: 'User2',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    },
-    content: 'I am fine, thank you!',
-    timestamp: '2023-05-27 10:05',
-  },
-  {
-    id: '2',
-    user: {
-      name: 'User2',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    },
-    content: 'I am fine, thank you!',
-    timestamp: '2023-05-27 10:05',
-  },
-  {
-    id: '2',
+    id: '7',
     user: {
       name: 'User2',
       avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
