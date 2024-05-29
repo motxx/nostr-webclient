@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { useAtom } from 'jotai'
+import { publicChannelScrollPositionAtom } from '../../state/atoms'
 import PublicChannelChatMessage from './PublicChannelChatMessage'
 import { mockMessages } from '../../data/dummy-mock-messages'
 import { PublicChannelType } from '../../global/types'
 
 interface PublicChannelChatWindowProps {
-  channel?: PublicChannelType
+  channel: PublicChannelType
   onOpenSidebar: () => void
 }
 
@@ -14,10 +16,39 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
 }) => {
   const [messages, setMessages] = useState(mockMessages)
   const [newMessage, setNewMessage] = useState<string>('')
+  const chatWindowRef = useRef<HTMLDivElement>(null)
+  const [scrollPositions, setScrollPositions] = useAtom(
+    publicChannelScrollPositionAtom
+  )
 
   useEffect(() => {
     setMessages(mockMessages)
   }, [])
+
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      const savedScrollPosition = scrollPositions[channel.id]
+      chatWindowRef.current.scrollTop = savedScrollPosition ?? 0
+    }
+  }, [channel, scrollPositions])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (channel && chatWindowRef.current) {
+        setScrollPositions((prev) => ({
+          ...prev,
+          [channel.id]: chatWindowRef.current!.scrollTop,
+        }))
+      }
+    }
+
+    const chatWindow = chatWindowRef.current
+    chatWindow?.addEventListener('scroll', handleScroll)
+
+    return () => {
+      chatWindow?.removeEventListener('scroll', handleScroll)
+    }
+  }, [channel, setScrollPositions])
 
   const handleSendMessage = () => {
     if (newMessage.trim() !== '') {
@@ -50,7 +81,7 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
 
   return (
     <div className="w-full flex flex-col h-full relative">
-      <div className="flex-grow overflow-auto">
+      <div className="flex-grow overflow-auto" ref={chatWindowRef}>
         <div className="z-10 flex sticky top-0 w-full bg-white dark:bg-black">
           <button
             onClick={onOpenSidebar}

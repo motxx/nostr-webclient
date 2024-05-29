@@ -11,3 +11,7 @@ export const userAtom = atom(
     image: '../../assets/images/example/me.png',
   })
 )
+
+export const publicChannelScrollPositionAtom = atom<{
+  [channelId: string]: number
+}>({})
