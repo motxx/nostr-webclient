@@ -14,7 +14,15 @@ const TimelineTab = forwardRef<HTMLDivElement, TimelineTabProps>(
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`flex-1 text-center py-3 border-b-2 ${tab.id === activeTabId ? 'border-blue-500 font-semibold text-gray-700 dark:text-gray-300' : 'border-white dark:border-black text-gray-500 dark:text-gray-500'} hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-mplus-2`}
+            className={
+              'flex-1 whitespace-nowrap text-center text-sm py-3 border-b-2 ' +
+              `${
+                tab.id === activeTabId
+                  ? 'border-blue-500 text-gray-700 dark:text-gray-300 font-semibold'
+                  : 'border-white dark:border-black text-gray-500 dark:text-gray-500'
+              } ` +
+              'hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-mplus-2'
+            }
             onClick={() => onTabItemClick(tab.id)}
           >
             {tab.name}

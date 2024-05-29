@@ -10,12 +10,7 @@ interface TimelineProps {
   onToggleFollow: (userId: string) => boolean
 }
 
-export type TimelineTabId =
-  | 'following'
-  | 'recommended'
-  | 'illusts'
-  | 'comics'
-  | 'clips'
+export type TimelineTabId = 'following' | 'recommended' | 'images' | 'clips'
 export type TimelineFeedType = 'standard' | 'image-grid' | 'video-swipe'
 export type TimelineTabType = {
   id: TimelineTabId
@@ -45,14 +40,9 @@ const Timeline: React.FC<TimelineProps> = ({
       name: 'おすすめ',
     },
     {
-      id: 'illusts',
+      id: 'images',
       feedType: 'image-grid',
-      name: 'イラスト',
-    },
-    {
-      id: 'comics',
-      feedType: 'image-grid',
-      name: 'コミック',
+      name: 'イラスト・コミック',
     },
     {
       id: 'clips',
