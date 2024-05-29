@@ -20,14 +20,14 @@ const PublicChannelList: React.FC<PublicChannelListProps> = ({
   }
 
   return (
-    <div className="bg-gray-200 dark:bg-gray-800 p-4 h-full flex flex-col">
+    <div className="bg-gray-100 dark:bg-gray-950 border-r-8 border-gray-200 dark:border-gray-900 p-4 h-full flex flex-col">
       <h2 className="text-lg font-bold mb-4">公開チャンネル</h2>
       <ul className="flex-grow overflow-auto">
         {PublicChannels.map((channel) => (
           <li
             key={channel.id}
             onClick={() => handleChannelClick(channel)}
-            className={`cursor-pointer p-2 ${channel.id === selectedChannel.id ? 'font-bold' : 'text-gray-600 dark:text-gray-400'} hover:bg-gray-300 dark:hover:bg-gray-700 font-noto-sans rounded`}
+            className={`cursor-pointer p-2 ${channel.id === selectedChannel.id ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'} hover:bg-gray-200 dark:hover:bg-gray-900 text-sm font-noto-sans rounded`}
           >
             # {channel.name}
           </li>
