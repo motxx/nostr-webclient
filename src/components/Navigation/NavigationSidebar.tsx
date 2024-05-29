@@ -56,9 +56,11 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           {isMining ? (
             <FaToggleOn className="text-xl text-green-500" />
           ) : (
-            <FaToggleOff className="text-xl" />
+            <FaToggleOff className="text-xl text-gray-400 dark:text-gray-500" />
           )}
-          <span className="hidden lg:block">
+          <span
+            className={`hidden lg:block ${isMining ? 'text-gray-600 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'}`}
+          >
             {isMining ? 'マイニング ON' : 'マイニング OFF'}
           </span>
         </div>
