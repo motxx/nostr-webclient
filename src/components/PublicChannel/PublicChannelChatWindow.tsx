@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, FormEvent } from 'react'
 import { useAtom } from 'jotai'
 import { publicChannelScrollPositionAtom } from '../../state/atoms'
 import PublicChannelChatMessage from './PublicChannelChatMessage'
@@ -51,7 +51,8 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
     }
   }, [channel, setScrollPositions])
 
-  const handleSendMessage = () => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault() // フォームのデフォルトの動作をキャンセル
     if (newMessage.trim() !== '') {
       const newMsg = {
         id: String(messages.length + 1),
@@ -64,6 +65,9 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
       }
       setMessages([...messages, newMsg])
       setNewMessage('')
+      if (chatWindowRef.current) {
+        chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight
+      }
     }
   }
 
@@ -118,7 +122,7 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
       </div>
       {channel && (
         <div className="sticky bottom-0 mb-20 sm:mb-0 p-2 sm:px-4 sm:border-t border-gray-200 dark:border-gray-700">
-          <div className="flex">
+          <form className="flex" onSubmit={handleSubmit}>
             <input
               type="text"
               value={newMessage}
@@ -127,12 +131,12 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
               placeholder="Type your message"
             />
             <button
-              onClick={handleSendMessage}
+              type="submit"
               className="ml-1 p-2 flex justify-center items-center bg-blue-500 dark:bg-gray-800 text-white rounded-full sm:rounded"
             >
               <IoMdSend className="text-xl" />
             </button>
-          </div>
+          </form>
         </div>
       )}
     </div>
