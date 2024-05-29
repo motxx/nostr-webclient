@@ -42,12 +42,12 @@ const user = {
 const navigationItems: NavigationItem[] = [
   { id: 'home', icon: FiHome, label: 'ホーム', hasPostNoteButton: true },
   { id: 'explore', icon: FiCompass, label: '探索' },
-  { id: 'dashboard', icon: FiPieChart, label: 'ダッシュボード' },
   {
     id: 'public-channel',
     icon: FiUsers,
     label: '公開チャンネル',
   },
+  { id: 'dashboard', icon: FiPieChart, label: 'ダッシュボード' },
   { id: 'notification', icon: FiBell, label: '通知' },
   {
     id: 'message',
