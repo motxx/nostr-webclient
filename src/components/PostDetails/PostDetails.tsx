@@ -1,5 +1,5 @@
 import React from 'react'
-import MediaContent from './MediaContent'
+import PostDetailsMediaContent from './PostDetailsMediaContent'
 import PostDetailsActions from './PostDetailsActions'
 import RepliesThread from '../Reply/RepliesThread'
 import { PostItemType } from '../../global/types'
@@ -43,7 +43,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
       <div className="relative w-full h-full flex overflow-hidden">
         <div className="relative flex-1 h-full" onClick={handleBackgroundClick}>
           {originalPost.mediaUrl && originalPost.mediaType && (
-            <MediaContent
+            <PostDetailsMediaContent
               mediaUrl={originalPost.mediaUrl}
               mediaType={originalPost.mediaType}
               onBackgroundClick={handleBackgroundClick}
