@@ -6,12 +6,14 @@ import { NavigationItem, NavigationItemId } from './Navigation'
 
 interface NavigationSidebarProps {
   navigationItems: NavigationItem[]
+  activeItemId: NavigationItemId
   user: any
   onNavigate: (to: NavigationItemId) => void
 }
 
 const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   navigationItems,
+  activeItemId,
   user,
   onNavigate,
 }) => {
@@ -20,6 +22,8 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   const handleToggleMining = () => {
     setIsMining(!isMining)
   }
+
+  const isActiveItem = (id: NavigationItemId) => id === activeItemId
 
   return (
     <div className="bg-white dark:bg-black w-20 lg:w-60 h-full border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between px-4 py-6 fixed font-mplus-2">
@@ -41,6 +45,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
             icon={item.icon}
             id={item.id}
             label={item.label}
+            active={isActiveItem(item.id)}
             onClick={() => onNavigate(item.id)}
           />
         ))}

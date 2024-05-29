@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { IconType } from 'react-icons'
 import {
   FiHome,
@@ -67,6 +67,7 @@ const Navigation: React.FC<NavigationProps> = ({
 }) => {
   const [isMobile, setIsMobile] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,6 +78,26 @@ const Navigation: React.FC<NavigationProps> = ({
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  const getActiveItemId = (): NavigationItemId => {
+    const path = location.pathname.substring(1) // Remove leading '/'
+
+    if (path.startsWith('public-channel')) {
+      return 'public-channel'
+    }
+
+    switch (path) {
+      case 'home':
+      case 'explore':
+      case 'dashboard':
+      case 'notification':
+      case 'message':
+      case 'settings':
+        return path as NavigationItemId
+      default:
+        return 'home'
+    }
+  }
 
   const handleNavigate = (to: NavigationItemId) => {
     if (isMobile) {
@@ -96,6 +117,7 @@ const Navigation: React.FC<NavigationProps> = ({
     <NavigationSidebar
       navigationItems={navigationItems}
       user={user}
+      activeItemId={getActiveItemId()}
       onNavigate={handleNavigate}
     />
   )
