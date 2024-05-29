@@ -8,7 +8,7 @@ interface TimelineTabProps {
 }
 
 const TimelineTab = forwardRef<HTMLDivElement, TimelineTabProps>(
-  ({ onTabItemClick, tabs, activeTabId }) => (
+  ({ onTabItemClick, tabs, activeTabId }, ref) => (
     <div className="sticky top-0 bg-white dark:bg-black z-10 overflow-x-auto hide-scrollbar">
       <div className="flex min-w-[500px] border-b border-gray-200 dark:border-gray-700">
         {tabs.map((tab) => (
