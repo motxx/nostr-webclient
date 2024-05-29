@@ -47,7 +47,6 @@ const navigationItems: NavigationItem[] = [
     id: 'public-channel',
     icon: FiUsers,
     label: '公開チャンネル',
-    hasPostNoteButton: true,
   },
   { id: 'notification', icon: FiBell, label: '通知' },
   {

@@ -4,6 +4,7 @@ import { publicChannelScrollPositionAtom } from '../../state/atoms'
 import PublicChannelChatMessage from './PublicChannelChatMessage'
 import { mockMessages } from '../../data/dummy-mock-messages'
 import { PublicChannelType } from '../../global/types'
+import { IoMdSend } from 'react-icons/io'
 
 interface PublicChannelChatWindowProps {
   channel: PublicChannelType
@@ -116,20 +117,20 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
         )}
       </div>
       {channel && (
-        <div className="z-10 sticky bottom-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-black">
+        <div className="sticky bottom-0 mb-20 sm:mb-0 p-2 sm:px-4 sm:border-t border-gray-200 dark:border-gray-700">
           <div className="flex">
             <input
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              className="flex-grow p-2 border border-gray-300 dark:border-gray-700 rounded"
+              className="flex-grow rounded-full px-4 sm:px-0 sm:rounded-none outline-none w-full bg-gray-300 dark:bg-gray-800 sm:bg-transparent sm:dark:bg-transparent text-gray-700 dark:text-gray-300"
               placeholder="Type your message"
             />
             <button
               onClick={handleSendMessage}
-              className="ml-2 p-2 bg-blue-500 text-white rounded"
+              className="ml-1 p-2 flex justify-center items-center bg-blue-500 dark:bg-gray-800 text-white rounded-full sm:rounded"
             >
-              Send
+              <IoMdSend className="text-xl" />
             </button>
           </div>
         </div>
