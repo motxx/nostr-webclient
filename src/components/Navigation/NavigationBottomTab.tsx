@@ -7,6 +7,7 @@ interface NavigationBottomTabProps {
   navigationItems: NavigationItem[]
   user: any
   shouldFocusBottomTab: boolean
+  shouldShowPostButton: boolean
   onNavigate: (to: NavigationItemId) => void
 }
 
@@ -14,16 +15,19 @@ const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
   navigationItems,
   user,
   shouldFocusBottomTab,
+  shouldShowPostButton,
   onNavigate,
 }) => {
   return (
     <>
-      <div
-        className={`absolute bottom-24 right-6 p-3 z-20 bg-blue-500 active:bg-blue-600 dark:bg-blue-600 active:dark:bg-blue-700 rounded-full drop-shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-opacity duration-200 ${shouldFocusBottomTab ? 'opacity-50' : 'opacity-100'}`}
-        onClick={() => onNavigate('post')}
-      >
-        <PiNotePencil className="text-white text-center text-2xl" />
-      </div>
+      {shouldShowPostButton && (
+        <div
+          className={`absolute bottom-24 right-6 p-3 z-20 bg-blue-500 active:bg-blue-600 dark:bg-blue-600 active:dark:bg-blue-700 rounded-full drop-shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-opacity duration-200 ${shouldFocusBottomTab ? 'opacity-50' : 'opacity-100'}`}
+          onClick={() => onNavigate('post')}
+        >
+          <PiNotePencil className="text-white text-center text-2xl" />
+        </div>
+      )}
       <div
         className={`z-20 bg-white dark:bg-black w-full h-20 fixed bottom-0 pb-8 border-t border-gray-200 dark:border-gray-700 flex justify-around items-center px-4 transition-opacity duration-200 ${shouldFocusBottomTab ? 'opacity-50' : 'opacity-100'}`}
       >

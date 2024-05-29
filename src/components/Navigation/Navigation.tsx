@@ -30,6 +30,7 @@ export type NavigationItem = {
   icon: IconType
   label: string
   hiddenOnMobile?: boolean
+  hasPostNoteButton?: boolean
 }
 
 const user = {
@@ -39,22 +40,26 @@ const user = {
 }
 
 const navigationItems: NavigationItem[] = [
-  { id: 'home', icon: FiHome, label: 'ホーム' },
+  { id: 'home', icon: FiHome, label: 'ホーム', hasPostNoteButton: true },
   { id: 'explore', icon: FiCompass, label: '探索' },
   { id: 'dashboard', icon: FiPieChart, label: 'ダッシュボード' },
-  { id: 'public-channel', icon: FiUsers, label: '公開チャンネル' },
-  { id: 'notification', icon: FiBell, label: '通知' },
-  { id: 'message', icon: FiMessageSquare, label: 'メッセージ' },
-  /*
   {
-    id: 'post',
-    icon: FiPlusCircle,
-    label: 'ノートを書く',
-    hiddenOnMobile: true,
+    id: 'public-channel',
+    icon: FiUsers,
+    label: '公開チャンネル',
+    hasPostNoteButton: true,
   },
-  */
+  { id: 'notification', icon: FiBell, label: '通知' },
+  {
+    id: 'message',
+    icon: FiMessageSquare,
+    label: 'メッセージ',
+    hasPostNoteButton: true,
+  },
   { id: 'settings', icon: FiSettings, label: '設定', hiddenOnMobile: true },
 ]
+const toItem = (id: NavigationItemId): NavigationItem =>
+  navigationItems.find((item) => item.id === id)!
 
 interface NavigationProps {
   shouldFocusBottomTab: boolean
@@ -99,6 +104,9 @@ const Navigation: React.FC<NavigationProps> = ({
     }
   }
 
+  const hasPostNoteButton = () =>
+    toItem(getActiveItemId()).hasPostNoteButton || false
+
   const handleNavigate = (to: NavigationItemId) => {
     if (isMobile) {
       focusBottomTab()
@@ -109,6 +117,7 @@ const Navigation: React.FC<NavigationProps> = ({
   return isMobile ? (
     <NavigationBottomTab
       navigationItems={navigationItems}
+      shouldShowPostButton={hasPostNoteButton()}
       user={user}
       shouldFocusBottomTab={shouldFocusBottomTab}
       onNavigate={handleNavigate}
