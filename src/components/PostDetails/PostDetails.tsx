@@ -40,7 +40,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
       onClick={handleBackgroundClick}
     >
       <div
-        className="z-10 absolute top-2 left-2 w-10 h-10 flex items-center justify-center text-white text-xl rounded-full hover:bg-gray-500 cursor-pointer hover:bg-opacity-25"
+        className="z-40 absolute top-2 left-2 w-10 h-10 flex items-center justify-center text-white text-xl rounded-full hover:bg-gray-500 cursor-pointer hover:bg-opacity-25"
         onClick={handleBackgroundClick}
       >
         ✕
