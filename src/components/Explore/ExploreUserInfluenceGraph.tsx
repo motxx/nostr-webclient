@@ -9,7 +9,7 @@ import {
 type Metric = 'engagement' | 'reposts' | 'likes' | 'zaps'
 type NodeData = Node & { [key in Metric]: number }
 
-export const ExploreUserInfluenceGraph: React.FC = () => {
+const ExploreUserInfluenceGraph: React.FC = () => {
   const networkContainer = useRef<HTMLDivElement>(null)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false)
   const [metric, setMetric] = useState<Metric>('engagement')
@@ -211,3 +211,5 @@ export const ExploreUserInfluenceGraph: React.FC = () => {
     </div>
   )
 }
+
+export default ExploreUserInfluenceGraph
