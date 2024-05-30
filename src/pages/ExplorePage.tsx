@@ -7,13 +7,8 @@ import { posts } from '../data/dummy-posts'
 import { FiGrid, FiList, FiMap, FiFilter } from 'react-icons/fi'
 import { BsPersonFill, BsPeopleFill, BsGlobe } from 'react-icons/bs'
 import { RiUserFollowFill } from 'react-icons/ri'
-import {
-  MdTrendingUp,
-  MdFavorite,
-  MdRepeat,
-  MdBolt,
-  MdSort,
-} from 'react-icons/md'
+import { MdTrendingUp, MdFavorite, MdRepeat, MdBolt } from 'react-icons/md'
+import { FaToggleOff, FaToggleOn } from 'react-icons/fa'
 
 const ExplorePage: React.FC = () => {
   const [accountFilter, setAccountFilter] = useState('all')
@@ -41,7 +36,13 @@ const ExplorePage: React.FC = () => {
   }
 
   const handleSortByMetricChange = () => {
-    setSortByMetric(!sortByMetric)
+    const nextSortByMetric = !sortByMetric
+    if (nextSortByMetric) {
+      setMetric('engagement')
+    } else {
+      setMetric('')
+    }
+    setSortByMetric(nextSortByMetric)
   }
 
   const handleFinalSearch = (term: string) => {
@@ -81,78 +82,93 @@ const ExplorePage: React.FC = () => {
       <div className="mb-4">
         <SearchBar onSearch={handleFinalSearch} />
       </div>
-      <div className="flex flex-wrap items-center mb-4">
-        <label className="mr-2 text-gray-700 dark:text-gray-300">
-          アカウント:
-        </label>
+      <div className="flex flex-wrap items-center space-x-4">
+        <div className="flex flex-wrap items-center">
+          <label className="mr-2 text-gray-700 dark:text-gray-300">
+            アカウント:
+          </label>
+          <button
+            onClick={() => handleAccountFilterChange('all')}
+            className={`p-2 m-1 flex items-center justify-center ${accountFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+          >
+            <BsGlobe />
+          </button>
+          <button
+            onClick={() => handleAccountFilterChange('follow')}
+            className={`p-2 m-1 flex items-center justify-center ${accountFilter === 'follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+          >
+            <BsPersonFill />
+          </button>
+          <button
+            onClick={() => handleAccountFilterChange('follow-of-follow')}
+            className={`p-2 m-1 flex items-center justify-center ${accountFilter === 'follow-of-follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+          >
+            <RiUserFollowFill />
+          </button>
+          <button
+            onClick={() => handleAccountFilterChange('region')}
+            className={`p-2 m-1 flex items-center justify-center ${accountFilter === 'region' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+          >
+            <BsPeopleFill />
+          </button>
+        </div>
         <button
-          onClick={() => handleAccountFilterChange('all')}
-          className={`p-2 m-1 flex items-center justify-center ${accountFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+          onClick={() => setShowFilters(!showFilters)}
+          className="flex items-center justify-center h-8 px-2 bg-blue-500 text-white text-sm rounded-full"
         >
-          <BsGlobe />
-        </button>
-        <button
-          onClick={() => handleAccountFilterChange('follow')}
-          className={`p-2 m-1 flex items-center justify-center ${accountFilter === 'follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-        >
-          <BsPersonFill />
-        </button>
-        <button
-          onClick={() => handleAccountFilterChange('follow-of-follow')}
-          className={`p-2 m-1 flex items-center justify-center ${accountFilter === 'follow-of-follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-        >
-          <RiUserFollowFill />
-        </button>
-        <button
-          onClick={() => handleAccountFilterChange('region')}
-          className={`p-2 m-1 flex items-center justify-center ${accountFilter === 'region' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-        >
-          <BsPeopleFill />
+          <FiFilter className="mr-2" />
+          詳細フィルタ設定
         </button>
       </div>
-      <button
-        onClick={() => setShowFilters(!showFilters)}
-        className="flex items-center justify-center mb-4 p-2 bg-blue-500 text-white rounded-full"
-      >
-        <FiFilter className="mr-2" />
-        詳細フィルタ設定
-      </button>
       {showFilters && (
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-2">
           <div className="flex flex-wrap items-center">
             <label className="mr-2 text-gray-700 dark:text-gray-300">
               評価指標:
             </label>
+            <div
+              onClick={handleSortByMetricChange}
+              className="flex items-center justify-center p-2 m-1"
+            >
+              {sortByMetric ? (
+                <>
+                  <FaToggleOn className="text-xl text-green-500 mr-1" />
+                  <span className="text-xs font-mplus-2">ON</span>
+                </>
+              ) : (
+                <>
+                  <FaToggleOff className="text-xl text-gray-400 dark:text-gray-500 mr-1" />
+                  <span className="text-xs font-mplus-2">OFF</span>
+                </>
+              )}
+            </div>
             <button
               onClick={() => handleMetricChange('engagement')}
+              disabled={!sortByMetric}
               className={`p-2 m-1 flex items-center justify-center ${metric === 'engagement' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
             >
               <MdTrendingUp />
             </button>
             <button
               onClick={() => handleMetricChange('reposts')}
+              disabled={!sortByMetric}
               className={`p-2 m-1 flex items-center justify-center ${metric === 'reposts' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
             >
               <MdRepeat />
             </button>
             <button
               onClick={() => handleMetricChange('likes')}
+              disabled={!sortByMetric}
               className={`p-2 m-1 flex items-center justify-center ${metric === 'likes' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
             >
               <MdFavorite />
             </button>
             <button
               onClick={() => handleMetricChange('zaps')}
+              disabled={!sortByMetric}
               className={`p-2 m-1 flex items-center justify-center ${metric === 'zaps' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
             >
               <MdBolt />
-            </button>
-            <button
-              onClick={handleSortByMetricChange}
-              className={`p-2 m-1 flex items-center justify-center ${sortByMetric ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-            >
-              <MdSort />
-              ソート
             </button>
           </div>
           <div className="flex flex-wrap items-center">
