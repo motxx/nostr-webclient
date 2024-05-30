@@ -46,12 +46,14 @@ const PostDetails: React.FC<PostDetailsProps> = ({
         ✕
       </div>
       <div className="relative w-full h-full flex overflow-hidden">
-        <div
-          className="absolute left-0 w-[6%] min-w-[60px] h-full flex items-center justify-center text-gray-500 hover:text-gray-300 text-xl hover:bg-gray-500 cursor-pointer hover:bg-opacity-25 z-20"
-          onClick={onClickPrevPost}
-        >
-          <PiCaretLeftBold />
-        </div>
+        {onClickPrevPost && (
+          <div
+            className="absolute left-0 w-[6%] min-w-[60px] h-full flex items-center justify-center text-gray-500 hover:text-gray-300 text-xl hover:bg-gray-500 cursor-pointer hover:bg-opacity-25 z-20"
+            onClick={onClickPrevPost}
+          >
+            <PiCaretLeftBold />
+          </div>
+        )}
         <div
           className="relative flex-1 h-full z-10"
           onClick={handleBackgroundClick}
@@ -75,12 +77,14 @@ const PostDetails: React.FC<PostDetailsProps> = ({
             onToggleFollow={onToggleFollow}
           />
         </div>
-        <div
-          className="absolute right-0 w-[6%] min-w-[60px] h-full flex items-center justify-center text-gray-500 hover:text-gray-300 text-xl hover:bg-gray-500 cursor-pointer hover:bg-opacity-25 z-20"
-          onClick={onClickNextPost}
-        >
-          <PiCaretRightBold />
-        </div>
+        {onClickNextPost && (
+          <div
+            className="absolute right-0 w-[6%] min-w-[60px] h-full flex items-center justify-center text-gray-500 hover:text-gray-300 text-xl hover:bg-gray-500 cursor-pointer hover:bg-opacity-25 z-20"
+            onClick={onClickNextPost}
+          >
+            <PiCaretRightBold />
+          </div>
+        )}
       </div>
       <div className="hidden md:block w-[30%] h-full z-10 overflow-y-auto">
         <RepliesThread
