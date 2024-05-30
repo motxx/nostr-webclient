@@ -24,6 +24,7 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({ posts }) => {
   const selectPrevPost = () => {
     if (!selectedPost) return
     const currentIndex = imagePosts.findIndex(
+      // TODO: Use eventId instead of userId and timestamp
       (post) =>
         post.userId === selectedPost.userId &&
         post.timestamp === selectedPost.timestamp
@@ -37,6 +38,7 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({ posts }) => {
   const selectNextPost = () => {
     if (!selectedPost) return
     const currentIndex = imagePosts.findIndex(
+      // TODO: Use eventId instead of userId and timestamp
       (post) =>
         post.userId === selectedPost.userId &&
         post.timestamp === selectedPost.timestamp
