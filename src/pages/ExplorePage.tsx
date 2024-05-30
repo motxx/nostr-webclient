@@ -9,6 +9,7 @@ import { BsPersonFill, BsPeopleFill, BsGlobe } from 'react-icons/bs'
 import { RiUserFollowFill } from 'react-icons/ri'
 import { MdTrendingUp, MdFavorite, MdRepeat, MdBolt } from 'react-icons/md'
 import { FaToggleOff, FaToggleOn } from 'react-icons/fa'
+import Widgets from '../components/Widgets/Widgets'
 
 const ExplorePage: React.FC = () => {
   const [accountFilter, setAccountFilter] = useState('all')
@@ -77,147 +78,157 @@ const ExplorePage: React.FC = () => {
   }
 
   return (
-    <div className="sm:p-4">
-      <div className="p-4 sm:p-0">
-        <div className="mb-2">
-          <SearchBar onSearch={handleFinalSearch} />
-        </div>
-        <div className="flex flex-wrap items-center">
-          <div className="flex flex-wrap items-center space-x-2 mt-2 mr-4">
-            <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
-              アカウント:
-            </label>
-            <button
-              onClick={() => handleAccountFilterChange('all')}
-              className={`p-2 flex items-center justify-center ${accountFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-            >
-              <BsGlobe />
-            </button>
-            <button
-              onClick={() => handleAccountFilterChange('follow')}
-              className={`p-2 flex items-center justify-center ${accountFilter === 'follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-            >
-              <BsPersonFill />
-            </button>
-            <button
-              onClick={() => handleAccountFilterChange('follow-of-follow')}
-              className={`p-2 flex items-center justify-center ${accountFilter === 'follow-of-follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-            >
-              <RiUserFollowFill />
-            </button>
-            <button
-              onClick={() => handleAccountFilterChange('region')}
-              className={`p-2 flex items-center justify-center ${accountFilter === 'region' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-            >
-              <BsPeopleFill />
-            </button>
+    <div className="flex flex-col lg:flex-row justify-center sm:p-4">
+      <div className="flex-1">
+        <div className="p-4 sm:p-0">
+          <div className="mb-2">
+            <SearchBar onSearch={handleFinalSearch} />
           </div>
-          <div className="flex flex-wrap items-center mt-2 mr-4">
-            <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
-              出力:
-            </label>
-            <div className="flex flex-wrap items-center">
-              <div className="space-x-2">
-                <button
-                  onClick={() => handleOutputFormatChange('timeline')}
-                  className={`p-2 ${outputFormat === 'timeline' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-                >
-                  <FiList />
-                </button>
-                <button
-                  onClick={() => handleOutputFormatChange('image-grid')}
-                  className={`p-2 ${outputFormat === 'image-grid' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-                >
-                  <FiGrid />
-                </button>
-                <button
-                  onClick={() => handleOutputFormatChange('influence-map')}
-                  className={`p-2 ${outputFormat === 'influence-map' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-                >
-                  <FiMap />
-                </button>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center justify-center h-8 px-2 mt-2 bg-blue-500 text-white text-sm rounded-full"
-          >
-            <FiFilter className="mr-2" />
-            詳細フィルタ
-          </button>
-        </div>
-        {showFilters && (
           <div className="flex flex-wrap items-center">
-            <div className="flex flex-wrap items-center mr-8">
+            <div className="flex flex-wrap items-center space-x-2 mt-2 mr-4">
               <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
-                評価指標:
+                アカウント:
               </label>
-              <div
-                onClick={handleSortByMetricChange}
-                className="flex items-center justify-center p-2 m-1"
+              <button
+                onClick={() => handleAccountFilterChange('all')}
+                className={`p-2 flex items-center justify-center ${accountFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
               >
-                {sortByMetric ? (
-                  <>
-                    <FaToggleOn className="text-xl text-green-500 mr-1" />
-                    <span className="text-xs font-mplus-2">ON</span>
-                  </>
-                ) : (
-                  <>
-                    <FaToggleOff className="text-xl text-gray-400 dark:text-gray-500 mr-1" />
-                    <span className="text-xs font-mplus-2">OFF</span>
-                  </>
-                )}
+                <BsGlobe />
+              </button>
+              <button
+                onClick={() => handleAccountFilterChange('follow')}
+                className={`p-2 flex items-center justify-center ${accountFilter === 'follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+              >
+                <BsPersonFill />
+              </button>
+              <button
+                onClick={() => handleAccountFilterChange('follow-of-follow')}
+                className={`p-2 flex items-center justify-center ${accountFilter === 'follow-of-follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+              >
+                <RiUserFollowFill />
+              </button>
+              <button
+                onClick={() => handleAccountFilterChange('region')}
+                className={`p-2 flex items-center justify-center ${accountFilter === 'region' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+              >
+                <BsPeopleFill />
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center mt-2 mr-4">
+              <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
+                表示:
+              </label>
+              <div className="flex flex-wrap items-center">
+                <div className="space-x-2">
+                  <button
+                    onClick={() => handleOutputFormatChange('timeline')}
+                    className={`p-2 ${outputFormat === 'timeline' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+                  >
+                    <FiList />
+                  </button>
+                  <button
+                    onClick={() => handleOutputFormatChange('image-grid')}
+                    className={`p-2 ${outputFormat === 'image-grid' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+                  >
+                    <FiGrid />
+                  </button>
+                  <button
+                    onClick={() => handleOutputFormatChange('influence-map')}
+                    className={`p-2 ${outputFormat === 'influence-map' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+                  >
+                    <FiMap />
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => handleMetricChange('engagement')}
-                disabled={!sortByMetric}
-                className={`p-2 m-1 flex items-center justify-center ${metric === 'engagement' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-              >
-                <MdTrendingUp />
-              </button>
-              <button
-                onClick={() => handleMetricChange('reposts')}
-                disabled={!sortByMetric}
-                className={`p-2 m-1 flex items-center justify-center ${metric === 'reposts' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-              >
-                <MdRepeat />
-              </button>
-              <button
-                onClick={() => handleMetricChange('likes')}
-                disabled={!sortByMetric}
-                className={`p-2 m-1 flex items-center justify-center ${metric === 'likes' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-              >
-                <MdFavorite />
-              </button>
-              <button
-                onClick={() => handleMetricChange('zaps')}
-                disabled={!sortByMetric}
-                className={`p-2 m-1 flex items-center justify-center ${metric === 'zaps' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-              >
-                <MdBolt />
-              </button>
             </div>
-            <div className="flex flex-wrap items-center">
-              <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
-                タイムスタンプ:
-              </label>
-              <select
-                value={timeframe}
-                onChange={handleTimeframeChange}
-                className="p-1 bg-gray-200 dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 rounded-full"
-              >
-                <option value="24h">24h</option>
-                <option value="1week">1week</option>
-                <option value="1month">1month</option>
-                <option value="all">All</option>
-              </select>
-            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center justify-center h-8 px-2 mt-2 bg-blue-500 text-white text-sm rounded-full"
+            >
+              <FiFilter className="mr-2" />
+              詳細フィルタ
+            </button>
           </div>
-        )}
+          {showFilters && (
+            <div className="flex flex-wrap items-center">
+              <div className="flex flex-wrap items-center mr-8">
+                <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
+                  評価指標:
+                </label>
+                <div
+                  onClick={handleSortByMetricChange}
+                  className="flex items-center justify-center p-2 m-1"
+                >
+                  {sortByMetric ? (
+                    <>
+                      <FaToggleOn className="text-xl text-green-500 mr-1" />
+                      <span className="text-xs font-mplus-2">ON</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaToggleOff className="text-xl text-gray-400 dark:text-gray-500 mr-1" />
+                      <span className="text-xs font-mplus-2">OFF</span>
+                    </>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleMetricChange('engagement')}
+                  disabled={!sortByMetric}
+                  className={`p-2 m-1 flex items-center justify-center ${metric === 'engagement' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+                >
+                  <MdTrendingUp />
+                </button>
+                <button
+                  onClick={() => handleMetricChange('reposts')}
+                  disabled={!sortByMetric}
+                  className={`p-2 m-1 flex items-center justify-center ${metric === 'reposts' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+                >
+                  <MdRepeat />
+                </button>
+                <button
+                  onClick={() => handleMetricChange('likes')}
+                  disabled={!sortByMetric}
+                  className={`p-2 m-1 flex items-center justify-center ${metric === 'likes' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+                >
+                  <MdFavorite />
+                </button>
+                <button
+                  onClick={() => handleMetricChange('zaps')}
+                  disabled={!sortByMetric}
+                  className={`p-2 m-1 flex items-center justify-center ${metric === 'zaps' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+                >
+                  <MdBolt />
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center">
+                <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
+                  タイムスタンプ:
+                </label>
+                <select
+                  value={timeframe}
+                  onChange={handleTimeframeChange}
+                  className="p-1 bg-gray-200 dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 rounded-full"
+                >
+                  <option value="24h">24h</option>
+                  <option value="1week">1week</option>
+                  <option value="1month">1month</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="mt-4 flex items-center justify-center">
+          {renderOutput()}
+        </div>
       </div>
-      <div className="mt-4 flex items-center justify-center">
-        {renderOutput()}
+      <div className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px] ml-4">
+        <div
+          className="hidden lg:flex flex-col space-y-4 overflow-y-auto hide-scrollbar"
+          style={{ maxHeight: '100vh' }}
+        >
+          <Widgets />
+        </div>
       </div>
     </div>
   )

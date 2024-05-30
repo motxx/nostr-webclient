@@ -169,45 +169,11 @@ const ExploreUserInfluenceGraph: React.FC = () => {
   }, [networkData, metric, isDarkMode])
 
   return (
-    <div className="h-full flex flex-col">
-      <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
-        ユーザー影響力マップ
-      </h3>
-      <div className="flex items-center mb-4">
-        <label
-          className="mr-2 text-gray-700 dark:text-gray-300"
-          htmlFor="metric"
-        >
-          指標選択:
-        </label>
-        <select
-          id="metric"
-          value={metric}
-          onChange={handleMetricChange}
-          className="mr-4 p-2 border border-gray-300 dark:border-gray-600 rounded bg-transparent dark:bg-gray-800 dark:text-gray-300"
-        >
-          <option value="engagement">エンゲージメント</option>
-          <option value="reposts">Renote数</option>
-          <option value="likes">Like数</option>
-          <option value="zaps">Zap数</option>
-        </select>
-        <label
-          className="mr-2 text-gray-700 dark:text-gray-300"
-          htmlFor="hashtag"
-        >
-          ハッシュタグ:
-        </label>
-        <input
-          id="hashtag"
-          type="text"
-          value={hashtag}
-          onChange={handleHashtagChange}
-          className="p-2 border border-gray-300 dark:border-gray-600 rounded bg-transparent dark:bg-gray-800 dark:text-gray-300"
-        />
-      </div>
-      <div className="flex-1">
-        <div ref={networkContainer} className="w-full aspect-square" />
-      </div>
+    <div className="flex items-center justify-center w-full h-full">
+      <div
+        ref={networkContainer}
+        className="w-full h-full max-w-screen-md aspect-square"
+      />
     </div>
   )
 }

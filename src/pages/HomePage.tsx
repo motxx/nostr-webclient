@@ -26,7 +26,11 @@ const HomePage: React.FC<HomeProps> = ({
       </div>
       <div className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px] ml-4">
         <div className="hidden lg:block bg-white dark:bg-black z-10 p-4">
-          <SearchBar />
+          <SearchBar
+            onSearch={() => {
+              /* routerでexploreに飛ぶ */
+            }}
+          />
         </div>
         <div
           className="hidden lg:flex flex-col space-y-4 overflow-y-auto hide-scrollbar"
