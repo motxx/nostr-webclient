@@ -27,8 +27,10 @@ const ExplorePage: React.FC = () => {
     setMetric(filter)
   }
 
-  const handleTimeframeChange = (filter: string) => {
-    setTimeframe(filter)
+  const handleTimeframeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setTimeframe(event.target.value)
   }
 
   const handleOutputFormatChange = (format: string) => {
@@ -175,30 +177,16 @@ const ExplorePage: React.FC = () => {
             <label className="mr-2 text-gray-700 dark:text-gray-300">
               タイムスタンプ:
             </label>
-            <button
-              onClick={() => handleTimeframeChange('24h')}
-              className={`p-2 m-1 ${timeframe === '24h' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+            <select
+              value={timeframe}
+              onChange={handleTimeframeChange}
+              className="p-2 m-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full"
             >
-              24h
-            </button>
-            <button
-              onClick={() => handleTimeframeChange('1week')}
-              className={`p-2 m-1 ${timeframe === '1week' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-            >
-              1week
-            </button>
-            <button
-              onClick={() => handleTimeframeChange('1month')}
-              className={`p-2 m-1 ${timeframe === '1month' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-            >
-              1month
-            </button>
-            <button
-              onClick={() => handleTimeframeChange('all')}
-              className={`p-2 m-1 ${timeframe === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-            >
-              All
-            </button>
+              <option value="24h">24h</option>
+              <option value="1week">1week</option>
+              <option value="1month">1month</option>
+              <option value="all">All</option>
+            </select>
           </div>
           <div className="flex flex-wrap items-center md:col-span-2">
             <label className="mr-2 text-gray-700 dark:text-gray-300">
