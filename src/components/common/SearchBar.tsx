@@ -59,7 +59,7 @@ const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
           <button type="submit" className="hidden"></button>
         </form>
       </div>
-      {suggestions.length > 0 && (
+      {searchTerm.length > 0 && (
         <div className="absolute z-50 top-full left-0 w-full bg-white dark:bg-gray-800 mt-2 rounded-lg shadow-lg">
           <div
             onClick={handleSearchSubmit}
@@ -69,7 +69,9 @@ const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
               {`「${searchTerm}」を検索`}
             </div>
           </div>
-          <hr className="border-gray-300 dark:border-gray-700" />
+          {suggestions.length > 0 && (
+            <hr className="border-gray-300 dark:border-gray-700" />
+          )}
           {suggestions.map((user) => (
             <div
               key={user.id}
@@ -84,10 +86,10 @@ const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
                 />
                 <div>
                   <div className="text-gray-800 dark:text-gray-200 font-semibold">
-                    {user.userId}
+                    {user.userName}
                   </div>
-                  <div className="text-gray-600 dark:text-gray-400">
-                    @{user.userName}
+                  <div className="text-gray-600 dark:text-gray-400 text-sm">
+                    @{user.userId}
                   </div>
                 </div>
               </div>
