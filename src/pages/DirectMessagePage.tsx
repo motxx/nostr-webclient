@@ -176,7 +176,7 @@ const Conversation: React.FC<{
               <img
                 src={message.avatar}
                 alt={message.sender}
-                className="w-8 h-8 rounded-full mr-2"
+                className="w-8 h-8 mt-2 rounded-full mr-2"
               />
             )}
             <div
@@ -184,13 +184,6 @@ const Conversation: React.FC<{
             >
               {message.content}
             </div>
-            {message.sender === 'You' && (
-              <img
-                src={message.avatar}
-                alt={message.sender}
-                className="w-8 h-8 rounded-full ml-2"
-              />
-            )}
           </div>
         ))}
       </div>
