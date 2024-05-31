@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, FormEvent } from 'react'
 import { useAtom } from 'jotai'
 import { publicChannelScrollPositionAtom } from '../../state/atoms'
 import PublicChannelChatMessage from './PublicChannelChatMessage'
-import { mockMessages } from '../../data/dummy-mock-messages'
+import { mockChannelChats } from '../../data/dummy-channel-chats'
 import { PublicChannelType } from '../../global/types'
 import { IoMdSend } from 'react-icons/io'
 
@@ -15,16 +15,12 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
   channel,
   onOpenSidebar,
 }) => {
-  const [messages, setMessages] = useState(mockMessages)
+  const [messages, setMessages] = useState(mockChannelChats)
   const [newMessage, setNewMessage] = useState<string>('')
   const chatWindowRef = useRef<HTMLDivElement>(null)
   const [scrollPositions, setScrollPositions] = useAtom(
     publicChannelScrollPositionAtom
   )
-
-  useEffect(() => {
-    setMessages(mockMessages)
-  }, [])
 
   useEffect(() => {
     if (chatWindowRef.current) {

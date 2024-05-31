@@ -1,4 +1,4 @@
-export const mockMessages = [
+export const mockChannelChats = [
   {
     id: '1',
     user: {
