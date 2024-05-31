@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Navigation from './components/Navigation/Navigation'
 import HomePage from './pages/HomePage'
 import ExplorePage from './pages/ExplorePage'
-import NotificationPage from './pages/NotificationPage'
+import NotificationPage from './pages/NotificationPage' // 追加
 import PublicChannelPage from './pages/PublicChannelPage'
 import DirectMessagePage from './pages/DirectMessagePage'
 import SettingsPage from './pages/SettingsPage'
@@ -91,7 +91,7 @@ const App: React.FC = () => {
                 />
               }
             />
-            <Route path="/dashboard" element={<DashboardPage />} />{' '}
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
           <Toaster />

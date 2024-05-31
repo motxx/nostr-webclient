@@ -14,6 +14,11 @@ export type PostItemType = {
   following: boolean // TODO: ユーザデータなので消す
 }
 
+export type NotificationPostItemType = PostItemType & {
+  id: string
+  type: 'like' | 'reply' | 'repost' | 'zap'
+}
+
 export interface UserType {
   npub: string
   pubkey: string
