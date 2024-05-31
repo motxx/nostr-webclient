@@ -29,7 +29,7 @@ const PostDetails: React.FC<PostDetailsActionsProps> = ({
   ) => {
     e.stopPropagation()
     if (type === 'reply') {
-      if (window.matchMedia('(max-width: 640px)').matches) {
+      if (window.matchMedia('(max-width: 768px)').matches) {
         setIsRepliesThreadModalOpen(true)
       } else {
         setIsReplyModalOpen(true)
@@ -46,7 +46,7 @@ const PostDetails: React.FC<PostDetailsActionsProps> = ({
 
   return (
     <div
-      className="absolute bottom-0 pb-8 sm:pb-0 w-full bg-black bg-opacity-50"
+      className="absolute bottom-0 pb-8 sm:pb-0 w-full bg-black bg-opacity-10 dark:bg-opacity-50"
       onClick={onBackgroundClick}
     >
       <div

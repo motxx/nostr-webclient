@@ -36,7 +36,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20 dark:bg-opacity-90"
       onClick={handleBackgroundClick}
     >
       <div
@@ -86,7 +86,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
           </div>
         )}
       </div>
-      <div className="hidden md:block w-[30%] h-full z-10 overflow-y-auto">
+      <div className="hidden md:block w-[35%] h-full z-10 overflow-y-auto">
         <RepliesThread
           originalPost={originalPost}
           onToggleFollow={onToggleFollow}
