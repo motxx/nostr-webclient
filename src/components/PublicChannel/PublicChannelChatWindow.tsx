@@ -90,7 +90,7 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
         <div className="z-10 flex sticky top-0 w-full bg-white dark:bg-black">
           <button
             onClick={onOpenSidebar}
-            className="md:hidden w-8 h-12 px-4 font-bold"
+            className="md:hidden w-8 h-12 px-4 py-5 font-bold"
           >
             ←
           </button>
