@@ -46,19 +46,20 @@ const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
 
   return (
     <div className="relative">
-      <div className="flex items-center bg-gray-200 dark:bg-gray-700 p-2 rounded-full">
+      <form
+        onSubmit={handleFormSubmit}
+        className="flex items-center w-full bg-gray-200 dark:bg-gray-700 p-2 rounded-full"
+      >
         <FiSearch className="text-gray-700 dark:text-gray-300 mr-2" />
-        <form onSubmit={handleFormSubmit}>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            placeholder="検索"
-            className="bg-transparent outline-none w-full text-gray-700 dark:text-gray-300"
-          />
-          <button type="submit" className="hidden"></button>
-        </form>
-      </div>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          placeholder="検索"
+          className="bg-transparent outline-none w-full text-gray-700 dark:text-gray-300"
+        />
+        <button type="submit" className="hidden"></button>
+      </form>
       {searchTerm.length > 0 && (
         <div className="absolute z-50 top-full left-0 w-full bg-white dark:bg-gray-800 mt-2 rounded-lg shadow-lg">
           <div
