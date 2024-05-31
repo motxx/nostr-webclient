@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Navigation from './components/Navigation/Navigation'
 import HomePage from './pages/HomePage'
 import ExplorePage from './pages/ExplorePage'
-import NotificationPage from './pages/NotificationPage' // 追加
+import NotificationPage from './pages/NotificationPage'
 import PublicChannelPage from './pages/PublicChannelPage'
-import DirectMessagePage from './pages/DirectMessagePage'
+import MessagePage from './pages/MessagePage'
 import SettingsPage from './pages/SettingsPage'
 import DashboardPage from './pages/DashboardPage'
 import toast, { Toaster } from 'react-hot-toast'
@@ -80,7 +80,7 @@ const App: React.FC = () => {
               path="/public-channel/:channelId"
               element={<PublicChannelPage />}
             />
-            <Route path="/message" element={<DirectMessagePage />} />
+            <Route path="/message" element={<MessagePage />} />
             <Route
               path="/post"
               element={
