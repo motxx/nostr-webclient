@@ -3,6 +3,7 @@ import { FiSearch } from 'react-icons/fi'
 import MessageConversation from '../components/Message/MessageConversation'
 import { mockConversations } from '../data/dummy-message-conversations'
 import { MessageConversationType } from '../global/types'
+import { LuMessageSquarePlus } from 'react-icons/lu'
 
 const MessagePage: React.FC = () => {
   const [selectedConversation, setSelectedConversation] =
@@ -55,6 +56,12 @@ const MessagePage: React.FC = () => {
     <div className="flex h-full">
       <div className="w-1/3 border-r border-gray-200 dark:border-gray-700">
         <div className="p-4">
+          <div className="flex items-center mb-4">
+            <h1 className="text-lg font-bold">メッセージ</h1>
+            <button className="ml-auto">
+              <LuMessageSquarePlus className="text-2xl hover:text-blue-500 transition" />
+            </button>
+          </div>
           <div className="relative">
             <div className="flex items-center w-full p-2 border border-gray-200 dark:border-gray-700 rounded-full">
               <FiSearch className="text-gray-700 dark:text-gray-300 mr-2" />
