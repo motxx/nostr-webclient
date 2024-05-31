@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import { FiSearch } from 'react-icons/fi'
+import { LuMessageSquarePlus } from 'react-icons/lu'
 import MessageConversation from '../components/Message/MessageConversation'
+import MessageCreateChatModal from '../components/Message/MessageCreateChatModal'
 import { mockConversations } from '../data/dummy-message-conversations'
 import { MessageConversationType } from '../global/types'
-import { LuMessageSquarePlus } from 'react-icons/lu'
 
 const MessagePage: React.FC = () => {
   const [selectedConversation, setSelectedConversation] =
     useState<MessageConversationType | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [conversations, setConversations] = useState(mockConversations)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleSelectConversation = (conversationId: string) => {
     const conversation = conversations.find(
@@ -44,6 +46,17 @@ const MessagePage: React.FC = () => {
     setSearchTerm(event.target.value)
   }
 
+  const handleCreateChat = (chatName: string, participants: string[]) => {
+    const newChat = {
+      id: String(conversations.length + 1),
+      name: chatName,
+      avatar: 'https://randomuser.me/api/portraits/women/8.jpg',
+      members: participants,
+      messages: [],
+    }
+    setConversations([...conversations, newChat])
+  }
+
   const filteredConversations = conversations.filter(
     (conversation) =>
       conversation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,7 +71,7 @@ const MessagePage: React.FC = () => {
         <div className="p-4">
           <div className="flex items-center mb-4">
             <h1 className="text-lg font-bold">メッセージ</h1>
-            <button className="ml-auto">
+            <button className="ml-auto" onClick={() => setIsModalOpen(true)}>
               <LuMessageSquarePlus className="text-2xl hover:text-blue-500 transition" />
             </button>
           </div>
@@ -115,6 +128,11 @@ const MessagePage: React.FC = () => {
           <></>
         )}
       </div>
+      <MessageCreateChatModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreateChat={handleCreateChat}
+      />
     </div>
   )
 }
