@@ -1,8 +1,5 @@
 import React from 'react'
 import { User } from '../../models/user'
-import user1Image from '../../assets/images/example/user1.png'
-import user2Image from '../../assets/images/example/user2.png'
-import user3Image from '../../assets/images/example/user3.png'
 import Widget from './Widget'
 
 type Channel = {
@@ -23,19 +20,19 @@ const WidgetRecommendedPublicChannel: React.FC = () => {
           npub: 'npubhogefuga',
           pubkey: 'pubhogefuga',
           name: 'julia',
-          image: user1Image,
+          image: 'https://randomuser.me/api/portraits/women/1.jpg',
         }),
         new User({
           npub: 'npubhogefuga2',
           pubkey: 'pubhogefuga2',
           name: 'kaori',
-          image: user2Image,
+          image: 'https://randomuser.me/api/portraits/women/2.jpg',
         }),
         new User({
           npub: 'npubhogefuga3',
           pubkey: 'pubhogefuga3',
           name: 'nostaro',
-          image: user3Image,
+          image: 'https://randomuser.me/api/portraits/men/1.jpg',
         }),
       ],
       channeldId: 'https://channel1.example.com',
@@ -48,13 +45,13 @@ const WidgetRecommendedPublicChannel: React.FC = () => {
           npub: 'npubhogefuga',
           pubkey: 'pubhogefuga',
           name: 'julia',
-          image: user1Image,
+          image: 'https://randomuser.me/api/portraits/women/3.jpg',
         }),
         new User({
           npub: 'npubhogefuga2',
           pubkey: 'pubhogefuga2',
           name: 'kaori',
-          image: user2Image,
+          image: 'https://randomuser.me/api/portraits/women/4.jpg',
         }),
       ],
       channeldId: 'https://channel2.example.com',

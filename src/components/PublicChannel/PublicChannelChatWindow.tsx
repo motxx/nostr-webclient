@@ -94,7 +94,7 @@ const PublicChannelChatWindow: React.FC<PublicChannelChatWindowProps> = ({
           >
             ←
           </button>
-          <h2 className="text-lg font-bold mb-4 px-2 md:px-4 py-4 h-12 flex items-center">
+          <h2 className="text-lg font-bold mb-4 px-2 md:px-4 pt-8 pb-4 h-12 flex items-center">
             {channel ? `# ${channel.name}` : 'Select a channel'}
           </h2>
         </div>

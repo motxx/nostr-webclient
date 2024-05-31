@@ -13,8 +13,6 @@ import { TbDeviceDesktopAnalytics } from 'react-icons/tb'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
 
-import userImage from '../../assets/images/example/me.png'
-
 export type NavigationItemId =
   | 'home'
   | 'explore'
@@ -36,7 +34,7 @@ export type NavigationItem = {
 const user = {
   name: 'moti',
   id: '@very-very-long-user-id',
-  image: userImage,
+  image: 'https://randomuser.me/api/portraits/men/5.jpg',
 }
 
 const navigationItems: NavigationItem[] = [

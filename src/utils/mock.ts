@@ -1,5 +1,4 @@
 import { PostItemType } from '../global/types'
-import meImage from '../assets/images/example/me.png'
 
 export const createDummyNewReply = (
   text: string
@@ -8,7 +7,7 @@ export const createDummyNewReply = (
     id: '109',
     userName: 'moti',
     content: text,
-    userImage: meImage,
+    userImage: 'https://randomuser.me/api/portraits/men/5.jpg',
     timestamp: 'just now',
     userId: 'riel.pages.dev',
     verified: false,

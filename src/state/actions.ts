@@ -15,7 +15,7 @@ export const logoutAction = atom(null, (get, set) => {
       pubkey:
         '629f93924527a7438296485e9edf3d2a2a18876c57132463582ef13e2099cec8',
       name: 'moti',
-      image: '../../assets/images/example/me.png',
+      image: 'https://randomuser.me/api/portraits/men/5.jpg',
     })
   )
   set(isLoggedInAtom, false)

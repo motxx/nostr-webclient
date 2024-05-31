@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { FiSend } from 'react-icons/fi'
 import replyData from '../../data/dummy-reply-data'
-import meImage from '../../assets/images/example/me.png'
 import PostItem from '../PostItem/PostItem'
 import { PostItemType } from '../../global/types'
 import PrimaryButton from '../common/PrimaryButton'
@@ -31,7 +30,7 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
         id: '109',
         userName: 'moti',
         content: newReply,
-        userImage: meImage,
+        userImage: 'https://randomuser.me/api/portraits/men/5.jpg',
         timestamp: 'just now',
         userId: 'riel.pages.dev',
         verified: false,
