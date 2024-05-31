@@ -1,59 +1,20 @@
 import React, { useState } from 'react'
 import { FiSearch } from 'react-icons/fi'
 import MessageConversation from '../components/Message/MessageConversation'
+import { mockConversations } from '../data/dummy-message-conversations'
+import { MessageConversationType } from '../global/types'
 
 const MessagePage: React.FC = () => {
-  const [selectedConversation, setSelectedConversation] = useState(null)
+  const [selectedConversation, setSelectedConversation] =
+    useState<MessageConversationType | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [conversations, setConversations] = useState([
-    {
-      id: 1,
-      name: 'User 1',
-      avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-      members: ['User 1'],
-      messages: [
-        {
-          sender: 'User 1',
-          avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-          content: 'Hello!',
-        },
-        {
-          sender: 'You',
-          avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
-          content: 'Hi!',
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Group Chat',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-      members: ['User 2', 'User 3', 'You'],
-      messages: [
-        {
-          sender: 'User 2',
-          avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-          content: 'Hi everyone!',
-        },
-        {
-          sender: 'User 3',
-          avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
-          content: 'Hello!',
-        },
-        {
-          sender: 'You',
-          avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
-          content: 'How are you?',
-        },
-      ],
-    },
-  ])
+  const [conversations, setConversations] = useState(mockConversations)
 
-  const handleSelectConversation = (conversationId: number) => {
+  const handleSelectConversation = (conversationId: string) => {
     const conversation = conversations.find(
       (conv) => conv.id === conversationId
     )
-    setSelectedConversation(conversation)
+    setSelectedConversation(conversation ?? null)
   }
 
   const handleSendMessage = (content: string) => {
