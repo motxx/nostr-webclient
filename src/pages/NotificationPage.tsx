@@ -116,10 +116,10 @@ const NotificationPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-2xl mx-auto py-4">
-      <h2 className="text-2xl font-bold mb-4 text-gray-700 dark:text-gray-300">
+      <h2 className="text-xl font-bold ml-2 mb-4 text-gray-700 dark:text-gray-300">
         通知
       </h2>
-      <div className="bg-white dark:bg-black border-t border-b md:border border-gray-200 dark:border-gray-700 md:rounded-md">
+      <div className="bg-white dark:bg-black border-t border-b md:border border-gray-200 dark:border-gray-700 md:rounded-md mb-20 sm:mb-0">
         {Object.values(groupedNotifications).map((notifications, index) => (
           <div
             key={index}
