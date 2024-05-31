@@ -40,19 +40,19 @@ const user = {
 const navigationItems: NavigationItem[] = [
   { id: 'home', icon: FiHome, label: 'ホーム', hasPostNoteButton: true },
   { id: 'explore', icon: FiCompass, label: '探索' },
+  { id: 'notification', icon: FiBell, label: '通知' },
   {
     id: 'public-channel',
     icon: FiUsers,
     label: '公開チャンネル',
   },
-  { id: 'dashboard', icon: TbDeviceDesktopAnalytics, label: 'アナリティクス' },
-  { id: 'notification', icon: FiBell, label: '通知' },
   {
     id: 'message',
     icon: FiMessageSquare,
     label: 'メッセージ',
     hasPostNoteButton: true,
   },
+  { id: 'dashboard', icon: TbDeviceDesktopAnalytics, label: 'アナリティクス' },
   { id: 'settings', icon: FiSettings, label: '設定', hiddenOnMobile: true },
 ]
 const toItem = (id: NavigationItemId): NavigationItem =>
