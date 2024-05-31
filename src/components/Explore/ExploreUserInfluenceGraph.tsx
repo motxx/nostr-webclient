@@ -5,15 +5,21 @@ import {
   Node,
   Options,
 } from 'vis-network/standalone/esm/vis-network'
+import { ExploreMetric } from '../../pages/ExplorePage'
 
-type Metric = 'engagement' | 'reposts' | 'likes' | 'zaps'
-type NodeData = Node & { [key in Metric]: number }
+type NodeData = Node & { [key in ExploreMetric]: number }
 
-const ExploreUserInfluenceGraph: React.FC = () => {
+interface ExploreUserInfluenceGraphProps {
+  hashtags: string[]
+  metric: ExploreMetric
+}
+
+const ExploreUserInfluenceGraph: React.FC<ExploreUserInfluenceGraphProps> = ({
+  hashtags,
+  metric,
+}) => {
   const networkContainer = useRef<HTMLDivElement>(null)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false)
-  const [metric, setMetric] = useState<Metric>('engagement')
-  const [hashtag, setHashtag] = useState<string>('')
 
   const [networkData, setNetworkData] = useState<{
     nodes: NodeData[]
@@ -24,10 +30,11 @@ const ExploreUserInfluenceGraph: React.FC = () => {
         shape: 'circularImage',
         id: 1,
         label: 'User 1',
-        engagement: 10,
+        engagement: 1000,
         reposts: 5,
         likes: 20,
         zaps: 2,
+        followers: 100,
         image: 'https://randomuser.me/api/portraits/men/1.jpg',
       },
       {
@@ -35,9 +42,10 @@ const ExploreUserInfluenceGraph: React.FC = () => {
         id: 2,
         label: 'User 2',
         engagement: 20,
-        reposts: 10,
+        reposts: 1000,
         likes: 30,
         zaps: 5,
+        followers: 200,
         image: 'https://randomuser.me/api/portraits/men/2.jpg',
       },
       {
@@ -46,8 +54,9 @@ const ExploreUserInfluenceGraph: React.FC = () => {
         label: 'User 3',
         engagement: 30,
         reposts: 15,
-        likes: 40,
+        likes: 1000,
         zaps: 10,
+        followers: 300,
         image: 'https://randomuser.me/api/portraits/women/1.jpg',
       },
       {
@@ -57,7 +66,8 @@ const ExploreUserInfluenceGraph: React.FC = () => {
         engagement: 40,
         reposts: 20,
         likes: 50,
-        zaps: 20,
+        zaps: 1000,
+        followers: 400,
         image: 'https://randomuser.me/api/portraits/women/2.jpg',
       },
     ],
@@ -70,14 +80,6 @@ const ExploreUserInfluenceGraph: React.FC = () => {
       { from: 4, to: 3 },
     ],
   })
-
-  const handleMetricChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setMetric(event.target.value as Metric)
-  }
-
-  const handleHashtagChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setHashtag(event.target.value)
-  }
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')

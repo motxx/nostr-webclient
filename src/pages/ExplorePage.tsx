@@ -6,14 +6,28 @@ import SearchBar from '../components/common/SearchBar'
 import { posts } from '../data/dummy-posts'
 import { FiGrid, FiList, FiMap, FiFilter } from 'react-icons/fi'
 import { BsPersonFill, BsPeopleFill, BsGlobe } from 'react-icons/bs'
-import { RiUserFollowFill } from 'react-icons/ri'
-import { MdTrendingUp, MdFavorite, MdRepeat, MdBolt } from 'react-icons/md'
+import {
+  MdTrendingUp,
+  MdFavorite,
+  MdRepeat,
+  MdBolt,
+  MdPeople,
+} from 'react-icons/md'
 import { FaToggleOff, FaToggleOn } from 'react-icons/fa'
 import Widgets from '../components/Widgets/Widgets'
 
+export type ExploreMetric =
+  | 'engagement'
+  | 'reposts'
+  | 'likes'
+  | 'zaps'
+  | 'followers'
+
+export type ExploreMetricWithNull = ExploreMetric | null
+
 const ExplorePage: React.FC = () => {
   const [accountFilter, setAccountFilter] = useState('all')
-  const [metric, setMetric] = useState('')
+  const [metric, setMetric] = useState(null as ExploreMetricWithNull)
   const [timeframe, setTimeframe] = useState('all')
   const [outputFormat, setOutputFormat] = useState('timeline')
   const [showFilters, setShowFilters] = useState(false)
@@ -24,7 +38,7 @@ const ExplorePage: React.FC = () => {
     setAccountFilter(filter)
   }
 
-  const handleMetricChange = (filter: string) => {
+  const handleMetricChange = (filter: ExploreMetric) => {
     setMetric(filter)
   }
 
@@ -43,7 +57,7 @@ const ExplorePage: React.FC = () => {
     if (nextSortByMetric) {
       setMetric('engagement')
     } else {
-      setMetric('')
+      setMetric(null)
     }
     setSortByMetric(nextSortByMetric)
   }
@@ -60,9 +74,10 @@ const ExplorePage: React.FC = () => {
     return matchesSearchTerm && matchesAccountFilter && matchesTimeframe
   })
 
-  const sortedPosts = sortByMetric
-    ? filteredPosts.sort((a, b) => b[metric] - a[metric])
-    : filteredPosts
+  const sortedPosts =
+    sortByMetric && metric
+      ? filteredPosts.sort((a, b) => b[metric] - a[metric])
+      : filteredPosts
 
   const renderOutput = () => {
     switch (outputFormat) {
@@ -71,7 +86,12 @@ const ExplorePage: React.FC = () => {
       case 'image-grid':
         return <TimelineImageGrid posts={sortedPosts} />
       case 'influence-map':
-        return <ExploreUserInfluenceGraph />
+        return (
+          <ExploreUserInfluenceGraph
+            hashtags={[]}
+            metric={metric || 'followers'}
+          />
+        )
       default:
         return null
     }
@@ -104,12 +124,6 @@ const ExplorePage: React.FC = () => {
               <button
                 onClick={() => handleAccountFilterChange('follow-of-follow')}
                 className={`p-2 flex items-center justify-center ${accountFilter === 'follow-of-follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-              >
-                <RiUserFollowFill />
-              </button>
-              <button
-                onClick={() => handleAccountFilterChange('region')}
-                className={`p-2 flex items-center justify-center ${accountFilter === 'region' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
               >
                 <BsPeopleFill />
               </button>
@@ -198,6 +212,13 @@ const ExplorePage: React.FC = () => {
                   className={`p-2 m-1 flex items-center justify-center ${metric === 'zaps' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
                 >
                   <MdBolt />
+                </button>
+                <button
+                  onClick={() => handleMetricChange('followers')}
+                  disabled={!sortByMetric}
+                  className={`p-2 m-1 flex items-center justify-center ${metric === 'followers' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+                >
+                  <MdPeople />
                 </button>
               </div>
               <div className="flex flex-wrap items-center">
