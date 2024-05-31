@@ -33,6 +33,7 @@ const ExplorePage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [sortByMetric, setSortByMetric] = useState(false)
   const [finalSearchTerm, setFinalSearchTerm] = useState('')
+  const [languageGroupFilter, setLanguageGroupFilter] = useState('all')
 
   const handleAccountFilterChange = (filter: string) => {
     setAccountFilter(filter)
@@ -66,12 +67,26 @@ const ExplorePage: React.FC = () => {
     setFinalSearchTerm(term)
   }
 
+  const handleLanguageGroupFilterChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setLanguageGroupFilter(event.target.value)
+  }
+
   const filteredPosts = posts.filter((post) => {
     const matchesSearchTerm = post.content.includes(finalSearchTerm)
     const matchesAccountFilter =
       accountFilter === 'all' || post.accountType === accountFilter
     const matchesTimeframe = true // Implement your timeframe filtering logic here
-    return matchesSearchTerm && matchesAccountFilter && matchesTimeframe
+    const matchesLanguageGroupFilter =
+      languageGroupFilter === 'all' ||
+      post.languageGroup === languageGroupFilter
+    return (
+      matchesSearchTerm &&
+      matchesAccountFilter &&
+      matchesTimeframe &&
+      matchesLanguageGroupFilter
+    )
   })
 
   const sortedPosts =
@@ -221,7 +236,7 @@ const ExplorePage: React.FC = () => {
                   <MdPeople />
                 </button>
               </div>
-              <div className="flex flex-wrap items-center">
+              <div className="flex flex-wrap items-center mr-8">
                 <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
                   タイムスタンプ:
                 </label>
@@ -234,6 +249,29 @@ const ExplorePage: React.FC = () => {
                   <option value="1week">1week</option>
                   <option value="1month">1month</option>
                   <option value="all">All</option>
+                </select>
+              </div>
+              <div className="flex flex-wrap items-center">
+                <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
+                  言語圏:
+                </label>
+                <select
+                  value={languageGroupFilter}
+                  onChange={handleLanguageGroupFilterChange}
+                  className="p-1 bg-gray-200 dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300 rounded-full"
+                >
+                  <option value="all">グローバル</option>
+                  <option value="english">英語圏</option>
+                  <option value="japanese">日本語</option>
+                  <option value="spanish">スペイン語圏</option>
+                  <option value="chinese">中国語圏</option>
+                  <option value="hindi">ヒンディー語圏</option>
+                  <option value="arabic">アラビア語圏</option>
+                  <option value="portuguese">ポルトガル語圏</option>
+                  <option value="russian">ロシア語圏</option>
+                  <option value="french">フランス語圏</option>
+                  <option value="german">ドイツ語圏</option>
+                  {/* Add more language groups as needed */}
                 </select>
               </div>
             </div>
