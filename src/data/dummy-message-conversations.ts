@@ -112,4 +112,147 @@ export const mockConversations: MessageConversationType[] = [
       },
     ],
   },
+  {
+    id: '3',
+    name: 'User 3',
+    avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+    members: ['User 4'],
+    messages: [
+      {
+        sender: 'User 1',
+        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '4',
+    name: 'User 4',
+    avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
+    members: ['User 4'],
+    messages: [
+      {
+        sender: 'User 4',
+        avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '5',
+    name: 'User 5',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    members: ['User 5'],
+    messages: [
+      {
+        sender: 'User 5',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '6',
+    name: 'User 5',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    members: ['User 5'],
+    messages: [
+      {
+        sender: 'User 5',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '7',
+    name: 'User 5',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    members: ['User 5'],
+    messages: [
+      {
+        sender: 'User 5',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '8',
+    name: 'User 5',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    members: ['User 5'],
+    messages: [
+      {
+        sender: 'User 5',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '9',
+    name: 'User 5',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    members: ['User 5'],
+    messages: [
+      {
+        sender: 'User 5',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '10',
+    name: 'User 5',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    members: ['User 5'],
+    messages: [
+      {
+        sender: 'User 5',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '11',
+    name: 'User 5',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    members: ['User 5'],
+    messages: [
+      {
+        sender: 'User 5',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '12',
+    name: 'User 5',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    members: ['User 5'],
+    messages: [
+      {
+        sender: 'User 5',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        content: 'hello',
+      },
+    ],
+  },
+  {
+    id: '13',
+    name: 'User 1',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+    members: ['User 1'],
+    messages: [
+      {
+        sender: 'User 1',
+        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+        content: 'hello',
+      },
+    ],
+  },
 ]

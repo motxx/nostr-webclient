@@ -34,7 +34,7 @@ const MessageChatSidebar = forwardRef<HTMLDivElement, MessageChatSidebarProps>(
     return (
       <div
         className={classNames(
-          'w-full sm:w-1/3 sm:border-r sm:border-gray-200 sm:dark:border-gray-700',
+          'w-full sm:w-1/3 sm:border-r sm:border-gray-200 sm:dark:border-gray-700 h-screen overflow-y-auto hide-scrollbar',
           className
         )}
       >

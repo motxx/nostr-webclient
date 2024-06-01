@@ -17,7 +17,7 @@ const MessageConversation: React.FC<{
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-screen overflow-y-auto hide-scrollbar">
       <div className="sticky top-0 z-30 bg-white dark:bg-black flex items-center p-4 border-b border-gray-200 dark:border-gray-700">
         <button onClick={onBack} className="sm:hidden mr-4">
           <FiArrowLeft className="text-2xl" />
@@ -36,7 +36,7 @@ const MessageConversation: React.FC<{
           )}
         </div>
       </div>
-      <div className="ml-2 mr-2 flex-1 overflow-y-auto">
+      <div className="ml-2 mr-2 flex-1">
         {conversation.messages.map((message: any, index: number) => (
           <div
             key={index}
