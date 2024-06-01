@@ -62,31 +62,21 @@ const MessagePage: React.FC = () => {
 
   return (
     <div className="flex h-full">
-      {selectedConversation ? (
-        <MessageChatSidebar
-          className="w-full sm:w-1/3 sm:block hidden"
-          conversations={conversations}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filteredConversations={filteredConversations}
-          handleSelectConversation={handleSelectConversation}
-          setIsModalOpen={setIsModalOpen}
-        />
-      ) : (
-        <MessageChatSidebar
-          conversations={conversations}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filteredConversations={filteredConversations}
-          handleSelectConversation={handleSelectConversation}
-          setIsModalOpen={setIsModalOpen}
-        />
-      )}
+      <MessageChatSidebar
+        className={selectedConversation ? 'hidden sm:block' : 'block'}
+        conversations={conversations}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        filteredConversations={filteredConversations}
+        handleSelectConversation={handleSelectConversation}
+        setIsModalOpen={setIsModalOpen}
+      />
       <div className="flex-1">
         {selectedConversation ? (
           <MessageConversation
             conversation={selectedConversation}
             onSendMessage={handleSendMessage}
+            onBack={() => setSelectedConversation(null)}
           />
         ) : (
           <></>

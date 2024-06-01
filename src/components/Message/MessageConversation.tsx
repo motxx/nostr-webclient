@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { IoMdSend } from 'react-icons/io'
+import { FiArrowLeft } from 'react-icons/fi'
 
 const MessageConversation: React.FC<{
   conversation: any
   onSendMessage: (content: string) => void
-}> = ({ conversation, onSendMessage }) => {
+  onBack: () => void
+}> = ({ conversation, onSendMessage, onBack }) => {
   const [newMessage, setNewMessage] = useState('')
 
   const handleSend = () => {
@@ -16,6 +18,24 @@ const MessageConversation: React.FC<{
 
   return (
     <div className="flex flex-col h-full">
+      <div className="sticky top-0 z-30 bg-white dark:bg-black flex items-center p-4 border-b border-gray-200 dark:border-gray-700">
+        <button onClick={onBack} className="sm:hidden mr-4">
+          <FiArrowLeft className="text-2xl" />
+        </button>
+        <img
+          src={conversation.avatar}
+          alt={conversation.name}
+          className="w-8 h-8 rounded-full mr-2"
+        />
+        <div>
+          <div className="font-bold">{conversation.name}</div>
+          {conversation.members.length > 2 && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {conversation.members.join(', ')}
+            </div>
+          )}
+        </div>
+      </div>
       <div className="ml-2 mr-2 flex-1 overflow-y-auto">
         {conversation.messages.map((message: any, index: number) => (
           <div
