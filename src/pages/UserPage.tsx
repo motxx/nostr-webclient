@@ -93,11 +93,13 @@ const UserPage: React.FC = () => {
           alt="Header"
           className="w-full h-48 object-cover"
         />
-        <img
-          src={user.image}
-          alt="User profile"
-          className="absolute -bottom-20 left-8 w-40 h-40 rounded-full border-4 border-white"
-        />
+        <div className="flex justify-center items-center">
+          <img
+            src={user.image}
+            alt="User profile"
+            className="absolute -bottom-20 sm:left-8 w-40 h-40 rounded-full border-4 border-white"
+          />
+        </div>
         <div className="absolute -bottom-12 right-4 flex space-x-2">
           <div
             className="flex items-center space-x-1 cursor-pointer"
