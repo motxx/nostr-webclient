@@ -3,6 +3,7 @@ import { RiVerifiedBadgeFill } from 'react-icons/ri'
 import PostItemMenu from './PostItemMenu'
 import { useState } from 'react'
 import { PostItemType } from '../../global/types'
+import { useNavigate } from 'react-router-dom'
 
 interface PostItemHeaderProps {
   post: PostItemType
@@ -13,6 +14,7 @@ const PostItemHeader: React.FC<PostItemHeaderProps> = ({
   post,
   onToggleFollow,
 }) => {
+  const navigate = useNavigate()
   const [showMenu, setShowMenu] = useState(false)
   const openMenu = () => setShowMenu(true)
   const closeMenu = () => setShowMenu(false)
@@ -20,7 +22,10 @@ const PostItemHeader: React.FC<PostItemHeaderProps> = ({
   return (
     <>
       <div className="flex justify-between items-center font-noto-sans">
-        <div className="flex items-center space-x-3">
+        <div
+          className="flex items-center space-x-3 cursor-pointer"
+          onClick={() => navigate(`/user/${post.userId}`)}
+        >
           <img
             src={post.userImage}
             alt={`${post.userName}'s profile`}

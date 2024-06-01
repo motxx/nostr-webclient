@@ -10,6 +10,7 @@ import SettingsPage from './pages/SettingsPage'
 import DashboardPage from './pages/DashboardPage'
 import toast, { Toaster } from 'react-hot-toast'
 import { User } from './models/user'
+import UserPage from './pages/UserPage'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
@@ -93,6 +94,7 @@ const App: React.FC = () => {
             />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/user/:userId" element={<UserPage />} />
           </Routes>
           <Toaster />
         </div>

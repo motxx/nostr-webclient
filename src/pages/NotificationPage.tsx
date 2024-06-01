@@ -5,8 +5,11 @@ import { NotificationPostItemType } from '../global/types'
 import PostItem from '../components/PostItem/PostItem'
 import notificationList from '../data/dummy-notifications'
 import { BsHeartFill } from 'react-icons/bs'
+import { Link, useNavigate } from 'react-router-dom'
+import UserIdLink from '../components/common/UserIdLink'
 
 const NotificationPage: React.FC = () => {
+  const navigate = useNavigate()
   const groupedNotifications = notificationList.reduce(
     (acc, notification) => {
       if (!acc[notification.content]) {
@@ -28,12 +31,14 @@ const NotificationPage: React.FC = () => {
             <p className="text-gray-700 dark:text-gray-300 text-sm">
               {notifications.length > 1 ? (
                 <>
-                  {notifications[0].userName}さんと他{notifications.length - 1}
+                  <UserIdLink userId={notifications[0].userName} />
+                  さんと他{notifications.length - 1}
                   人があなたの投稿をいいねしました
                 </>
               ) : (
                 <>
-                  {notifications[0].userName} があなたの投稿をいいねしました (
+                  <UserIdLink userId={notifications[0].userName} />
+                  さんがあなたの投稿をいいねしました (
                   {notifications[0].timestamp})
                 </>
               )}
@@ -49,12 +54,14 @@ const NotificationPage: React.FC = () => {
             <p className="text-gray-700 dark:text-gray-300 text-sm">
               {notifications.length > 1 ? (
                 <>
-                  {notifications[0].userName}さんと他{notifications.length - 1}
+                  <UserIdLink userId={notifications[0].userName} />
+                  さんと他{notifications.length - 1}
                   人があなたの投稿をリノートしました
                 </>
               ) : (
                 <>
-                  {notifications[0].userName} があなたの投稿をリノートしました (
+                  <UserIdLink userId={notifications[0].userName} />
+                  さんがあなたの投稿をリノートしました (
                   {notifications[0].timestamp})
                 </>
               )}
@@ -70,7 +77,8 @@ const NotificationPage: React.FC = () => {
             <p className="text-gray-700 dark:text-gray-300 text-sm">
               {notifications.length > 1 ? (
                 <>
-                  {notifications[0].userName}さんと他{notifications.length - 1}
+                  <UserIdLink userId={notifications[0].userName} />
+                  さんと他{notifications.length - 1}
                   人があなたの投稿に合計
                   {notifications.reduce((acc, notification) => {
                     return acc + notification.zaps
@@ -79,7 +87,8 @@ const NotificationPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  {notifications[0].userName} があなたの投稿に
+                  <UserIdLink userId={notifications[0].userName} />
+                  さんがあなたの投稿に
                   {notifications[0].zaps}
                   satsをzapしました ({notifications[0].timestamp})
                 </>
