@@ -23,7 +23,11 @@ export interface UserType {
   npub: string
   pubkey: string
   name: string
+  bio?: string
   image?: string
+  followersCount?: number
+  followingCount?: number
+  headerImage?: string
   settings?: UserSettingsType
 }
 
