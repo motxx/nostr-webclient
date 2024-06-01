@@ -51,7 +51,7 @@ const ExplorePage: React.FC = () => {
   return (
     <div className="flex flex-col lg:flex-row justify-center sm:p-4">
       <div className="flex-1">
-        <div className="p-4 sm:p-0">
+        <div className="sticky top-0 z-10 bg-white dark:bg-black p-4 sm:p-0">
           <div className="mb-2">
             <SearchBar onSearch={handleFinalSearch} />
           </div>
