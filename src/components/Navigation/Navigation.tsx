@@ -50,7 +50,7 @@ const navigationItems: NavigationItem[] = [
     id: 'message',
     icon: FiMessageSquare,
     label: 'メッセージ',
-    hasPostNoteButton: true,
+    hasPostNoteButton: false,
   },
   { id: 'dashboard', icon: TbDeviceDesktopAnalytics, label: 'アナリティクス' },
   { id: 'settings', icon: FiSettings, label: '設定', hiddenOnMobile: true },
