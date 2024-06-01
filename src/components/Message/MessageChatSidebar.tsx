@@ -58,7 +58,7 @@ const MessageChatSidebar = forwardRef<HTMLDivElement, MessageChatSidebarProps>(
             </div>
           </div>
         </div>
-        <ul>
+        <ul className="mb-20 sm:mb-0">
           {filteredConversations.map((conversation) => (
             <li
               key={conversation.id}

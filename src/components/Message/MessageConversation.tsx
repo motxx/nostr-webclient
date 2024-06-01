@@ -36,7 +36,7 @@ const MessageConversation: React.FC<{
           )}
         </div>
       </div>
-      <div className="ml-2 mr-2 flex-1">
+      <div className="ml-2 mr-2 flex-1 mb-10 sm:mb-0">
         {conversation.messages.map((message: any, index: number) => (
           <div
             key={index}
