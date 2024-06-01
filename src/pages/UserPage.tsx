@@ -6,6 +6,14 @@ import PostItem from '../components/PostItem/PostItem'
 import { posts as mockPosts } from '../data/dummy-posts'
 import { User } from '../models/user'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
+import {
+  FaGithub,
+  FaMastodon,
+  FaTelegram,
+  FaInstagram,
+  FaGlobe,
+} from 'react-icons/fa'
+import { SiBluesky, SiX } from 'react-icons/si'
 
 const UserPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>()
@@ -25,6 +33,17 @@ const UserPage: React.FC = () => {
         followersCount: 150,
         followingCount: 100,
         headerImage: 'https://picsum.photos/600/200',
+        links: {
+          github: 'https://github.com/example',
+          twitter: 'https://twitter.com/example',
+          mastodon: 'https://mastodon.social/@example',
+          telegram: 'https://t.me/example',
+          bluesky: 'https://bsky.app/profile/example',
+          pixiv: 'https://pixiv.net/users/example',
+          skeb: 'https://skeb.jp/@example',
+          instagram: 'https://instagram.com/example',
+          website: 'https://example.com',
+        },
       })
       setUser(mockUser)
     }
@@ -50,6 +69,21 @@ const UserPage: React.FC = () => {
   }
 
   if (!user) return <div>Loading...</div>
+
+  const renderLinkIcon = (
+    url: string,
+    IconComponent: React.ComponentType,
+    alt: string
+  ) => (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-2xl text-gray-700 dark:text-gray-300 hover:text-blue-500 transition"
+    >
+      <IconComponent aria-label={alt} />
+    </a>
+  )
 
   return (
     <div className="flex flex-col items-center">
@@ -85,6 +119,29 @@ const UserPage: React.FC = () => {
           <div>
             <span className="font-bold">{user.followersCount}</span> フォロワー
           </div>
+        </div>
+        <div className="flex space-x-4 mt-4">
+          {user.links &&
+            user.links.github &&
+            renderLinkIcon(user.links.github, FaGithub, 'GitHub')}
+          {user.links &&
+            user.links.twitter &&
+            renderLinkIcon(user.links.twitter, SiX, 'X')}
+          {user.links &&
+            user.links.bluesky &&
+            renderLinkIcon(user.links.bluesky, SiBluesky, 'BlueSky')}
+          {user.links &&
+            user.links.mastodon &&
+            renderLinkIcon(user.links.mastodon, FaMastodon, 'Mastodon')}
+          {user.links &&
+            user.links.telegram &&
+            renderLinkIcon(user.links.telegram, FaTelegram, 'Telegram')}
+          {user.links &&
+            user.links.instagram &&
+            renderLinkIcon(user.links.instagram, FaInstagram, 'Instagram')}
+          {user.links &&
+            user.links.website &&
+            renderLinkIcon(user.links.website, FaGlobe, 'Website')}
         </div>
         <div className="mt-8 w-full">
           <h2 className="text-lg font-bold mb-4">投稿</h2>

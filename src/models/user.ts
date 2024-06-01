@@ -9,6 +9,7 @@ export class User implements UserType {
   followersCount?: number
   followingCount?: number
   headerImage?: string
+  links?: Record<string, string>
   settings?: UserSettingsType
 
   constructor(data: UserType) {
