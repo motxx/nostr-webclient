@@ -30,14 +30,11 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
     <div className="bg-white dark:bg-black w-20 lg:w-60 h-full border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between px-4 py-6 fixed font-mplus-2">
       <div className="space-y-2 lg:space-y-4">
         <Link
-          className="flex justify-center lg:justify-start items-center lg:space-x-2 p-2 font-['Futura']"
+          className="hidden lg:block lg:justify-start items-center lg:space-x-2 p-2 font-['Futura']"
           to="/"
         >
           <div className="text-2xl font-bold text-black hidden lg:block dark:text-white">
             Noscape
-          </div>
-          <div className="text-2xl font-bold text-black lg:hidden dark:text-white">
-            NS
           </div>
         </Link>
         {navigationItems.map((item: NavigationItem, index: number) => (
