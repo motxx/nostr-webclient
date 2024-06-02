@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 
-interface DefaultLinkProps {
+interface RouterLinkProps {
   to: string
   children: React.ReactNode
 }
 
-const DefaultLink: React.FC<DefaultLinkProps> = ({ to, children, ...rest }) => {
+const RouterLink: React.FC<RouterLinkProps> = ({ to, children, ...rest }) => {
   return (
     <Link to={to} {...rest} className="hover:underline text-blue-500">
       {children}
@@ -13,4 +13,4 @@ const DefaultLink: React.FC<DefaultLinkProps> = ({ to, children, ...rest }) => {
   )
 }
 
-export default DefaultLink
+export default RouterLink

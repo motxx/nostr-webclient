@@ -1,6 +1,7 @@
 import React from 'react'
 import parse, { DOMNode, domToReact, Element } from 'html-react-parser'
-import DefaultLink from './DefaultLink'
+import RouterLink from './RouterLink'
+import ExternalLink from './ExternalLink'
 
 interface UnsafeReactComponentProps {
   jsxString: string
@@ -12,14 +13,25 @@ const UnsafeReactComponent: React.FC<UnsafeReactComponentProps> = ({
   const options = {
     replace: (domNode: DOMNode) => {
       if (
-        (domNode as Element).name?.toLowerCase() === 'defaultlink' &&
+        (domNode as Element).name?.toLowerCase() === 'routerlink' &&
         (domNode as Element).attribs?.to
       ) {
         const { to, ...rest } = (domNode as Element).attribs
         return (
-          <DefaultLink to={to}>
+          <RouterLink to={to}>
             {domToReact((domNode as Element).children as DOMNode[])}
-          </DefaultLink>
+          </RouterLink>
+        )
+      }
+      if (
+        (domNode as Element).name?.toLowerCase() === 'externallink' &&
+        (domNode as Element).attribs?.href
+      ) {
+        const { href, ...rest } = (domNode as Element).attribs
+        return (
+          <ExternalLink href={href}>
+            {domToReact((domNode as Element).children as DOMNode[])}
+          </ExternalLink>
         )
       }
     },
