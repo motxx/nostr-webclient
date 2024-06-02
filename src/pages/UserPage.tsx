@@ -25,7 +25,7 @@ const UserPage: React.FC = () => {
         name: 'moti',
         nostrAddress: '_@motxx.pages.dev',
         image: 'https://randomuser.me/api/portraits/men/5.jpg',
-        bio: 'This is a mock user bio.\nhttps://example.com',
+        bio: 'This is a mock user bio.\nhttps://example.com#example',
         followersCount: 150,
         followingCount: 100,
         headerImage: 'https://picsum.photos/600/200',

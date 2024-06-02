@@ -32,7 +32,7 @@ interface TextConverterProps {
 
 export const TextConverter: React.FC<TextConverterProps> = ({ text }) => {
   const sanitizedHTML = DOMPurify.sanitize(text)
-  const transformations = [newlineToBr, atagToHyperLink, hashtagToLink]
+  const transformations = [newlineToBr, hashtagToLink, atagToHyperLink]
   const transformedText = applyTransformations(sanitizedHTML, transformations)
   return <UnsafeReactComponent jsxString={transformedText} />
 }
