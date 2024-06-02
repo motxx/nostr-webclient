@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { User } from '../../models/user'
-import { nostrAddressForDisplay } from '../../utils/addressConverter'
+import { userIdForDisplay } from '../../utils/addressConverter'
 
 interface NavigationSidebarUserSectionProps {
   user: User
@@ -24,9 +24,7 @@ const NavigationSidebarUserSection: React.FC<
       <div className="hidden lg:block ml-2">
         <div>{user.name}</div>
         <div className="text-gray-500 dark:text-gray-400">
-          {user.nostrAddress
-            ? nostrAddressForDisplay(user.nostrAddress).substring(0, 17)
-            : user.npub.substring(0, 17)}
+          {userIdForDisplay(user.nostrAddress ?? user.npub)}
         </div>
       </div>
     </div>

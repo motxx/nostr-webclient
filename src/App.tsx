@@ -11,6 +11,7 @@ import DashboardPage from './pages/DashboardPage'
 import toast, { Toaster } from 'react-hot-toast'
 import { User } from './models/user'
 import UserPage from './pages/UserPage'
+import { userIdForDisplay } from './utils/addressConverter'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
@@ -29,9 +30,10 @@ const App: React.FC = () => {
   const [following, setFollowing] = useState<boolean>(false)
 
   const toggleFollow = (userId: string) => {
-    setFollowing(!following)
+    const newFollowing = !following
+    setFollowing(newFollowing)
     toast(
-      `@${userId}さん${following ? 'をフォローしました' : 'のフォローを解除しました'}`,
+      `${userIdForDisplay(userId)}さん${newFollowing ? 'をフォローしました' : 'のフォローを解除しました'}`,
       {
         position: 'bottom-center',
         duration: 2000,
@@ -94,7 +96,12 @@ const App: React.FC = () => {
             />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/user/:userId" element={<UserPage />} />
+            <Route
+              path="/user/:userId"
+              element={
+                <UserPage isFollowing={following} toggleFollow={toggleFollow} />
+              }
+            />
           </Routes>
           <Toaster />
         </div>
