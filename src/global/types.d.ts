@@ -22,6 +22,7 @@ export type NotificationPostItemType = PostItemType & {
 export interface UserType {
   npub: string
   pubkey: string
+  nostrAddress?: string
   name: string
   bio?: string
   image?: string

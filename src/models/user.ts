@@ -3,6 +3,7 @@ import { UserSettingsType, UserType } from '../global/types'
 export class User implements UserType {
   npub: string = ''
   pubkey: string = ''
+  nostrAddress?: string
   name: string = ''
   bio: string = ''
   image?: string
