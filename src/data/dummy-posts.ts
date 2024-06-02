@@ -8,7 +8,7 @@ type PostTypeWithId = PostItemType & { id: string }
 export const posts: PostTypeWithId[] = [
   {
     id: '1',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',
@@ -75,7 +75,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '5',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: 'おすすめのVTuberです!!',
@@ -91,7 +91,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '6',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content:
@@ -108,7 +108,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '7',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',
@@ -124,7 +124,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '8',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',
@@ -140,7 +140,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '9',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',
@@ -156,7 +156,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '10',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',
@@ -172,7 +172,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '11',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',
@@ -188,7 +188,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '12',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',
@@ -204,7 +204,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '13',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',
@@ -220,7 +220,7 @@ export const posts: PostTypeWithId[] = [
   },
   {
     id: '14',
-    userId: 'riel.pages.dev',
+    userId: '_@motxx.pages.dev',
     userName: 'riel@休職中',
     verified: false,
     content: '#PublicDomain #風景画',

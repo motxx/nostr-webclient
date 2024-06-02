@@ -42,7 +42,7 @@ const Timeline: React.FC<TimelineProps> = ({
     {
       id: 'images',
       feedType: 'image-grid',
-      name: 'イラスト・マンガ',
+      name: 'ピクチャー',
     },
     {
       id: 'clips',
