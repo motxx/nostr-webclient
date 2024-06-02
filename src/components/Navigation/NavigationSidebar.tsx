@@ -28,7 +28,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   const isActiveItem = (id: NavigationItemId) => id === activeItemId
 
   return (
-    <div className="bg-white dark:bg-black w-20 lg:w-60 h-full border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between px-4 py-6 fixed font-mplus-2">
+    <div className="z-50 bg-white dark:bg-black w-20 lg:w-60 h-full border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between px-4 py-6 fixed font-mplus-2">
       <div className="space-y-2 lg:space-y-4">
         <Link
           className="hidden lg:block lg:justify-start items-center lg:space-x-2 p-2 font-['Futura']"

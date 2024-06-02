@@ -32,7 +32,7 @@ const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
         </div>
       )}
       <div
-        className={`z-20 bg-white dark:bg-black w-full h-20 fixed bottom-0 pb-8 border-t border-gray-200 dark:border-gray-700 flex justify-around items-center px-4 transition-opacity duration-200 ${shouldFocusBottomTab ? 'opacity-50' : 'opacity-100'}`}
+        className={`z-50 bg-white dark:bg-black w-full h-20 fixed bottom-0 pb-8 border-t border-gray-200 dark:border-gray-700 flex justify-around items-center px-4 transition-opacity duration-200 ${shouldFocusBottomTab ? 'opacity-50' : 'opacity-100'}`}
       >
         {navigationItems
           .filter((item) => !item.hiddenOnMobile)
