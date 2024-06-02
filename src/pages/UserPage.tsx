@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import FollowButton from '../components/common/FollowButton'
-import PostItem from '../components/PostItem/PostItem'
 import { posts as mockPosts } from '../data/dummy-posts'
 import { User } from '../models/user'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
 import UserExternalLinks from '../components/User/UserExternalLinks'
 import { nostrAddressForDisplay } from '../utils/addressConverter'
 import { TextConverter } from '../components/common/TextConverter'
+import TimelineStandard from '../components/Timeline/TimelineStandard'
 
 const UserPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>()
@@ -117,9 +117,12 @@ const UserPage: React.FC = () => {
 
         <div className="mt-8 w-full max-w-2xl mx-auto">
           <h2 className="text-lg font-bold mb-4">投稿</h2>
-          {userPosts.map((post) => (
-            <PostItem key={post.id} post={post} onToggleFollow={() => false} />
-          ))}
+          <TimelineStandard
+            posts={userPosts}
+            onToggleFollow={() => {
+              return true
+            }}
+          />
         </div>
       </div>
     </div>
