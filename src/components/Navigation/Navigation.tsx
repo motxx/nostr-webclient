@@ -23,6 +23,7 @@ export type NavigationItemId =
   | 'post'
   | 'dashboard'
   | 'settings'
+  | 'others'
 
 export type NavigationItem = {
   id: NavigationItemId
@@ -58,8 +59,8 @@ const navigationItems: NavigationItem[] = [
   { id: 'dashboard', icon: TbDeviceDesktopAnalytics, label: 'アナリティクス' },
   { id: 'settings', icon: FiSettings, label: '設定', hiddenOnMobile: true },
 ]
-const toItem = (id: NavigationItemId): NavigationItem =>
-  navigationItems.find((item) => item.id === id)!
+const toItem = (id: NavigationItemId): NavigationItem | undefined =>
+  navigationItems.find((item) => item.id === id)
 
 interface NavigationProps {
   shouldFocusBottomTab: boolean
@@ -100,12 +101,12 @@ const Navigation: React.FC<NavigationProps> = ({
       case 'settings':
         return path as NavigationItemId
       default:
-        return 'home'
+        return 'others'
     }
   }
 
   const hasPostNoteButton = () =>
-    toItem(getActiveItemId()).hasPostNoteButton || false
+    toItem(getActiveItemId())?.hasPostNoteButton || false
 
   const handleNavigate = (to: NavigationItemId) => {
     if (isMobile) {
