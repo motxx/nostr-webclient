@@ -36,9 +36,6 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
             ? nostrAddressForDisplay(user.nostrAddress)
             : user.npub}
         </p>
-        <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
-          <TextConverter text={user.bio} />
-        </p>
         <div className="flex space-x-4">
           <div>
             <span className="font-bold">{user.followingCount}</span> フォロー中
@@ -47,6 +44,9 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
             <span className="font-bold">{user.followersCount}</span> フォロワー
           </div>
         </div>
+        <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
+          <TextConverter text={user.bio} />
+        </p>
       </div>
     </>
   )

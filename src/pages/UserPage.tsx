@@ -23,7 +23,7 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
         name: 'moti',
         nostrAddress: '_@motxx.pages.dev',
         image: 'https://randomuser.me/api/portraits/men/5.jpg',
-        bio: 'This is a mock user bio.\nhttps://example.com#example',
+        bio: 'This is a mock user bio.\nhttps://example.com#example\nhttps://x.com/X/status/1790873164374810919',
         followersCount: 150,
         followingCount: 100,
         headerImage:
@@ -51,13 +51,15 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
   return (
     <div className="flex flex-col items-center w-full">
       <UserHeader user={user} />
-      <div className="w-full px-6 pt-2 sm:pt-6">
-        <UserDescription
-          user={user}
-          isFollowing={isFollowing}
-          toggleFollow={toggleFollow}
-        />
-        <div className="flex flex-col items-start">
+      <div className="w-full">
+        <div className="px-2 sm:px-6 pt-2 sm:pt-6">
+          <UserDescription
+            user={user}
+            isFollowing={isFollowing}
+            toggleFollow={toggleFollow}
+          />
+        </div>
+        <div className="flex flex-col items-start pt-10">
           <UserContents user={user} toggleFollow={toggleFollow} />
         </div>
       </div>
