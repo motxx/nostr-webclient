@@ -1,17 +1,14 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const convertHashtags = (text: string) => {
   const hashtagPattern = /#([^ \n]+)/g
   return text.split(hashtagPattern).map((part, index) => {
     if (index % 2 === 1) {
       return (
-        <a
-          href={`/hashtag/${part}`}
-          key={index}
-          className="text-blue-500 hover:underline"
-        >
+        <Link to={`/hashtag/${part}`} className="text-blue-500 hover:underline">
           #{part}
-        </a>
+        </Link>
       )
     }
     return part
