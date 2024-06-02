@@ -14,7 +14,7 @@ const NavigationSidebarUserSection: React.FC<
   return (
     <div
       className="flex justify-center lg:justify-start items-center lg:space-x-2 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md transition cursor-pointer"
-      onClick={() => navigate(`/user/${user.nostrAddress}`)}
+      onClick={() => navigate(`/user/${user.nostrAddress || user.npub}`)}
     >
       <img
         src={user.image}
