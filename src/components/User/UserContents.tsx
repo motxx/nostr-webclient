@@ -23,15 +23,17 @@ const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
   )
 
   return (
-    <div className="mt-10 w-full max-w-2xl mx-auto">
+    <div className="mt-10 w-full max-w-2xl mx-auto space-y-12">
       {imagePosts.length > 0 && (
-        <>
+        <div>
           <h2 className="text-lg font-bold mb-4">ピクチャー</h2>
           <ImageCarousel images={mockImages} />
-        </>
+        </div>
       )}
-      <h2 className="text-lg font-bold mb-4">投稿</h2>
-      <TimelineStandard posts={posts} onToggleFollow={toggleFollow} />
+      <div>
+        <h2 className="text-lg font-bold mb-8">投稿</h2>
+        <TimelineStandard posts={posts} onToggleFollow={toggleFollow} />
+      </div>
     </div>
   )
 }

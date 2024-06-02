@@ -18,7 +18,11 @@ const ExploreOutput: React.FC<ExploreOutputProps> = ({
   const renderOutput = () => {
     switch (outputFormat) {
       case 'timeline':
-        return <TimelineStandard posts={sortedPosts} />
+        return (
+          <div className="pt-4 sm:pt-8">
+            <TimelineStandard posts={sortedPosts} />
+          </div>
+        )
       case 'image-grid':
         return <TimelineImageGrid posts={sortedPosts} />
       case 'influence-map':

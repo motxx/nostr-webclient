@@ -76,9 +76,17 @@ const Timeline: React.FC<TimelineProps> = ({
   const renderFeed = () => {
     const activeTab = tabs.find((tab) => tab.id === activeTabId)
     if (activeTab?.feedType === 'standard') {
-      return <TimelineStandard posts={posts} onToggleFollow={onToggleFollow} />
+      return (
+        <div className="pt-4 sm:pt-8">
+          <TimelineStandard posts={posts} onToggleFollow={onToggleFollow} />
+        </div>
+      )
     } else if (activeTab?.feedType === 'image-grid') {
-      return <TimelineImageGrid posts={posts} />
+      return (
+        <div className="pt-0 sm:pt-4">
+          <TimelineImageGrid posts={posts} />
+        </div>
+      )
     } else {
       // 他のフィードタイプのコンポーネントもここに追加できます
       return null
