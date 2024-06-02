@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { posts as mockPosts } from '../data/dummy-posts'
 import { User } from '../models/user'
-import TimelineStandard from '../components/Timeline/TimelineStandard'
 import UserHeader from '../components/User/UserHeader'
 import UserDescription from '../components/User/UserDescription'
+import UserContents from '../components/User/UserContents'
 
 interface UserPageProps {
   isFollowing: boolean
@@ -14,7 +13,6 @@ interface UserPageProps {
 const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
   const { userId } = useParams<{ userId: string }>()
   const [user, setUser] = useState<User | null>(null)
-  const userPosts = mockPosts.filter((post) => post.userId === userId)
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -60,10 +58,7 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
           toggleFollow={toggleFollow}
         />
         <div className="flex flex-col items-start">
-          <div className="mt-10 w-full max-w-2xl mx-auto">
-            <h2 className="text-lg font-bold mb-4">投稿</h2>
-            <TimelineStandard posts={userPosts} onToggleFollow={toggleFollow} />
-          </div>
+          <UserContents user={user} toggleFollow={toggleFollow} />
         </div>
       </div>
     </div>
