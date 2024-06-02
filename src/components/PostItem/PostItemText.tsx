@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { convertTextForDisplay } from '../../utils/contentConverter'
+import { TextConverter } from '../common/TextConverter'
 
 interface PostItemTextProps {
   text: string
@@ -11,9 +11,7 @@ const PostItemText: React.FC<PostItemTextProps> = ({ text }) => {
 
   return (
     <div className="text-sm text-gray-700 dark:text-gray-300 font-noto-sans">
-      {showMore
-        ? convertTextForDisplay(text)
-        : convertTextForDisplay(text.substring(0, 100))}
+      <TextConverter text={showMore ? text : text.substring(0, 100)} />
       {text.length > 100 && (
         <span>
           {!showMore && <span>...</span>}

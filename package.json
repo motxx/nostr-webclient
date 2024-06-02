@@ -8,11 +8,13 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.97",
-    "@types/react": "^18.3.2",
+    "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@use-gesture/react": "^10.3.1",
     "chart.js": "^4.4.3",
     "classnames": "^2.5.1",
+    "dompurify": "^3.1.5",
+    "html-react-parser": "^5.1.10",
     "immutability-helper": "^3.1.1",
     "jotai": "^2.8.1",
     "react": "^18.3.1",
@@ -63,6 +65,7 @@
     ]
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "@types/react-dnd": "^3.0.2",
     "@types/react-dnd-html5-backend": "^3.0.2",
     "@types/react-sparklines": "^1.7.5",

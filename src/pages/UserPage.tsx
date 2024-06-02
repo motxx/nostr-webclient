@@ -8,7 +8,7 @@ import { User } from '../models/user'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
 import UserExternalLinks from '../components/User/UserExternalLinks'
 import { nostrAddressForDisplay } from '../utils/addressConverter'
-import { convertTextForDisplay } from '../utils/contentConverter'
+import { TextConverter } from '../components/common/TextConverter'
 
 const UserPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>()
@@ -101,7 +101,7 @@ const UserPage: React.FC = () => {
               : user.npub}
           </p>
           <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
-            {convertTextForDisplay(user.bio)}
+            <TextConverter text={user.bio} />
           </p>
           <div className="flex space-x-4">
             <div>

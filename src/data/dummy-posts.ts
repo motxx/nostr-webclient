@@ -94,7 +94,8 @@ export const posts: PostTypeWithId[] = [
     userId: 'riel.pages.dev',
     userName: 'riel@休職中',
     verified: false,
-    content: '#PublicDomain #風景画',
+    content:
+      '#this_is-a.hashtag@test test hoge #test aaaa\nbbbb\nccc#c#ccc\nhoge/fug#a#\\piyo#.com#$#{}#}',
     replies: 0,
     likes: 20000,
     reposts: 100,
