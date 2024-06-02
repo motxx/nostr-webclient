@@ -27,7 +27,8 @@ export const posts: PostTypeWithId[] = [
     userId: 'Ai_Manga',
     userName: 'AI Manga Artist',
     verified: true,
-    content: 'AI漫画を始めました #AI漫画 #AI絵師と繋がりたい',
+    content:
+      'AI漫画を始めました #AI漫画 #AI絵師と繋がりたい\nhttps://x.com/X/status/1794453447787364678',
     replies: 0,
     likes: 1645,
     reposts: 13,

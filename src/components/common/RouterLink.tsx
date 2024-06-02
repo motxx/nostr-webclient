@@ -7,7 +7,11 @@ interface RouterLinkProps {
 
 const RouterLink: React.FC<RouterLinkProps> = ({ to, children, ...rest }) => {
   return (
-    <Link to={to} {...rest} className="hover:underline text-blue-500">
+    <Link
+      to={to}
+      {...rest}
+      className="hover:underline text-blue-500 dark:text-blue-400"
+    >
       {children}
     </Link>
   )

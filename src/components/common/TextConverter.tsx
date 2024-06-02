@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import DOMPurify from 'dompurify'
 import UnsafeReactComponent from './UnsafeReactComponent'
-import axios from 'axios'
 
 const newlineToBr = (text: string): string => text.split('\n').join('<br />')
 
@@ -11,41 +10,46 @@ const hashtagToLink = (text: string): string =>
     (match, p1) => `<RouterLink to='/hashtag/${p1}'>#${p1}</RouterLink>`
   )
 
+const nostrNpubToLink = (text: string): string =>
+  // TODO: Convert npub to nostr address
+  text.replace(
+    /nostr:(npub1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{58})/g,
+    (match, p1) => `<RouterLink to='/user/${p1}'>${p1}</RouterLink>`
+  )
+
 const expandExternalLink = (text: string): string =>
   text.replace(
     /(https?:\/\/(?:www\.)?(?!(?:x\.com|twitter\.com)\/\S+)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*))/g,
     (match, p1) => `<ExternalLink href='${p1}'>${p1}</ExternalLink>`
   )
 
-const expandOEmbedOfX = async (text: string): Promise<string> => {
-  const fetchOEmbed = async (url: string) => {
-    try {
-      const response = await axios.get(
-        `https://noscape-backend.motxx.workers.dev/api/oembed?url=${url}`
-      )
-      return response.data.html
-    } catch (error) {
-      console.error('Failed to fetch oEmbed data:', error)
-      return ''
-    }
-  }
+const expandOEmbedOfStatusX = (text: string): string =>
+  text.replace(
+    /(https:\/\/(x|twitter)\.com\/(\w+)\/status\/(\d+))/g,
+    (match, p1, p2, p3, p4) => `<TwitterTweetEmbed tweetId="${p4}" />`
+  )
 
-  const urlMatch = text.match(/(https?:\/\/)?(www\.)?(x|twitter)\.com\/\S+/)
-  if (urlMatch) {
-    const oEmbedHTML = await fetchOEmbed(encodeURIComponent(urlMatch[0]))
-    console.log(oEmbedHTML)
-    return text.replace(urlMatch[0], oEmbedHTML)
-  }
-  return text
+const expandExternalLinkForProfileX = (text: string): string =>
+  text.replace(
+    /(https:\/\/(x|twitter)\.com\/\w+\/?)/g,
+    (match, p1, p2, p3) => `<ExternalLink href="${p1}">${p1}</ExternalLink>`
+  )
+
+const expandOEmbedOfTimelineX = (text: string): string => {
+  return text.replace(
+    /(https:\/\/(x|twitter)\.com\/(\w+)\/?)/g,
+    (match, p1, p2, p3) =>
+      `<TwitterTimelineEmbed sourceType="profile" screenName="${p3}" />`
+  )
 }
 
-const applyTransformations = async (
+const applyTransformations = (
   text: string,
-  transformations: ((text: string) => string | Promise<string>)[]
-): Promise<string> => {
+  transformations: ((text: string) => string)[]
+): string => {
   let transformedText = text
   for (const transformation of transformations) {
-    transformedText = await transformation(transformedText)
+    transformedText = transformation(transformedText)
   }
   return transformedText
 }
@@ -55,26 +59,15 @@ interface TextConverterProps {
 }
 
 export const TextConverter: React.FC<TextConverterProps> = ({ text }) => {
-  const [transformedText, setTransformedText] = useState<string>('')
-
-  useEffect(() => {
-    const transformText = async () => {
-      const sanitizedHTML = DOMPurify.sanitize(text)
-      const transformations = [
-        newlineToBr,
-        hashtagToLink,
-        expandOEmbedOfX,
-        expandExternalLink,
-      ]
-      const finalText = await applyTransformations(
-        sanitizedHTML,
-        transformations
-      )
-      setTransformedText(finalText)
-    }
-
-    transformText()
-  }, [text])
-
-  return <UnsafeReactComponent jsxString={transformedText} />
+  const sanitizedHTML = DOMPurify.sanitize(text)
+  const transformations = [
+    newlineToBr,
+    hashtagToLink,
+    nostrNpubToLink,
+    expandExternalLink,
+    expandOEmbedOfStatusX,
+    expandExternalLinkForProfileX,
+  ]
+  const finalText = applyTransformations(sanitizedHTML, transformations)
+  return <UnsafeReactComponent jsxString={finalText} />
 }
