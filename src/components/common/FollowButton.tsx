@@ -12,7 +12,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   toggleFollow,
 }) => (
   <button
-    className={`px-4 py-2 font-semibold rounded-full ${isFollowing ? 'border border-black dark:border-white bg-transparent hover:bg-gray-500 hover:bg-opacity-30' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-600 hover:dark:bg-blue-700 active:dark:bg-blue-800 text-white'}`}
+    className={`px-4 py-2 font-semibold rounded-full whitespace-nowrap text-sm sm:text-base ${isFollowing ? 'border border-black dark:border-white bg-transparent hover:bg-gray-500 hover:bg-opacity-30' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 dark:bg-blue-600 hover:dark:bg-blue-700 active:dark:bg-blue-800 text-white'}`}
     onClick={() => toggleFollow(userId)}
   >
     {isFollowing ? 'フォロー中' : 'フォロー'}
