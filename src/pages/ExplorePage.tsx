@@ -50,7 +50,7 @@ const ExplorePage: React.FC = () => {
 
   return (
     <div className="flex flex-col lg:flex-row justify-center">
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto hide-scrollbar max-h-screen">
         <div className="sticky top-0 z-10 bg-white dark:bg-black p-4 sm:pb-4">
           <div className="mb-2">
             <SearchBar onSearch={handleFinalSearch} />
@@ -80,13 +80,8 @@ const ExplorePage: React.FC = () => {
           />
         </div>
       </div>
-      <div className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px] ml-4">
-        <div
-          className="hidden lg:flex flex-col space-y-4 overflow-y-auto hide-scrollbar"
-          style={{ maxHeight: '100vh' }}
-        >
-          <Widgets />
-        </div>
+      <div className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px] py-4 overflow-y-auto hide-scrollbar max-h-screen">
+        <Widgets />
       </div>
     </div>
   )
