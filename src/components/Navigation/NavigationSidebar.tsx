@@ -4,11 +4,12 @@ import NavigationSidebarItem from './NavigationSidebarItem'
 import NavigationSidebarUserSection from './NavigationSidebarUserSection'
 import { NavigationItem, NavigationItemId } from './Navigation'
 import { Link } from 'react-router-dom'
+import { User } from '../../models/user'
 
 interface NavigationSidebarProps {
   navigationItems: NavigationItem[]
   activeItemId: NavigationItemId
-  user: any
+  user: User
   onNavigate: (to: NavigationItemId) => void
 }
 

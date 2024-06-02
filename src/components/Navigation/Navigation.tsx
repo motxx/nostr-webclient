@@ -12,6 +12,7 @@ import {
 import { TbDeviceDesktopAnalytics } from 'react-icons/tb'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
+import { User } from '../../models/user'
 
 export type NavigationItemId =
   | 'home'
@@ -31,11 +32,13 @@ export type NavigationItem = {
   hasPostNoteButton?: boolean
 }
 
-const user = {
+const user = new User({
+  npub: 'npubexampleexampleexample',
+  pubkey: 'pubkeyexampleexampleexample',
   name: 'moti',
-  id: '@very-very-long-user-id',
+  nostrAddress: '_@motxx.pages.dev',
   image: 'https://randomuser.me/api/portraits/men/5.jpg',
-}
+})
 
 const navigationItems: NavigationItem[] = [
   { id: 'home', icon: FiHome, label: 'ホーム', hasPostNoteButton: true },

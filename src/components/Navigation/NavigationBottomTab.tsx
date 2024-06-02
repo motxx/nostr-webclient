@@ -2,10 +2,11 @@ import React from 'react'
 import { PiNotePencil } from 'react-icons/pi'
 import NavigationBottomTabItem from './NavigationBottomTabItem'
 import { NavigationItem, NavigationItemId } from './Navigation'
+import { User } from '../../models/user'
 
 interface NavigationBottomTabProps {
   navigationItems: NavigationItem[]
-  user: any
+  user: User
   shouldFocusBottomTab: boolean
   shouldShowPostButton: boolean
   onNavigate: (to: NavigationItemId) => void

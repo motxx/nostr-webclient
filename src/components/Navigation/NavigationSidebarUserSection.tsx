@@ -1,8 +1,21 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { User } from '../../models/user'
+import { nostrAddressForDisplay } from '../../utils/addressConverter'
 
-const NavigationSidebarUserSection = ({ user }: any) => {
+interface NavigationSidebarUserSectionProps {
+  user: User
+}
+
+const NavigationSidebarUserSection: React.FC<
+  NavigationSidebarUserSectionProps
+> = ({ user }) => {
+  const navigate = useNavigate()
   return (
-    <div className="flex justify-center lg:justify-start items-center lg:space-x-2 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md transition cursor-pointer">
+    <div
+      className="flex justify-center lg:justify-start items-center lg:space-x-2 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md transition cursor-pointer"
+      onClick={() => navigate(`/user/${user.nostrAddress}`)}
+    >
       <img
         src={user.image}
         alt="User profile"
@@ -11,7 +24,9 @@ const NavigationSidebarUserSection = ({ user }: any) => {
       <div className="hidden lg:block ml-2">
         <div>{user.name}</div>
         <div className="text-gray-500 dark:text-gray-400">
-          {user.id.substring(0, 17)}
+          {user.nostrAddress
+            ? nostrAddressForDisplay(user.nostrAddress).substring(0, 17)
+            : user.npub.substring(0, 17)}
         </div>
       </div>
     </div>
