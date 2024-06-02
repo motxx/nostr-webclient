@@ -28,7 +28,8 @@ const UserPage: React.FC = () => {
         bio: 'This is a mock user bio.\nhttps://example.com#example',
         followersCount: 150,
         followingCount: 100,
-        headerImage: 'https://picsum.photos/600/200',
+        headerImage:
+          'https://fastly.picsum.photos/id/227/600/200.jpg?hmac=iWKqkrS9xX7cgGWbiBCnAUzNtyCn8vpUBupjxwF3Lo8',
         links: {
           github: 'https://github.com/example',
           twitter: 'https://twitter.com/example',
@@ -114,7 +115,6 @@ const UserPage: React.FC = () => {
             </div>
           </div>
         </div>
-
         <div className="mt-8 w-full max-w-2xl mx-auto">
           <h2 className="text-lg font-bold mb-4">投稿</h2>
           <TimelineStandard
