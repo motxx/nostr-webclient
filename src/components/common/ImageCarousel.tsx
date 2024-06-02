@@ -2,6 +2,13 @@ import React, { useRef, useEffect, useState } from 'react'
 import Slider from 'react-slick'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
+import { BsCaretLeftFill, BsCaretRightFill } from 'react-icons/bs'
+
+interface ImageCarouselArrowProps {
+  className?: string
+  style?: React.CSSProperties
+  onClick?: () => void
+}
 
 interface ImageCarouselProps {
   images: string[]
@@ -10,7 +17,26 @@ interface ImageCarouselProps {
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   const sliderRef = useRef<Slider | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [hovered, setHovered] = useState(false)
   const [scrollDistance, setScrollDistance] = useState(0)
+
+  const PrevArrow: React.FC<ImageCarouselArrowProps> = ({ onClick }) => {
+    return (
+      <BsCaretLeftFill
+        onClick={onClick}
+        className={`block absolute top-1/2 transform -translate-y-1/2 -left-6 text-3xl rounded-full p-2 cursor-pointer z-20 ${hovered ? 'text-white bg-gray-800 dark:text-white dark:bg-gray-100 opacity-90 dark:opacity-90 bg-opacity-10 dark:bg-opacity-10' : 'text-gray-100 dark:text-gray-800 opacity-95'}`}
+      />
+    )
+  }
+
+  const NextArrow: React.FC<ImageCarouselArrowProps> = ({ onClick }) => {
+    return (
+      <BsCaretRightFill
+        onClick={onClick}
+        className={`block absolute top-1/2 transform -translate-y-1/2 -right-6 text-3xl rounded-full p-2 cursor-pointer z-20 ${hovered ? 'text-white bg-gray-800 dark:text-white dark:bg-gray-100 opacity-90 dark:opacity-90 bg-opacity-10 dark:bg-opacity-10' : 'text-gray-100 dark:text-gray-800 opacity-95'}`}
+      />
+    )
+  }
 
   const settings = {
     dots: true,
@@ -34,6 +60,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
         },
       },
     ],
+    prevArrow: <PrevArrow />,
+    nextArrow: <NextArrow />,
   }
 
   useEffect(() => {
@@ -65,7 +93,12 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   }, [scrollDistance])
 
   return (
-    <div ref={containerRef} className="mx-auto w-full hide-scroll">
+    <div
+      ref={containerRef}
+      className="mx-auto w-full hide-scroll"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <Slider ref={sliderRef} {...settings}>
         {images.map((image, index) => (
           <div key={index} className="px-2">
