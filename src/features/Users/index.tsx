@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { User } from '@/models/user'
-import UserHeader from '@/components/User/UserHeader'
-import UserDescription from '@/components/User/UserDescription'
-import UserContents from '@/components/User/UserContents'
+import UserHeader from './components/UserHeader'
+import UserDescription from './components/UserDescription'
+import UserContents from './components/UserContents'
 
 interface UserPageProps {
   isFollowing: boolean

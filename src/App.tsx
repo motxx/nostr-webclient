@@ -10,7 +10,7 @@ import SettingsPage from './pages/SettingsPage'
 import DashboardPage from '@/features/Dashboard'
 import toast, { Toaster } from 'react-hot-toast'
 import { User } from './models/user'
-import UserPage from './pages/UserPage'
+import UserPage from '@/features/Users'
 import { userIdForDisplay } from './utils/addressConverter'
 
 const App: React.FC = () => {
