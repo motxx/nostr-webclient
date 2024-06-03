@@ -1,7 +1,7 @@
 import React from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import SettingProfile from './SettingProfile'
-import { SettingNavigationItem } from '@/pages/SettingsPage'
+import { SettingNavigationItem } from '../types'
 
 interface SettingContentProps {
   selected: SettingNavigationItem

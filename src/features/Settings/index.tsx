@@ -1,17 +1,11 @@
 import React, { useMemo } from 'react'
-import SettingSidebar from '@/components/Settings/SettingSidebar'
-import SettingContent from '@/components/Settings/SettingContent'
+import SettingSidebar from './components/SettingSidebar'
+import SettingContent from './components/SettingContent'
 import { useLocation } from 'react-router-dom'
 import { FiEye, FiLogOut, FiUser } from 'react-icons/fi'
 import { MdAccountBalanceWallet } from 'react-icons/md'
 import { BiServer } from 'react-icons/bi'
-import { IconType } from 'react-icons'
-
-export type SettingNavigationItem = {
-  id: string
-  label: string
-  icon: IconType
-}
+import { SettingNavigationItem } from './types'
 
 const settingItems: SettingNavigationItem[] = [
   { id: 'account', label: 'プロフィール', icon: FiUser },
