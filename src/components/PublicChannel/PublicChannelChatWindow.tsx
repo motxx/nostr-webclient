@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, FormEvent } from 'react'
 import { useAtom } from 'jotai'
-import { publicChannelScrollPositionAtom } from '../../state/atoms'
+import { publicChannelScrollPositionAtom } from '@/state/atoms'
 import PublicChannelChatMessage from './PublicChannelChatMessage'
-import { mockChannelChats } from '../../data/dummy-channel-chats'
-import { PublicChannelType } from '../../global/types'
+import { mockChannelChats } from '@/data/dummy-channel-chats'
+import { PublicChannelType } from '@/global/types'
 import { IoMdSend } from 'react-icons/io'
 
 interface PublicChannelChatWindowProps {

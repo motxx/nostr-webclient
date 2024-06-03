@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { User } from '../../models/user'
-import { userIdForDisplay } from '../../utils/addressConverter'
+import { User } from '@/models/user'
+import { userIdForDisplay } from '@/utils/addressConverter'
 
 interface NavigationSidebarUserSectionProps {
   user: User

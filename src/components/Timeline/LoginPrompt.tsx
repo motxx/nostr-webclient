@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import LoginModal from '../Authentication/LoginModal'
-import PrimaryButton from '../ui-parts/PrimaryButton'
-import { isLoggedInAtom } from '../../state/atoms'
+import LoginModal from '@/components/Authentication/LoginModal'
+import PrimaryButton from '@/components/ui-parts/PrimaryButton'
+import { isLoggedInAtom } from '@/state/atoms'
 import { useAtom } from 'jotai'
 
 const LoginPrompt: React.FC = () => {

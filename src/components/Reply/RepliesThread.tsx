@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { FiSend } from 'react-icons/fi'
-import replyData from '../../data/dummy-reply-data'
-import PostItem from '../PostItem/PostItem'
-import { PostItemType } from '../../global/types'
-import PrimaryButton from '../ui-parts/PrimaryButton'
+import replyData from '@/data/dummy-reply-data'
+import PostItem from '@/components/PostItem/PostItem'
+import { PostItemType } from '@/global/types'
+import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 
 interface RepliesThreadProps {
   originalPost: PostItemType

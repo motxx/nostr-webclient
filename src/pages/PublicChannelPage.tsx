@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import PublicChannelList from '../components/PublicChannel/PublicChannelList'
-import PublicChannelChatWindow from '../components/PublicChannel/PublicChannelChatWindow'
-import { PublicChannelType } from '../global/types'
+import PublicChannelList from '@/components/PublicChannel/PublicChannelList'
+import PublicChannelChatWindow from '@/components/PublicChannel/PublicChannelChatWindow'
+import { PublicChannelType } from '@/global/types'
 
 export const PublicChannels: PublicChannelType[] = [
   { id: '1', name: '何でも質問板@Nostr' },

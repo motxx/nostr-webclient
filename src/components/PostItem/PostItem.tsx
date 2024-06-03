@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import PostDetails from '../PostDetails/PostDetails'
+import PostDetails from '@/components/PostDetails/PostDetails'
 import PostItemMedia from './PostItemMedia'
 import PostItemActions from './PostItemActions'
-import { PostItemType } from '../../global/types'
-import RepliesThreadModal from '../Reply/RepliesThreadModal'
+import { PostItemType } from '@/global/types'
+import RepliesThreadModal from '@/components/Reply/RepliesThreadModal'
 import PostItemHeader from './PostItemHeader'
 import PostItemText from './PostItemText'
 

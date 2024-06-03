@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { PostItemType } from '../../global/types'
-import PostDetails from '../PostDetails/PostDetails'
+import { PostItemType } from '@/global/types'
+import PostDetails from '@/components/PostDetails/PostDetails'
 
 interface TimelineImageGridProps {
   posts: PostItemType[]

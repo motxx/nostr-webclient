@@ -1,6 +1,6 @@
 import React from 'react'
-import PostItem from '../PostItem/PostItem'
-import { PostItemType } from '../../global/types'
+import PostItem from '@/components/PostItem/PostItem'
+import { PostItemType } from '@/global/types'
 import classNames from 'classnames'
 
 interface TimelineStandardProps {

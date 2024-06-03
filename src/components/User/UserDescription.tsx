@@ -1,11 +1,11 @@
 import { AiOutlineThunderbolt } from 'react-icons/ai'
 import { useNavigate } from 'react-router-dom'
 import UserExternalLinks from './UserExternalLinks'
-import { TextConverter } from '../functional/TextConverter'
-import { User } from '../../models/user'
-import TertiaryButton from '../ui-parts/TertiaryButton'
-import FollowButton from '../ui-parts/FollowButton'
-import { nostrAddressForDisplay } from '../../utils/addressConverter'
+import { TextConverter } from '@/components/functional/TextConverter'
+import { User } from '@/models/user'
+import TertiaryButton from '@/components/ui-parts/TertiaryButton'
+import FollowButton from '@/components/ui-parts/FollowButton'
+import { nostrAddressForDisplay } from '@/utils/addressConverter'
 
 interface UserDescriptionProps {
   user: User

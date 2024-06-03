@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { IoMdPersonAdd } from 'react-icons/io'
 import { LuMessageSquarePlus } from 'react-icons/lu'
-import Button from '../ui-elements/Button'
-import Input from '../ui-elements/Input'
-import PrimaryButton from '../ui-parts/PrimaryButton'
+import Button from '@/components/ui-elements/Button'
+import Input from '@/components/ui-elements/Input'
+import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 
 interface MessageCreateChatModalProps {
   isOpen: boolean

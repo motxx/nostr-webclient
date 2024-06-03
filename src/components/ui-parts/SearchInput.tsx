@@ -1,6 +1,6 @@
 import React from 'react'
 import { FiSearch } from 'react-icons/fi'
-import Input from '../ui-elements/Input'
+import Input from '@/components/ui-elements/Input'
 import classNames from 'classnames'
 
 interface SearchInputProps {

@@ -2,7 +2,7 @@ import { FiMoreHorizontal } from 'react-icons/fi'
 import { RiVerifiedBadgeFill } from 'react-icons/ri'
 import PostItemMenu from './PostItemMenu'
 import { useState } from 'react'
-import { PostItemType } from '../../global/types'
+import { PostItemType } from '@/global/types'
 import { useNavigate } from 'react-router-dom'
 
 interface PostItemHeaderProps {

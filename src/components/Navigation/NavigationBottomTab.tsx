@@ -2,7 +2,7 @@ import React from 'react'
 import { PiNotePencil } from 'react-icons/pi'
 import NavigationBottomTabItem from './NavigationBottomTabItem'
 import { NavigationItem, NavigationItemId } from './Navigation'
-import { User } from '../../models/user'
+import { User } from '@/models/user'
 import { useNavigate } from 'react-router-dom'
 
 interface NavigationBottomTabProps {

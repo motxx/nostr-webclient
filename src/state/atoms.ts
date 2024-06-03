@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
-import { LoginStatus } from '../global/types'
-import { User } from '../models/user'
+import { LoginStatus } from '@/global/types'
+import { User } from '@/models/user'
 
 export const isLoggedInAtom = atom<LoginStatus>(false)
 export const userAtom = atom(

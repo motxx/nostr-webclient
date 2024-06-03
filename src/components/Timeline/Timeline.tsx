@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
 import TimelineImageGrid from './TimelineImageGrid'
-import { posts } from '../../data/dummy-posts'
+import { posts } from '@/data/dummy-posts'
 
 interface TimelineProps {
   onScrollUp: () => void

@@ -1,5 +1,5 @@
 import React from 'react'
-import { convertToEmbedUrl } from '../../utils/contentConverter'
+import { convertToEmbedUrl } from '@/utils/contentConverter'
 
 interface PostDetailsMediaContentProps {
   mediaUrl: string

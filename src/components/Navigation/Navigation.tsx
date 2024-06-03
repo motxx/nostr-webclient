@@ -12,7 +12,7 @@ import {
 import { TbDeviceDesktopAnalytics } from 'react-icons/tb'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
-import { User } from '../../models/user'
+import { User } from '@/models/user'
 
 export type NavigationItemId =
   | 'home'

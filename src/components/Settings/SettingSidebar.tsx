@@ -1,7 +1,7 @@
 import React from 'react'
 import { PiCaretRightBold } from 'react-icons/pi'
 import classNames from 'classnames'
-import { SettingNavigationItem } from '../../pages/SettingsPage'
+import { SettingNavigationItem } from '@/pages/SettingsPage'
 import { Link } from 'react-router-dom'
 
 interface SettingSidebarProps {

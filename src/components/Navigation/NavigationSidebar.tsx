@@ -4,7 +4,7 @@ import NavigationSidebarItem from './NavigationSidebarItem'
 import NavigationSidebarUserSection from './NavigationSidebarUserSection'
 import { NavigationItem, NavigationItemId } from './Navigation'
 import { Link } from 'react-router-dom'
-import { User } from '../../models/user'
+import { User } from '@/models/user'
 
 interface NavigationSidebarProps {
   navigationItems: NavigationItem[]

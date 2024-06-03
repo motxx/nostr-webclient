@@ -1,5 +1,5 @@
 import React from 'react'
-import { User } from '../../models/user'
+import { User } from '@/models/user'
 import Widget from './Widget'
 
 type Channel = {

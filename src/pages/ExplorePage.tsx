@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import SearchBar from '../components/ui-parts/SearchBar'
+import SearchBar from '@/components/ui-parts/SearchBar'
 import Widgets from '@/components/Widgets/Widgets'
 import ExploreFilters from '@/features/Explore/components/ExploreFilters'
 import ExploreOutput from '@/features/Explore/components/ExploreOutput'
 import { ExploreMetricWithNull } from '@/features/Explore/types'
-import { posts } from '../data/dummy-posts'
+import { posts } from '@/data/dummy-posts'
 
 const ExplorePage: React.FC = () => {
   const [accountFilter, setAccountFilter] = useState('all')

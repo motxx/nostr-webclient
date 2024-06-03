@@ -1,6 +1,6 @@
 import React from 'react'
-import Button from '../ui-elements/Button'
-import Icon from '../ui-elements/Icon'
+import Button from '@/components/ui-elements/Button'
+import Icon from '@/components/ui-elements/Icon'
 
 interface FilterButtonProps {
   onClick: () => void

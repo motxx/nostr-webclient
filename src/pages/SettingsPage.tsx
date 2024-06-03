@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
-import SettingSidebar from '../components/Settings/SettingSidebar'
-import SettingContent from '../components/Settings/SettingContent'
+import SettingSidebar from '@/components/Settings/SettingSidebar'
+import SettingContent from '@/components/Settings/SettingContent'
 import { useLocation } from 'react-router-dom'
 import { FiEye, FiLogOut, FiUser } from 'react-icons/fi'
 import { MdAccountBalanceWallet } from 'react-icons/md'

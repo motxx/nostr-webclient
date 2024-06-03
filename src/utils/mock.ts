@@ -1,4 +1,4 @@
-import { PostItemType } from '../global/types'
+import { PostItemType } from '@/global/types'
 
 export const createDummyNewReply = (
   text: string

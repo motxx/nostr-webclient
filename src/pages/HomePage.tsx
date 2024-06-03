@@ -1,8 +1,8 @@
 import React from 'react'
-import SearchBar from '../components/ui-parts/SearchBar'
-import LoginPrompt from '../components/Timeline/LoginPrompt'
-import Timeline from '../components/Timeline/Timeline'
-import Widgets from '../components/Widgets/Widgets'
+import SearchBar from '@/components/ui-parts/SearchBar'
+import LoginPrompt from '@/components/Timeline/LoginPrompt'
+import Timeline from '@/components/Timeline/Timeline'
+import Widgets from '@/components/Widgets/Widgets'
 
 interface HomeProps {
   focusBottomTab: () => void

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { TextConverter } from '../functional/TextConverter'
+import { TextConverter } from '@/components/functional/TextConverter'
 
 interface PostItemTextProps {
   text: string

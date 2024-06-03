@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { IoMdSend } from 'react-icons/io'
 import { FiArrowLeft } from 'react-icons/fi'
-import Button from '../ui-elements/Button'
-import Input from '../ui-elements/Input'
+import Button from '@/components/ui-elements/Button'
+import Input from '@/components/ui-elements/Input'
 
 const MessageConversation: React.FC<{
   conversation: any

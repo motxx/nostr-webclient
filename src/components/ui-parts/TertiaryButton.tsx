@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from '../ui-elements/Button'
+import Button from '@/components/ui-elements/Button'
 import classNames from 'classnames'
 
 interface TertiaryButtonProps

@@ -1,7 +1,7 @@
 import React from 'react'
 import parse, { DOMNode, domToReact, Element } from 'html-react-parser'
-import RouterLink from '../ui-elements/RouterLink'
-import ExternalLink from '../ui-elements/ExternalLink'
+import RouterLink from '@/components/ui-elements/RouterLink'
+import ExternalLink from '@/components/ui-elements/ExternalLink'
 import { TwitterTweetEmbed } from 'react-twitter-embed'
 
 interface UnsafeReactComponentProps {

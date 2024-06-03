@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { users } from '../../data/dummy-users'
-import SearchInput from '../ui-parts/SearchInput'
+import { users } from '@/data/dummy-users'
+import SearchInput from '@/components/ui-parts/SearchInput'
 
 const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
   onSearch,

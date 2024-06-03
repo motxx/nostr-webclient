@@ -1,9 +1,9 @@
 import React from 'react'
 import PostDetailsMediaContent from './PostDetailsMediaContent'
 import PostDetailsActions from './PostDetailsActions'
-import RepliesThread from '../Reply/RepliesThread'
-import { PostItemType } from '../../global/types'
-import { PostActionType } from '../PostItem/PostItem'
+import RepliesThread from '@/components/Reply/RepliesThread'
+import { PostItemType } from '@/global/types'
+import { PostActionType } from '@/components/PostItem/PostItem'
 import { PiCaretLeftBold, PiCaretRightBold } from 'react-icons/pi'
 
 interface PostDetailsProps {

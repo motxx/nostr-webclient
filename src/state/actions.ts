@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
 import { isLoggedInAtom, userAtom } from './atoms'
-import { User } from '../models/user'
+import { User } from '@/models/user'
 
 export const loginAction = atom(null, (get, set, user: User) => {
   set(userAtom, user)

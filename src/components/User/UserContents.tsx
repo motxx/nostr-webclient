@@ -1,7 +1,7 @@
-import { User } from '../../models/user'
-import TimelineStandard from '../Timeline/TimelineStandard'
-import { posts as mockAllPosts } from '../../data/dummy-posts'
-import ImageCarousel from '../ui-parts/ImageCarousel'
+import { User } from '@/models/user'
+import TimelineStandard from '@/components/Timeline/TimelineStandard'
+import { posts as mockAllPosts } from '@/data/dummy-posts'
+import ImageCarousel from '@/components/ui-parts/ImageCarousel'
 
 interface UserContentsProps {
   user: User

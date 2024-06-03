@@ -1,4 +1,4 @@
-import { UserSettingsType, UserType } from '../global/types'
+import { UserSettingsType, UserType } from '@/global/types'
 
 export class User implements UserType {
   npub: string = ''

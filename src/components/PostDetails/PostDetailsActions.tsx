@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { FiHeart, FiMessageCircle, FiRepeat } from 'react-icons/fi'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
-import { PostActionType } from '../PostItem/PostItem'
-import ReplyModal from '../Reply/ReplyModal'
-import { PostItemType } from '../../global/types'
-import RepliesThreadModal from '../Reply/RepliesThreadModal'
+import { PostActionType } from '@/components/PostItem/PostItem'
+import ReplyModal from '@/components/Reply/ReplyModal'
+import { PostItemType } from '@/global/types'
+import RepliesThreadModal from '@/components/Reply/RepliesThreadModal'
 
 interface PostDetailsActionsProps {
   originalPost: PostItemType
