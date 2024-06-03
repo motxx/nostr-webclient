@@ -1,9 +1,9 @@
 import React, { forwardRef } from 'react'
 import { LuMessageSquarePlus } from 'react-icons/lu'
-import { MessageConversationType } from '@/global/types'
 import classNames from 'classnames'
 import SearchInput from '@/components/ui-parts/SearchInput'
 import Button from '@/components/ui-elements/Button'
+import { MessageConversationType } from '../types'
 
 interface MessageChatSidebarProps {
   conversations: MessageConversationType[]

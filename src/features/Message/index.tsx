@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import MessageConversation from '@/components/Message/MessageConversation'
-import MessageCreateChatModal from '@/components/Message/MessageCreateChatModal'
-import MessageChatSidebar from '@/components/Message/MessageChatSidebar'
+import MessageConversation from './components/MessageConversation'
+import MessageCreateChatModal from './components/MessageCreateChatModal'
+import MessageChatSidebar from './components/MessageChatSidebar'
 import { mockConversations } from '@/data/dummy-message-conversations'
-import { MessageConversationType } from '@/global/types'
+import { MessageConversationType } from './types'
 
 const MessagePage: React.FC = () => {
   const [selectedConversation, setSelectedConversation] =
