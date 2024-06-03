@@ -44,9 +44,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject",
     "prettier": "prettier --write \"**/*.{js,jsx,json,css,scss,md}\"",
     "prettier:check": "prettier --check \"**/*.{js,jsx,json,css,scss,md}\""
@@ -70,6 +70,7 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@types/dompurify": "^3.0.5",
     "@types/react-dnd": "^3.0.2",
     "@types/react-dnd-html5-backend": "^3.0.2",
