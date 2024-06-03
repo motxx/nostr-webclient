@@ -25,8 +25,8 @@ const HomePage: React.FC<HomeProps> = ({
           onToggleFollow={toggleFollow}
         />
       </div>
-      <div className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px]">
-        <div className="hidden lg:block bg-white dark:bg-black z-10 pl-8 py-4">
+      <aside className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px]">
+        <div className="bg-white dark:bg-black z-10 pl-8 py-4">
           <SearchBar
             onSearch={() => {
               /* routerでexploreに飛ぶ */
@@ -34,12 +34,12 @@ const HomePage: React.FC<HomeProps> = ({
           />
         </div>
         <div
-          className="hidden lg:flex flex-col space-y-4 overflow-y-auto hide-scrollbar pl-4"
+          className="flex flex-col space-y-4 overflow-y-auto hide-scrollbar pl-4"
           style={{ maxHeight: '100vh' }}
         >
           <Widgets />
         </div>
-      </div>
+      </aside>
     </div>
   )
 }

@@ -29,26 +29,10 @@ const Timeline: React.FC<TimelineProps> = ({
   const [lastScrollTop, setLastScrollTop] = useState(0)
 
   const tabs: TimelineTabType[] = [
-    {
-      id: 'following',
-      feedType: 'standard',
-      name: 'フォロー中',
-    },
-    {
-      id: 'recommended',
-      feedType: 'standard',
-      name: 'おすすめ',
-    },
-    {
-      id: 'images',
-      feedType: 'image-grid',
-      name: 'ピクチャー',
-    },
-    {
-      id: 'clips',
-      feedType: 'video-swipe',
-      name: 'クリップ',
-    },
+    { id: 'following', feedType: 'standard', name: 'フォロー中' },
+    { id: 'recommended', feedType: 'standard', name: 'おすすめ' },
+    { id: 'images', feedType: 'image-grid', name: 'ピクチャー' },
+    { id: 'clips', feedType: 'video-swipe', name: 'クリップ' },
   ]
 
   const handleTabClick = (tabId: TimelineTabId) => {
@@ -75,21 +59,19 @@ const Timeline: React.FC<TimelineProps> = ({
 
   const renderFeed = () => {
     const activeTab = tabs.find((tab) => tab.id === activeTabId)
-    if (activeTab?.feedType === 'standard') {
-      return (
-        <div className="pt-4 sm:pt-8">
-          <TimelineStandard posts={posts} onToggleFollow={onToggleFollow} />
-        </div>
-      )
-    } else if (activeTab?.feedType === 'image-grid') {
-      return (
-        <div className="pt-0 sm:pt-4">
-          <TimelineImageGrid posts={posts} />
-        </div>
-      )
-    } else {
-      // 他のフィードタイプのコンポーネントもここに追加できます
-      return null
+    switch (activeTab?.feedType) {
+      case 'standard':
+        return (
+          <TimelineStandard
+            className="pt-4 sm:pt-8"
+            posts={posts}
+            onToggleFollow={onToggleFollow}
+          />
+        )
+      case 'image-grid':
+        return <TimelineImageGrid className="pt-0 sm:pt-4" posts={posts} />
+      default:
+        return null
     }
   }
 
