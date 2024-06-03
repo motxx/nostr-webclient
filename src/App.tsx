@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Navigation from './components/Navigation/Navigation'
-import HomePage from './pages/HomePage'
+import HomePage from '@/features/Home'
 import ExplorePage from '@/features/Explore'
 import NotificationPage from './pages/NotificationPage'
 import PublicChannelPage from '@/features/PublicChannel'
