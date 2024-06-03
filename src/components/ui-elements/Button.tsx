@@ -1,19 +1,24 @@
 import React from 'react'
+import classNames from 'classnames'
 
 interface ButtonProps {
-  onClick: () => void
-  className: string
-  disabled?: boolean
+  className?: string
+  onClick?: () => void
   children: React.ReactNode
+  disabled?: boolean
 }
 
 const Button: React.FC<ButtonProps> = ({
-  onClick,
   className,
-  disabled = false,
+  onClick,
   children,
+  disabled,
 }) => (
-  <button onClick={onClick} className={className} disabled={disabled}>
+  <button
+    className={classNames('p-2', className)}
+    onClick={onClick}
+    disabled={disabled}
+  >
     {children}
   </button>
 )

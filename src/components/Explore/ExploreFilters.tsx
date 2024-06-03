@@ -100,7 +100,7 @@ const ExploreFilters: React.FC<ExploreFiltersProps> = ({
       </div>
       <Button
         onClick={() => setShowFilters(!showFilters)}
-        className="flex items-center justify-center h-8 px-2 mt-2 bg-blue-500 text-white text-sm rounded-full"
+        className="flex items-center justify-center mt-2 bg-blue-500 text-white text-xs rounded-full"
       >
         <FiFilter className="mr-2" />
         詳細フィルタ

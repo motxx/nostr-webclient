@@ -19,7 +19,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({
 }) => (
   <Button
     onClick={onClick}
-    className={`p-2 flex items-center justify-center ${active ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
+    className={`flex items-center justify-center ${active ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
     disabled={disabled}
   >
     <Icon icon={icon} />
