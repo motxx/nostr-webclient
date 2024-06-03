@@ -46,7 +46,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const renderLoginButtons = () => (
     <>
       <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-8 font-['Futura']">
-        Noscape
+        COBRA
       </h1>
 
       <PrimaryButton
