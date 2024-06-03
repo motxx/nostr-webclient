@@ -4,6 +4,8 @@ import UserExternalLinks from './UserExternalLinks'
 import FollowButton from '../common/FollowButton'
 import { nostrAddressForDisplay } from '../../utils/addressConverter'
 import { User } from '../../models/user'
+import TertiaryButton from '../common/TertiaryButton'
+import { useNavigate } from 'react-router-dom'
 
 interface UserDescriptionProps {
   user: User
@@ -16,6 +18,9 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
   isFollowing,
   toggleFollow,
 }) => {
+  const isUserMe =
+    user.nostrAddress && user.nostrAddress === '_@motxx.pages.dev'
+  const navigate = useNavigate()
   return (
     <>
       <div className="flex items-center justify-between pt-4 w-full">
@@ -23,11 +28,20 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
         <div className="flex items-center space-x-2 ml-auto">
           <UserExternalLinks links={user.links} />
           <AiOutlineThunderbolt className="text-3xl text-yellow-500" />
-          <FollowButton
-            userId={user.nostrAddress || user.npub}
-            isFollowing={isFollowing}
-            toggleFollow={toggleFollow}
-          />
+          {isUserMe ? (
+            <TertiaryButton
+              onClick={() => navigate('/settings/account')}
+              className="px-4 py-2 text-sm"
+            >
+              プロフィールを編集
+            </TertiaryButton>
+          ) : (
+            <FollowButton
+              userId={user.nostrAddress || user.npub}
+              isFollowing={isFollowing}
+              toggleFollow={toggleFollow}
+            />
+          )}
         </div>
       </div>
       <div>
