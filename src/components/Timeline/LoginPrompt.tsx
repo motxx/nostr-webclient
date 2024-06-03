@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import LoginModal from '../Authentication/LoginModal'
-import PrimaryButton from '../common/PrimaryButton'
+import PrimaryButton from '../ui-parts/PrimaryButton'
 import { isLoggedInAtom } from '../../state/atoms'
 import { useAtom } from 'jotai'
 

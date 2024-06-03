@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import DOMPurify from 'dompurify'
 import UnsafeReactComponent from './UnsafeReactComponent'
 

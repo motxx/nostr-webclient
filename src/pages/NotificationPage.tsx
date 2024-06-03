@@ -5,8 +5,8 @@ import { NotificationPostItemType } from '../global/types'
 import PostItem from '../components/PostItem/PostItem'
 import notificationList from '../data/dummy-notifications'
 import { BsHeartFill } from 'react-icons/bs'
-import { Link, useNavigate } from 'react-router-dom'
-import UserIdLink from '../components/common/UserIdLink'
+import { useNavigate } from 'react-router-dom'
+import UserIdLink from '../components/ui-elements/UserIdLink'
 
 const NotificationPage: React.FC = () => {
   const navigate = useNavigate()

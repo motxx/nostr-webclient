@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { FiSend } from 'react-icons/fi'
 import { PostItemType } from '../../global/types'
 import PostItem from '../PostItem/PostItem'
-import PrimaryButton from '../common/PrimaryButton'
+import PrimaryButton from '../ui-parts/PrimaryButton'
 
 interface ReplyModalProps {
   originalPost: PostItemType

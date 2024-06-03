@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import SearchBar from '../components/common/SearchBar'
+import SearchBar from '../components/ui-parts/SearchBar'
 import Widgets from '../components/Widgets/Widgets'
 import ExploreFilters from '../components/Explore/ExploreFilters'
 import ExploreOutput from '../components/Explore/ExploreOutput'

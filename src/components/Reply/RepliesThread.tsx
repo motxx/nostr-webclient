@@ -3,7 +3,7 @@ import { FiSend } from 'react-icons/fi'
 import replyData from '../../data/dummy-reply-data'
 import PostItem from '../PostItem/PostItem'
 import { PostItemType } from '../../global/types'
-import PrimaryButton from '../common/PrimaryButton'
+import PrimaryButton from '../ui-parts/PrimaryButton'
 
 interface RepliesThreadProps {
   originalPost: PostItemType

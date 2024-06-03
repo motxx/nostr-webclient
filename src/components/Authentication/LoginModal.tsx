@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react'
 import { FiLogIn, FiKey } from 'react-icons/fi'
 import { useClickAway } from 'react-use'
-import PrimaryButton from '../common/PrimaryButton'
-import SecondaryButton from '../common/SecondaryButton'
-import TertiaryButton from '../common/TertiaryButton'
+import PrimaryButton from '../ui-parts/PrimaryButton'
+import SecondaryButton from '../ui-parts/SecondaryButton'
+import TertiaryButton from '../ui-parts/TertiaryButton'
 
 interface LoginModalProps {
   isOpen: boolean
