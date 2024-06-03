@@ -33,7 +33,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
     return (
       <BsCaretRightFill
         onClick={onClick}
-        className={`block absolute top-1/2 transform -translate-y-1/2 right-4 sm:-right-2 text-3xl rounded-full p-2 cursor-pointer z-20 ${hovered ? 'text-white bg-gray-800 dark:text-white dark:bg-gray-100 opacity-90 dark:opacity-90 bg-opacity-10 dark:bg-opacity-10' : 'text-gray-100 dark:text-gray-800 opacity-95'}`}
+        className={`block absolute top-1/2 transform -translate-y-1/2 right-0 sm:-right-6 text-3xl rounded-full p-2 cursor-pointer z-20 ${hovered ? 'text-white bg-gray-800 dark:text-white dark:bg-gray-100 opacity-90 dark:opacity-90 bg-opacity-10 dark:bg-opacity-10' : 'text-gray-100 dark:text-gray-800 opacity-95'}`}
       />
     )
   }
