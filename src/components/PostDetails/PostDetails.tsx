@@ -48,7 +48,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
       <div className="relative w-full h-full flex overflow-hidden">
         {onClickPrevPost && (
           <div
-            className="absolute left-0 w-[6%] min-w-[60px] h-full flex items-center justify-center text-gray-500 hover:text-gray-300 text-xl hover:bg-gray-500 cursor-pointer hover:bg-opacity-25 z-20"
+            className="absolute left-0 w-12 h-12 rounded-full top-1/2 -translate-y-1/2 sm:w-[6%] sm:min-w-[60px] sm:h-full sm:rounded-none sm:top-0 sm:translate-y-0 flex items-center justify-center text-gray-500 hover:text-gray-300 text-xl hover:bg-gray-500 cursor-pointer hover:bg-opacity-25 z-20"
             onClick={onClickPrevPost}
           >
             <PiCaretLeftBold />
@@ -79,7 +79,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
         </div>
         {onClickNextPost && (
           <div
-            className="absolute right-0 w-[6%] min-w-[60px] h-full flex items-center justify-center text-gray-500 hover:text-gray-300 text-xl hover:bg-gray-500 cursor-pointer hover:bg-opacity-25 z-20"
+            className="absolute right-0 w-12 h-12 rounded-full top-1/2 -translate-y-1/2 sm:w-[6%] sm:min-w-[60px] sm:h-full sm:rounded-none sm:top-0 sm:translate-y-0 flex items-center justify-center text-gray-500 hover:text-gray-300 text-xl hover:bg-gray-500 cursor-pointer hover:bg-opacity-25 z-20"
             onClick={onClickNextPost}
           >
             <PiCaretRightBold />
