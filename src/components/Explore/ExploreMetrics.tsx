@@ -7,7 +7,8 @@ import {
   MdPeople,
 } from 'react-icons/md'
 import { FaToggleOff, FaToggleOn } from 'react-icons/fa'
-import { ExploreMetricWithNull } from '../../pages/ExplorePage'
+import { ExploreMetric, ExploreMetricWithNull } from '../../pages/ExplorePage'
+import FilterButton from '../ui-parts/FilterButton'
 
 interface ExploreMetricsProps {
   metric: ExploreMetricWithNull
@@ -22,9 +23,7 @@ const ExploreMetrics: React.FC<ExploreMetricsProps> = ({
   sortByMetric,
   handleSortByMetricChange,
 }) => {
-  const handleMetricChange = (metric: ExploreMetric) => {
-    setMetric(metric)
-  }
+  const handleMetricChange = (metric: ExploreMetric) => setMetric(metric)
 
   return (
     <div className="flex flex-wrap items-center mr-8">
@@ -47,41 +46,38 @@ const ExploreMetrics: React.FC<ExploreMetricsProps> = ({
           </>
         )}
       </div>
-      <button
-        onClick={() => handleMetricChange('engagement')}
-        disabled={!sortByMetric}
-        className={`p-2 m-1 flex items-center justify-center ${metric === 'engagement' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-      >
-        <MdTrendingUp />
-      </button>
-      <button
-        onClick={() => handleMetricChange('reposts')}
-        disabled={!sortByMetric}
-        className={`p-2 m-1 flex items-center justify-center ${metric === 'reposts' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-      >
-        <MdRepeat />
-      </button>
-      <button
-        onClick={() => handleMetricChange('likes')}
-        disabled={!sortByMetric}
-        className={`p-2 m-1 flex items-center justify-center ${metric === 'likes' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-      >
-        <MdFavorite />
-      </button>
-      <button
-        onClick={() => handleMetricChange('zaps')}
-        disabled={!sortByMetric}
-        className={`p-2 m-1 flex items-center justify-center ${metric === 'zaps' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-      >
-        <MdBolt />
-      </button>
-      <button
-        onClick={() => handleMetricChange('followers')}
-        disabled={!sortByMetric}
-        className={`p-2 m-1 flex items-center justify-center ${metric === 'followers' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-      >
-        <MdPeople />
-      </button>
+      <div className="grid grid-cols-5 gap-2">
+        <FilterButton
+          onClick={() => handleMetricChange('engagement')}
+          active={metric === 'engagement'}
+          icon={<MdTrendingUp />}
+          disabled={!sortByMetric}
+        />
+        <FilterButton
+          onClick={() => handleMetricChange('reposts')}
+          active={metric === 'reposts'}
+          icon={<MdRepeat />}
+          disabled={!sortByMetric}
+        />
+        <FilterButton
+          onClick={() => handleMetricChange('likes')}
+          active={metric === 'likes'}
+          icon={<MdFavorite />}
+          disabled={!sortByMetric}
+        />
+        <FilterButton
+          onClick={() => handleMetricChange('zaps')}
+          active={metric === 'zaps'}
+          icon={<MdBolt />}
+          disabled={!sortByMetric}
+        />
+        <FilterButton
+          onClick={() => handleMetricChange('followers')}
+          active={metric === 'followers'}
+          icon={<MdPeople />}
+          disabled={!sortByMetric}
+        />
+      </div>
     </div>
   )
 }

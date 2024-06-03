@@ -4,6 +4,8 @@ import { BsPersonFill, BsPeopleFill, BsGlobe } from 'react-icons/bs'
 import ExploreMetrics from './ExploreMetrics'
 import ExploreLanguageFilter from './ExploreLanguageFilter'
 import { ExploreMetricWithNull } from '../../pages/ExplorePage'
+import Button from '../ui-elements/Button'
+import FilterButton from '../ui-parts/FilterButton'
 
 interface ExploreFiltersProps {
   accountFilter: string
@@ -38,14 +40,8 @@ const ExploreFilters: React.FC<ExploreFiltersProps> = ({
   languageGroupFilter,
   setLanguageGroupFilter,
 }) => {
-  const handleAccountFilterChange = (filter: string) => {
-    setAccountFilter(filter)
-  }
-
-  const handleOutputFormatChange = (format: string) => {
-    setOutputFormat(format)
-  }
-
+  const handleAccountFilterChange = (filter: string) => setAccountFilter(filter)
+  const handleOutputFormatChange = (format: string) => setOutputFormat(format)
   const handleSortByMetricChange = () => {
     const nextSortByMetric = !sortByMetric
     if (nextSortByMetric) {
@@ -57,66 +53,58 @@ const ExploreFilters: React.FC<ExploreFiltersProps> = ({
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center">
-        <div className="flex flex-wrap items-center space-x-2 mt-2 mr-4">
-          <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
-            アカウント:
-          </label>
-          <button
+    <div className="flex flex-wrap items-center">
+      <div className="flex flex-wrap items-center mt-2 mr-4">
+        <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
+          アカウント:
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          <FilterButton
             onClick={() => handleAccountFilterChange('all')}
-            className={`p-2 flex items-center justify-center ${accountFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-          >
-            <BsGlobe />
-          </button>
-          <button
+            active={accountFilter === 'all'}
+            icon={<BsGlobe />}
+          />
+          <FilterButton
             onClick={() => handleAccountFilterChange('follow')}
-            className={`p-2 flex items-center justify-center ${accountFilter === 'follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-          >
-            <BsPersonFill />
-          </button>
-          <button
+            active={accountFilter === 'follow'}
+            icon={<BsPersonFill />}
+          />
+          <FilterButton
             onClick={() => handleAccountFilterChange('follow-of-follow')}
-            className={`p-2 flex items-center justify-center ${accountFilter === 'follow-of-follow' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-          >
-            <BsPeopleFill />
-          </button>
+            active={accountFilter === 'follow-of-follow'}
+            icon={<BsPeopleFill />}
+          />
         </div>
-        <div className="flex flex-wrap items-center mt-2 mr-4">
-          <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
-            表示:
-          </label>
-          <div className="flex flex-wrap items-center">
-            <div className="space-x-2">
-              <button
-                onClick={() => handleOutputFormatChange('timeline')}
-                className={`p-2 ${outputFormat === 'timeline' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-              >
-                <FiList />
-              </button>
-              <button
-                onClick={() => handleOutputFormatChange('image-grid')}
-                className={`p-2 ${outputFormat === 'image-grid' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-              >
-                <FiGrid />
-              </button>
-              <button
-                onClick={() => handleOutputFormatChange('influence-map')}
-                className={`p-2 ${outputFormat === 'influence-map' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'} rounded-full`}
-              >
-                <FiMap />
-              </button>
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center justify-center h-8 px-2 mt-2 bg-blue-500 text-white text-sm rounded-full"
-        >
-          <FiFilter className="mr-2" />
-          詳細フィルタ
-        </button>
       </div>
+      <div className="flex flex-wrap items-center mt-2 mr-4">
+        <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
+          表示:
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          <FilterButton
+            onClick={() => handleOutputFormatChange('timeline')}
+            active={outputFormat === 'timeline'}
+            icon={<FiList />}
+          />
+          <FilterButton
+            onClick={() => handleOutputFormatChange('image-grid')}
+            active={outputFormat === 'image-grid'}
+            icon={<FiGrid />}
+          />
+          <FilterButton
+            onClick={() => handleOutputFormatChange('influence-map')}
+            active={outputFormat === 'influence-map'}
+            icon={<FiMap />}
+          />
+        </div>
+      </div>
+      <Button
+        onClick={() => setShowFilters(!showFilters)}
+        className="flex items-center justify-center h-8 px-2 mt-2 bg-blue-500 text-white text-sm rounded-full"
+      >
+        <FiFilter className="mr-2" />
+        詳細フィルタ
+      </Button>
       {showFilters && (
         <div className="flex flex-wrap items-center">
           <ExploreMetrics
