@@ -20,7 +20,7 @@ const SettingsPage: React.FC = () => {
         selectedSetting={selectedSetting}
         handleSelectSetting={handleSelectSetting}
       />
-      <div className="flex-1">
+      <div className="flex-1 mb-20 sm:mb-0">
         {selectedSetting ? (
           <SettingContent setting={selectedSetting} onBack={handleBack} />
         ) : (

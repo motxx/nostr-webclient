@@ -12,6 +12,7 @@
     "@types/react-dom": "^18.3.0",
     "@use-gesture/react": "^10.3.1",
     "axios": "^1.7.2",
+    "boring-avatars": "^1.10.2",
     "chart.js": "^4.4.3",
     "classnames": "^2.5.1",
     "dompurify": "^3.1.5",

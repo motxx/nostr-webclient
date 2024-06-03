@@ -1,4 +1,5 @@
 import React from 'react'
+import SettingProfile from './SettingProfile'
 import { FiArrowLeft } from 'react-icons/fi'
 
 interface SettingContentProps {
@@ -10,7 +11,7 @@ const SettingContent: React.FC<SettingContentProps> = ({ setting, onBack }) => {
   const renderSettingContent = () => {
     switch (setting) {
       case 'プロフィール':
-        return <div>プロフィールの内容</div>
+        return <SettingProfile />
       case 'ウォレット':
         return <div>ウォレットの内容</div>
       case 'リレー':
@@ -30,7 +31,7 @@ const SettingContent: React.FC<SettingContentProps> = ({ setting, onBack }) => {
         </button>
         <h2 className="text-lg font-bold">{setting}</h2>
       </div>
-      <div className="p-4">{renderSettingContent()}</div>
+      <div>{renderSettingContent()}</div>
     </div>
   )
 }
