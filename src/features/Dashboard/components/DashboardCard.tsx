@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useDrag, useDrop } from 'react-dnd'
-import { ItemTypes } from './ItemTypes'
+import { ItemTypes } from '../types'
 import { getEmptyImage } from 'react-dnd-html5-backend'
 
 interface DashboardCardProps {
