@@ -50,25 +50,28 @@ const MessageCreateChatModal: React.FC<MessageCreateChatModalProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-25"
       onClick={handleBackgroundClick}
     >
-      <div className="bg-gray-200 dark:bg-gray-800 px-8 py-6 rounded-md shadow-md w-80">
+      <div className="bg-gray-200 dark:bg-gray-800 px-8 py-6 rounded-md shadow-md">
         <h2 className="text-lg font-bold mb-4">新しいチャットを作成</h2>
         <Input
           value={chatName}
           onChange={(e) => setChatName(e.target.value)}
           placeholder="チャット名を入力..."
-          className="w-full mb-4"
+          className="w-full mb-4 bg-transparent border"
         />
         <div className="mb-4">
           <h3 className="text-sm font-bold mb-2">参加者を追加</h3>
-          <div className="flex items-center">
+          <div className="flex items-center gap-x-2">
             <Input
               value={participantInput}
               onChange={(e) => setParticipantInput(e.target.value)}
               placeholder="ユーザー名を入力..."
-              className="flex-grow mr-2"
+              className="flex-grow bg-transparent border"
             />
-            <Button onClick={handleAddParticipant}>
-              <IoMdPersonAdd className="text-2xl text-white bg-blue-500 rounded-md p-2 h-10 w-10" />
+            <Button
+              onClick={handleAddParticipant}
+              className="text-2xl text-white bg-blue-500 rounded-md p-2 h-10 w-10"
+            >
+              <IoMdPersonAdd />
             </Button>
           </div>
           <ul className="mt-2">
