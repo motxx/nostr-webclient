@@ -1,17 +1,10 @@
 import React, { useState } from 'react'
 import SearchBar from '../components/ui-parts/SearchBar'
-import Widgets from '../components/Widgets/Widgets'
-import ExploreFilters from '../components/Explore/ExploreFilters'
-import ExploreOutput from '../components/Explore/ExploreOutput'
+import Widgets from '@/components/Widgets/Widgets'
+import ExploreFilters from '@/features/Explore/components/ExploreFilters'
+import ExploreOutput from '@/features/Explore/components/ExploreOutput'
+import { ExploreMetricWithNull } from '@/features/Explore/types'
 import { posts } from '../data/dummy-posts'
-
-export type ExploreMetric =
-  | 'engagement'
-  | 'reposts'
-  | 'likes'
-  | 'zaps'
-  | 'followers'
-export type ExploreMetricWithNull = ExploreMetric | null
 
 const ExplorePage: React.FC = () => {
   const [accountFilter, setAccountFilter] = useState('all')

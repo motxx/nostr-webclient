@@ -1,8 +1,8 @@
 import React from 'react'
-import TimelineStandard from '../Timeline/TimelineStandard'
-import TimelineImageGrid from '../Timeline/TimelineImageGrid'
+import TimelineStandard from '@/components/Timeline/TimelineStandard'
+import TimelineImageGrid from '@/components/Timeline/TimelineImageGrid'
 import ExploreUserInfluenceGraph from './ExploreUserInfluenceGraph'
-import { ExploreMetricWithNull } from '../../pages/ExplorePage'
+import { ExploreMetricWithNull } from '../types'
 
 interface ExploreOutputProps {
   outputFormat: string

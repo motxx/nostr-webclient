@@ -7,8 +7,8 @@ import {
   MdPeople,
 } from 'react-icons/md'
 import { FaToggleOff, FaToggleOn } from 'react-icons/fa'
-import { ExploreMetric, ExploreMetricWithNull } from '../../pages/ExplorePage'
-import FilterButton from '../ui-parts/FilterButton'
+import FilterButton from '@/components/ui-parts/FilterButton'
+import { ExploreMetric, ExploreMetricWithNull } from '../types'
 
 interface ExploreMetricsProps {
   metric: ExploreMetricWithNull

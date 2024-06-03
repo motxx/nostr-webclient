@@ -3,9 +3,9 @@ import { FiGrid, FiList, FiMap, FiFilter } from 'react-icons/fi'
 import { BsPersonFill, BsPeopleFill, BsGlobe } from 'react-icons/bs'
 import ExploreMetrics from './ExploreMetrics'
 import ExploreLanguageFilter from './ExploreLanguageFilter'
-import { ExploreMetricWithNull } from '../../pages/ExplorePage'
-import Button from '../ui-elements/Button'
-import FilterButton from '../ui-parts/FilterButton'
+import Button from '@/components/ui-elements/Button'
+import FilterButton from '@/components/ui-parts/FilterButton'
+import { ExploreMetricWithNull } from '../types'
 
 interface ExploreFiltersProps {
   accountFilter: string

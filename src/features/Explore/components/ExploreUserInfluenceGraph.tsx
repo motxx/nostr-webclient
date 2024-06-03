@@ -5,7 +5,7 @@ import {
   Node,
   Options,
 } from 'vis-network/standalone/esm/vis-network'
-import { ExploreMetric } from '../../pages/ExplorePage'
+import { ExploreMetric } from '../types'
 
 type NodeData = Node & { [key in ExploreMetric]: number }
 
