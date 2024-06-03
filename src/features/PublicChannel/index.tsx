@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import PublicChannelList from '@/components/PublicChannel/PublicChannelList'
-import PublicChannelChatWindow from '@/components/PublicChannel/PublicChannelChatWindow'
-import { PublicChannelType } from '@/global/types'
-
-export const PublicChannels: PublicChannelType[] = [
-  { id: '1', name: '何でも質問板@Nostr' },
-  { id: '2', name: '好きなボカロを紹介するスレ' },
-  { id: '3', name: 'Bitcoin 101' },
-]
+import PublicChannelList from './components/PublicChannelList'
+import PublicChannelChatWindow from './components/PublicChannelChatWindow'
+import { PublicChannels, PublicChannelType } from './types'
 
 const PublicChannelPage: React.FC = () => {
   const { channelId } = useParams()

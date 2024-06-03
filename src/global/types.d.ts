@@ -41,11 +41,6 @@ export interface UserSettingsType {
 
 export type LoginStatus = boolean
 
-export type PublicChannelType = {
-  id: string
-  name: string
-}
-
 export type MessageType = {
   sender: string
   avatar: string

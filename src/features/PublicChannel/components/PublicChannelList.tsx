@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PublicChannels } from '@/pages/PublicChannelPage'
-import { PublicChannelType } from '@/global/types'
+import { PublicChannels, PublicChannelType } from '../types'
 
 interface PublicChannelListProps {
   selectedChannel: PublicChannelType
