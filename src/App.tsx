@@ -95,7 +95,7 @@ const App: React.FC = () => {
               }
             />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/*" element={<SettingsPage />} />
             <Route
               path="/user/:userId"
               element={

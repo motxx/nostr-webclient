@@ -1,26 +1,16 @@
 import React from 'react'
-import { FiUser, FiLogOut, FiEye } from 'react-icons/fi'
-import { MdAccountBalanceWallet } from 'react-icons/md'
-import { BiServer } from 'react-icons/bi'
 import { PiCaretRightBold } from 'react-icons/pi'
 import classNames from 'classnames'
+import { SettingNavigationItem } from '../../pages/SettingsPage'
+import { Link } from 'react-router-dom'
 
 interface SettingSidebarProps {
-  selectedSetting: string | null
-  handleSelectSetting: (setting: string) => void
+  settingItems: SettingNavigationItem[]
   className?: string
 }
 
-const settings = [
-  { name: 'プロフィール', icon: FiUser },
-  { name: 'ウォレット', icon: MdAccountBalanceWallet },
-  { name: 'リレー', icon: BiServer },
-  { name: '表示', icon: FiEye },
-  { name: 'ログアウト', icon: FiLogOut },
-]
-
 const SettingSidebar: React.FC<SettingSidebarProps> = ({
-  handleSelectSetting,
+  settingItems,
   className,
 }) => {
   return (
@@ -32,19 +22,21 @@ const SettingSidebar: React.FC<SettingSidebarProps> = ({
     >
       <div className="">
         <h1 className="text-lg font-bold p-4">設定</h1>
-        <ul>
-          {settings.map(({ name, icon: Icon }) => (
-            <li
-              key={name}
-              className="flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-300 ease-in-out cursor-pointer"
-              onClick={() => handleSelectSetting(name)}
+        <nav>
+          {settingItems.map(({ id, label, icon: Icon }) => (
+            <Link
+              key={id}
+              to={`${id}`}
+              className="flex items-center px-4 py-3 hover:bg-gray-100
+              dark:hover:bg-gray-900 transition duration-300 ease-in-out
+              cursor-pointer"
             >
               <Icon className="text-xl mr-2" />
-              <span className="text-gray-700 dark:text-gray-300">{name}</span>
+              <span className="text-gray-700 dark:text-gray-300">{label}</span>
               <PiCaretRightBold className="ml-auto text-gray-400 dark:text-gray-500" />
-            </li>
+            </Link>
           ))}
-        </ul>
+        </nav>
       </div>
     </div>
   )
