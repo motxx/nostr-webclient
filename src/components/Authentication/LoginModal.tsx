@@ -45,10 +45,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
   const renderLoginButtons = () => (
     <>
-      <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-8 font-['Futura']">
+      <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-8 font-mplus-2">
         COBRA
       </h1>
-
       <PrimaryButton
         className="w-full py-3 pl-8 pr-8 mb-4"
         onClick={onLoginWithNsecApp}
@@ -56,7 +55,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
         <FiLogIn className="mr-2" />
         Nsec.appでログイン
       </PrimaryButton>
-
       <SecondaryButton
         className="w-full py-3 pl-8 pr-8 mb-4"
         onClick={onLoginWithExtension}
@@ -64,7 +62,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
         <FiLogIn className="mr-2" />
         拡張機能でログイン
       </SecondaryButton>
-
       <TertiaryButton
         className="w-full py-3 pl-8 pr-8"
         onClick={() => setIsImportingKey(true)}
