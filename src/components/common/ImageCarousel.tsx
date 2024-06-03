@@ -96,7 +96,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   return (
     <div
       ref={containerRef}
-      className="mx-auto w-full w-full hide-scroll"
+      className="mx-auto w-full hide-scroll"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
