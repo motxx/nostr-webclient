@@ -1,3 +1,4 @@
+import React from 'react'
 import SearchBar from '../components/common/SearchBar'
 import LoginPrompt from '../components/Timeline/LoginPrompt'
 import Timeline from '../components/Timeline/Timeline'

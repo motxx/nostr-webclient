@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import LoginModal from '../Authentication/LoginModal'
 import PrimaryButton from '../common/PrimaryButton'
 import { isLoggedInAtom } from '../../state/atoms'
