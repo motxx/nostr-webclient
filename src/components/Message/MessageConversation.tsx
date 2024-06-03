@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { IoMdSend } from 'react-icons/io'
 import { FiArrowLeft } from 'react-icons/fi'
+import Button from '../ui-elements/Button'
+import Input from '../ui-elements/Input'
 
 const MessageConversation: React.FC<{
   conversation: any
@@ -19,9 +21,9 @@ const MessageConversation: React.FC<{
   return (
     <div className="flex flex-col h-screen overflow-y-auto hide-scrollbar">
       <div className="sticky top-0 z-30 bg-white dark:bg-black flex items-center p-4 border-b border-gray-200 dark:border-gray-700">
-        <button onClick={onBack} className="sm:hidden mr-4">
+        <Button onClick={onBack} className="sm:hidden mr-4">
           <FiArrowLeft className="text-2xl" />
-        </button>
+        </Button>
         <img
           src={conversation.avatar}
           alt={conversation.name}
@@ -65,19 +67,18 @@ const MessageConversation: React.FC<{
             handleSend()
           }}
         >
-          <input
-            type="text"
+          <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-grow rounded-full px-4 sm:px-0 sm:rounded-none outline-none w-full bg-gray-300 dark:bg-gray-800 sm:bg-transparent sm:dark:bg-transparent text-gray-700 dark:text-gray-300"
             placeholder="メッセージを入力..."
+            className="flex-grow rounded-full px-4 sm:px-0 sm:rounded-none w-full bg-gray-300 dark:bg-gray-800 sm:bg-transparent sm:dark:bg-transparent text-gray-700 dark:text-gray-300"
           />
-          <button
+          <Button
             type="submit"
             className="ml-1 p-2 flex justify-center items-center bg-blue-500 dark:bg-gray-800 text-white rounded-full sm:rounded"
           >
             <IoMdSend className="text-xl" />
-          </button>
+          </Button>
         </form>
       </div>
     </div>
