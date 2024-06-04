@@ -2,6 +2,7 @@ import React from 'react'
 import classNames from 'classnames'
 
 interface InputProps {
+  id?: string
   type?: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -10,6 +11,7 @@ interface InputProps {
 }
 
 const Input: React.FC<InputProps> = ({
+  id,
   type = 'text',
   value,
   onChange,
@@ -17,6 +19,7 @@ const Input: React.FC<InputProps> = ({
   className,
 }) => (
   <input
+    id={id}
     type={type}
     value={value}
     onChange={onChange}

@@ -5,3 +5,10 @@ export type SettingNavigationItem = {
   label: string
   icon: IconType
 }
+
+export type BudgetPeriodId = 'daily' | 'weekly' | 'monthly' | 'yearly'
+
+export type SettingBudgetPeriod = {
+  id: BudgetPeriodId
+  label: string
+}
