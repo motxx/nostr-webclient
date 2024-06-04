@@ -26,6 +26,7 @@ const SettingsPage: React.FC = () => {
   const selected = toSettingItem(activeSettingId)
 
   const handleBack = () => {
+    // 遷移元がサイドバーの場合とユーザページの場合がある
     window.history.back()
   }
 
