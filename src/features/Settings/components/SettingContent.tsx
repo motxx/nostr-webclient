@@ -3,6 +3,7 @@ import { FiArrowLeft } from 'react-icons/fi'
 import { SettingNavigationItem } from '../types'
 import SettingProfile from './SettingProfile'
 import SettingWallet from './SettingWallet'
+import SettingRelay from './SettingRelay'
 
 interface SettingContentProps {
   selected: SettingNavigationItem
@@ -25,9 +26,11 @@ const SettingContent: React.FC<SettingContentProps> = ({
         <SettingProfile />
       ) : selected.id === 'wallet' ? (
         <SettingWallet />
-      ) : (
-        <div>{selected.label}の内容</div>
-      )}
+      ) : selected.id === 'relay' ? (
+        <SettingRelay />
+      ) : selected.id === 'display' ? (
+        <div>表示の内容</div>
+      ) : null}
     </div>
   )
 }
