@@ -44,7 +44,7 @@ const SettingProfile: React.FC = () => {
 
   return (
     <div>
-      <div className="relative mb-14">
+      <div className="relative mb-10">
         <div
           className="relative group w-full h-[200px] bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-900 transition-colors duration-300 ease-in-out overflow-hidden"
           onDragOver={(e) => e.preventDefault()}
