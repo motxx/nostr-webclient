@@ -1,7 +1,8 @@
 import React from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
-import SettingProfile from './SettingProfile'
 import { SettingNavigationItem } from '../types'
+import SettingProfile from './SettingProfile'
+import SettingWallet from './SettingWallet'
 
 interface SettingContentProps {
   selected: SettingNavigationItem
@@ -22,6 +23,8 @@ const SettingContent: React.FC<SettingContentProps> = ({
       </div>
       {selected.id === 'account' ? (
         <SettingProfile />
+      ) : selected.id === 'wallet' ? (
+        <SettingWallet />
       ) : (
         <div>{selected.label}の内容</div>
       )}

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import SettingSidebar from './components/SettingSidebar'
 import SettingContent from './components/SettingContent'
 import { useLocation } from 'react-router-dom'
@@ -15,24 +15,15 @@ const settingItems: SettingNavigationItem[] = [
   { id: 'logout', label: 'ログアウト', icon: FiLogOut },
 ]
 
-const toSettingItem = (id: string): SettingNavigationItem => {
-  return settingItems.find((item) => item.id === id) || settingItems[0]
-}
+const toSettingItem = (id: string): SettingNavigationItem =>
+  settingItems.find((item) => `/${item.id}` === id) ?? settingItems[0]
 
 const SettingsPage: React.FC = () => {
   const location = useLocation()
 
-  const activeSettingId = useMemo(() => {
-    return location.pathname.substring(9) // Remove leading '/settings'
-  }, [location])
-
-  const settingOpened = useMemo(() => {
-    return activeSettingId !== ''
-  }, [activeSettingId])
-
-  const selected = useMemo(() => {
-    return toSettingItem(activeSettingId)
-  }, [activeSettingId])
+  const activeSettingId = location.pathname.substring(9) // Remove leading '/settings'
+  const settingOpened = activeSettingId !== ''
+  const selected = toSettingItem(activeSettingId)
 
   const handleBack = () => {
     window.history.back()
