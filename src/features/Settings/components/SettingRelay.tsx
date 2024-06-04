@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { FiPlus, FiTrash } from 'react-icons/fi'
 import Input from '@/components/ui-elements/Input'
-import TertiaryButton from '@/components/ui-parts/TertiaryButton'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 
 const SettingRelay: React.FC = () => {
@@ -65,15 +64,12 @@ const SettingRelay: React.FC = () => {
           </PrimaryButton>
         </div>
       </div>
-
-      <div className="flex justify-end">
-        <TertiaryButton
-          onClick={handleSaveRelays}
-          className="flex items-center space-x-2 bg-green-500 text-white rounded-md px-4 py-2 hover:bg-green-700"
-        >
-          保存
-        </TertiaryButton>
-      </div>
+      <PrimaryButton
+        onClick={handleSaveRelays}
+        className="flex items-center space-x-2 bg-green-500 text-white rounded-md px-4 py-2 hover:bg-green-700"
+      >
+        保存
+      </PrimaryButton>
     </div>
   )
 }

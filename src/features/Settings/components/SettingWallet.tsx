@@ -4,6 +4,8 @@ import BulletOption from '@/components/ui-elements/BulletOption'
 import TertiaryButton from '@/components/ui-parts/TertiaryButton'
 import { SettingBudgetPeriod } from '../types'
 import QRCode from 'qrcode.react'
+import PrimaryButton from '@/components/ui-parts/PrimaryButton'
+import { MdOutlineQrCode } from 'react-icons/md'
 
 export const budgetPeriods: SettingBudgetPeriod[] = [
   { id: 'daily', label: '日次' },
@@ -22,6 +24,15 @@ const SettingWallet: React.FC = () => {
   const handleGenerateQRCode = () => {
     const qrValue = `nostr+walletauth://example`
     setQrCodeValue(qrValue)
+  }
+
+  const handleSave = () => {
+    console.log({
+      connectionUri,
+      defaultZapAmount,
+      authBudget,
+      budgetPeriodId,
+    })
   }
 
   return (
@@ -106,6 +117,7 @@ const SettingWallet: React.FC = () => {
           onClick={handleGenerateQRCode}
           className="w-[200px] rounded-md"
         >
+          <MdOutlineQrCode className="mr-2" />
           NWAのQRコード出力
         </TertiaryButton>
         {qrCodeValue && (
@@ -113,6 +125,12 @@ const SettingWallet: React.FC = () => {
             <QRCode value={qrCodeValue} size={200} />
           </div>
         )}
+        <PrimaryButton
+          onClick={handleSave}
+          className="flex items-center space-x-2 bg-green-500 text-white rounded-md px-4 py-2 hover:bg-green-700"
+        >
+          保存
+        </PrimaryButton>
       </div>
     </div>
   )

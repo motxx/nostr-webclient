@@ -1,5 +1,7 @@
 import React, { useState, DragEvent } from 'react'
 import Avatar from 'boring-avatars'
+import TertiaryButton from '@/components/ui-parts/TertiaryButton'
+import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 
 const SettingProfile: React.FC = () => {
   const [avatar, setAvatar] = useState<File | null>(null)
@@ -152,12 +154,12 @@ const SettingProfile: React.FC = () => {
             )}
           </div>
         ))}
-        <button
+        <PrimaryButton
           onClick={handleSave}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
+          className="flex items-center space-x-2 bg-green-500 text-white rounded-md px-4 py-2 hover:bg-green-700"
         >
           保存
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   )
