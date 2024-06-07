@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import { BsCaretLeftFill, BsCaretRightFill } from 'react-icons/bs'
+import { FaBitcoin } from 'react-icons/fa'
 
 interface ImageCarouselProps {
-  items: { image: string; link: string }[]
+  items: { image: string; link: string; title?: string; price?: string }[]
 }
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
@@ -100,11 +101,23 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
             href={item.link}
             className="carousel-item inline-block w-60 h-40 m-2 transform transition-transform duration-300 ease-in-out hover:scale-105"
           >
-            <img
-              src={item.image}
-              alt={`Carousel item ${index + 1}`}
-              className="w-full h-full object-cover rounded-lg"
-            />
+            <picture>
+              <source srcSet={item.image} type="image/webp" />
+              <img
+                src={item.image}
+                alt={`Carousel item ${index + 1}`}
+                className="w-full h-full object-cover rounded-lg"
+              />
+            </picture>
+            {item.title && item.price && (
+              <div className="mt-2 text-center">
+                <div className="text-sm font-semibold">{item.title}</div>
+                <div className="text-xs text-gray-500 flex justify-center items-center">
+                  <FaBitcoin className="mr-1" />
+                  {item.price}
+                </div>
+              </div>
+            )}
           </a>
         ))}
       </div>

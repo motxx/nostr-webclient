@@ -23,7 +23,7 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
         name: 'moti',
         nostrAddress: '_@motxx.pages.dev',
         image: 'https://randomuser.me/api/portraits/men/5.jpg',
-        bio: 'This is a mock user bio.\nnostr:npub14wr8qwpe82k072mjhdg8qjv0hkrkuvguwcjr7hmw5vn3336tg3dqgm752r\nhttps://example.com#example\nhttps://motxx.pages.dev/\n#hash\nhttps://x.com/mot_xx/',
+        bio: 'This is a mock user bio.\nnostr:npub14wr8qwpe82k072mjhdg8qjv0hkrkuvguwcjr7hmw5vn3336tg3dqgm752r\nhttps://www.example.com',
         followersCount: 150,
         followingCount: 100,
         headerImage:
