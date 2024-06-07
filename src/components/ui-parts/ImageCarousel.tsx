@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import { BsCaretLeftFill, BsCaretRightFill } from 'react-icons/bs'
 
@@ -8,6 +8,8 @@ interface ImageCarouselProps {
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
   const carouselRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
 
   const handleWheel = (event: WheelEvent) => {
     if (carouselRef.current) {
@@ -19,11 +21,13 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
     onSwipedLeft: (eventData) => {
       if (carouselRef.current) {
         carouselRef.current.scrollLeft += eventData.deltaX
+        updateButtonVisibility()
       }
     },
     onSwipedRight: (eventData) => {
       if (carouselRef.current) {
         carouselRef.current.scrollLeft -= eventData.deltaX
+        updateButtonVisibility()
       }
     },
   })
@@ -40,6 +44,18 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
     }
   }, [])
 
+  useEffect(() => {
+    updateButtonVisibility()
+  }, [items])
+
+  const updateButtonVisibility = () => {
+    if (carouselRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current
+      setCanScrollLeft(scrollLeft > 0)
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth)
+    }
+  }
+
   const smoothScroll = (distance: number) => {
     if (carouselRef.current) {
       const start = carouselRef.current.scrollLeft
@@ -53,6 +69,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
 
         if (progress < 1) {
           requestAnimationFrame(scroll)
+        } else {
+          updateButtonVisibility()
         }
       }
 
@@ -74,6 +92,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
         {...handlers}
         ref={carouselRef}
         className="carousel-container overflow-x-scroll whitespace-nowrap hide-scrollbar"
+        onScroll={updateButtonVisibility}
       >
         {items.map((item, index) => (
           <a
@@ -89,18 +108,22 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
           </a>
         ))}
       </div>
-      <button
-        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        onClick={scrollLeft}
-      >
-        <BsCaretLeftFill size={24} />
-      </button>
-      <button
-        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        onClick={scrollRight}
-      >
-        <BsCaretRightFill size={24} />
-      </button>
+      {canScrollLeft && (
+        <button
+          className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          onClick={scrollLeft}
+        >
+          <BsCaretLeftFill size={24} />
+        </button>
+      )}
+      {canScrollRight && (
+        <button
+          className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          onClick={scrollRight}
+        >
+          <BsCaretRightFill size={24} />
+        </button>
+      )}
     </div>
   )
 }
