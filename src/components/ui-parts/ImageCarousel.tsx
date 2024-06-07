@@ -98,7 +98,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
           <a
             key={index}
             href={item.link}
-            className="carousel-item inline-block w-60 h-40 m-2"
+            className="carousel-item inline-block w-60 h-40 m-2 transform transition-transform duration-300 ease-in-out hover:scale-105"
           >
             <img
               src={item.image}
