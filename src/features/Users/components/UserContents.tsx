@@ -9,12 +9,36 @@ interface UserContentsProps {
 }
 
 const mockImages = [
-  'https://fastly.picsum.photos/id/274/300/200.jpg?hmac=7bAwaFltG7_ocjXC8PfJHYE_kKSMBL1OuBk7kfClu9w',
-  'https://fastly.picsum.photos/id/549/2000/1000.jpg?hmac=ynmBAnvLsXoHfV9PM9t9GhZXfx6M_p5KXi7BmuqSluU',
-  'https://fastly.picsum.photos/id/756/300/200.jpg?hmac=ppa_nag_8FNw-XRBiUN1cfftQ63aZJXiGlM_qkz5eGc',
-  'https://fastly.picsum.photos/id/499/1000/2000.jpg?hmac=76SSf6avuWKleAwQ6UhOUROdWQVycs_5ucmQ8FgQhRk',
-  'https://fastly.picsum.photos/id/989/300/200.jpg?hmac=j2uYVYvbBugBbTY0qh5jKViUaitkclMfWZ3G7Ily5nA',
-  'https://fastly.picsum.photos/id/482/400/600.jpg?hmac=UmzILUDe8zb6mEeyMK2Nnpv4VOyhfNhSk2QmR-8KCLY',
+  {
+    image:
+      'https://fastly.picsum.photos/id/274/300/200.jpg?hmac=7bAwaFltG7_ocjXC8PfJHYE_kKSMBL1OuBk7kfClu9w',
+    link: 'https://www.example.com',
+  },
+  {
+    image:
+      'https://fastly.picsum.photos/id/549/2000/1000.jpg?hmac=ynmBAnvLsXoHfV9PM9t9GhZXfx6M_p5KXi7BmuqSluU',
+    link: 'https://www.example.com',
+  },
+  {
+    image:
+      'https://fastly.picsum.photos/id/756/300/200.jpg?hmac=ppa_nag_8FNw-XRBiUN1cfftQ63aZJXiGlM_qkz5eGc',
+    link: 'https://www.example.com',
+  },
+  {
+    image:
+      'https://fastly.picsum.photos/id/499/1000/2000.jpg?hmac=76SSf6avuWKleAwQ6UhOUROdWQVycs_5ucmQ8FgQhRk',
+    link: 'https://www.example.com',
+  },
+  {
+    image:
+      'https://fastly.picsum.photos/id/989/300/200.jpg?hmac=j2uYVYvbBugBbTY0qh5jKViUaitkclMfWZ3G7Ily5nA',
+    link: 'https://www.example.com',
+  },
+  {
+    image:
+      'https://fastly.picsum.photos/id/482/400/600.jpg?hmac=UmzILUDe8zb6mEeyMK2Nnpv4VOyhfNhSk2QmR-8KCLY',
+    link: 'https://www.example.com',
+  },
 ]
 
 const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
@@ -30,7 +54,13 @@ const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
       {imagePosts.length > 0 && (
         <div>
           <h2 className="text-lg font-bold mb-4 ml-2">ピクチャー</h2>
-          <ImageCarousel images={mockImages} />
+          <ImageCarousel items={mockImages} />
+        </div>
+      )}
+      {imagePosts.length > 0 && (
+        <div>
+          <h2 className="text-lg font-bold mb-4 ml-2">販売コンテンツ</h2>
+          <ImageCarousel items={mockImages} />
         </div>
       )}
       <div>

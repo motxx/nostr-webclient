@@ -8,8 +8,34 @@ module.exports = {
         'mplus-2': ['"M PLUS 2"', 'sans-serif'],
         'noto-sans': ['"Noto Sans JP"', 'sans-serif'],
       },
+      scrollBehavior: {
+        smooth: 'smooth',
+      },
+      hideScrollbar: {
+        '-ms-overflow-style': 'none' /* IE and Edge */,
+        'scrollbar-width': 'none' /* Firefox */,
+        '&::-webkit-scrollbar': {
+          display: 'none' /* Chrome, Safari, and Opera */,
+        },
+      },
     },
   },
+  variants: {},
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities(
+        {
+          '.hide-scrollbar': {
+            '-ms-overflow-style': 'none' /* IE and Edge */,
+            'scrollbar-width': 'none' /* Firefox */,
+            '&::-webkit-scrollbar': {
+              display: 'none' /* Chrome, Safari, and Opera */,
+            },
+          },
+        },
+        ['responsive']
+      )
+    },
+  ],
   darkMode: 'media',
-  plugins: [],
 }

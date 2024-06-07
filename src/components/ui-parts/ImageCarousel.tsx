@@ -1,118 +1,106 @@
-import React, { useRef, useEffect, useState } from 'react'
-import Slider, { Settings } from 'react-slick'
-import 'slick-carousel/slick/slick.css'
-import 'slick-carousel/slick/slick-theme.css'
+import React, { useRef, useEffect } from 'react'
+import { useSwipeable } from 'react-swipeable'
 import { BsCaretLeftFill, BsCaretRightFill } from 'react-icons/bs'
 
-interface ImageCarouselArrowProps {
-  className?: string
-  style?: React.CSSProperties
-  onClick?: () => void
-}
-
 interface ImageCarouselProps {
-  images: string[]
+  items: { image: string; link: string }[]
 }
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
-  const sliderRef = useRef<Slider | null>(null)
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const [hovered, setHovered] = useState(false)
-  const [scrollDistance, setScrollDistance] = useState(0)
+const ImageCarousel: React.FC<ImageCarouselProps> = ({ items }) => {
+  const carouselRef = useRef<HTMLDivElement>(null)
 
-  const PrevArrow: React.FC<ImageCarouselArrowProps> = ({ onClick }) => {
-    return (
-      <BsCaretLeftFill
-        onClick={onClick}
-        className={`block absolute top-1/2 transform -translate-y-1/2 left-0 sm:-left-6 text-3xl rounded-full p-2 cursor-pointer z-20 ${hovered ? 'text-white bg-gray-800 dark:text-white dark:bg-gray-100 opacity-90 dark:opacity-90 bg-opacity-10 dark:bg-opacity-10' : 'text-gray-100 dark:text-gray-800 opacity-95'}`}
-      />
-    )
+  const handleWheel = (event: WheelEvent) => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollLeft += event.deltaY
+    }
   }
 
-  const NextArrow: React.FC<ImageCarouselArrowProps> = ({ onClick }) => {
-    return (
-      <BsCaretRightFill
-        onClick={onClick}
-        className={`block absolute top-1/2 transform -translate-y-1/2 right-0 sm:-right-6 text-3xl rounded-full p-2 cursor-pointer z-20 ${hovered ? 'text-white bg-gray-800 dark:text-white dark:bg-gray-100 opacity-90 dark:opacity-90 bg-opacity-10 dark:bg-opacity-10' : 'text-gray-100 dark:text-gray-800 opacity-95'}`}
-      />
-    )
-  }
-
-  const settings: Settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 3,
-    swipe: true,
-    swipeToSlide: true,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-          infinite: true,
-          dots: true,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-    ],
-    prevArrow: <PrevArrow />,
-    nextArrow: <NextArrow />,
-  }
+  const handlers = useSwipeable({
+    onSwipedLeft: (eventData) => {
+      if (carouselRef.current) {
+        carouselRef.current.scrollLeft += eventData.deltaX
+      }
+    },
+    onSwipedRight: (eventData) => {
+      if (carouselRef.current) {
+        carouselRef.current.scrollLeft -= eventData.deltaX
+      }
+    },
+  })
 
   useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault()
-      const slideWidth = containerRef.current?.clientWidth || 0
-      setScrollDistance((prevDistance) => prevDistance + event.deltaX)
+    const carouselElement = carouselRef.current
+    if (carouselElement) {
+      carouselElement.addEventListener('wheel', handleWheel)
+    }
+    return () => {
+      if (carouselElement) {
+        carouselElement.removeEventListener('wheel', handleWheel)
+      }
+    }
+  }, [])
 
-      if (sliderRef.current) {
-        const innerSlider = sliderRef.current.innerSlider as any
-        const slidesToScroll = Math.round(scrollDistance / slideWidth)
-        if (slidesToScroll !== 0) {
-          innerSlider.slickGoTo(innerSlider.state.currentSlide + slidesToScroll)
-          setScrollDistance(0) // Reset the scroll distance after scrolling
+  const smoothScroll = (distance: number) => {
+    if (carouselRef.current) {
+      const start = carouselRef.current.scrollLeft
+      const startTime = performance.now()
+
+      const scroll = (currentTime: number) => {
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / 300, 1) // 300ms for the scroll
+        const amount = start + distance * progress
+        carouselRef.current!.scrollLeft = amount
+
+        if (progress < 1) {
+          requestAnimationFrame(scroll)
         }
       }
-    }
 
-    const container = containerRef.current
-    if (container) {
-      container.addEventListener('wheel', handleWheel, { passive: false })
+      requestAnimationFrame(scroll)
     }
+  }
 
-    return () => {
-      if (container) {
-        container.removeEventListener('wheel', handleWheel)
-      }
-    }
-  }, [scrollDistance])
+  const scrollLeft = () => {
+    smoothScroll(-300)
+  }
+
+  const scrollRight = () => {
+    smoothScroll(300)
+  }
 
   return (
-    <div
-      ref={containerRef}
-      className="mx-auto w-full hide-scroll"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <Slider ref={sliderRef} {...settings}>
-        {images.map((image, index) => (
-          <div key={index} className="px-2">
-            <div className="w-full h-full">
-              <img
-                src={image}
-                alt={`Slide ${index}`}
-                className="w-[200px] h-[200px] object-cover rounded-lg"
-              />
-            </div>
-          </div>
+    <div className="relative group">
+      <div
+        {...handlers}
+        ref={carouselRef}
+        className="carousel-container overflow-x-scroll whitespace-nowrap hide-scrollbar"
+      >
+        {items.map((item, index) => (
+          <a
+            key={index}
+            href={item.link}
+            className="carousel-item inline-block w-60 h-40 m-2"
+          >
+            <img
+              src={item.image}
+              alt={`Carousel item ${index + 1}`}
+              className="w-full h-full object-cover rounded-lg"
+            />
+          </a>
         ))}
-      </Slider>
+      </div>
+      <button
+        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        onClick={scrollLeft}
+      >
+        <BsCaretLeftFill size={24} />
+      </button>
+      <button
+        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        onClick={scrollRight}
+      >
+        <BsCaretRightFill size={24} />
+      </button>
     </div>
   )
 }
