@@ -3,13 +3,13 @@ import { useSpring, animated } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
 import { FiMessageCircle } from 'react-icons/fi'
 import replyData from '@/data/dummy-reply-data'
-import PostItem from '@/components/PostItem/PostItem'
-import { PostItemType } from '@/global/types'
+import NoteItem from '@/components/NoteItem/NoteItem'
+import { NoteItemType } from '@/global/types'
 import { createDummyNewReply } from '@/utils/mock'
 import './RepliesThreadModal.css'
 
 interface RepliesThreadModalProps {
-  originalPost: PostItemType
+  originalNote: NoteItemType
   showModal: boolean
   onClose: () => void
   onToggleFollow: (userId: string) => boolean
@@ -18,7 +18,7 @@ interface RepliesThreadModalProps {
 const frameHeight = (window.innerHeight * 4) / 5
 
 const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
-  originalPost,
+  originalNote,
   onClose,
   showModal,
   onToggleFollow,
@@ -109,9 +109,9 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
           >
             <div className="overflow-y-auto p-4 flex-grow">
               <div className="mb-6">
-                <PostItem
+                <NoteItem
                   post={{
-                    ...originalPost,
+                    ...originalNote,
                     mediaType: undefined,
                     mediaUrl: undefined,
                   }}
@@ -125,7 +125,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
               <div className="text-gray-700 dark:text-gray-300">
                 {replyData.map((reply, index) => (
                   <div key={index} className="mb-4">
-                    <PostItem
+                    <NoteItem
                       post={reply}
                       onToggleFollow={onToggleFollow}
                       onReply={handleReplyToReply}

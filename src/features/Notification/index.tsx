@@ -1,8 +1,8 @@
 import React from 'react'
 import { FiRepeat } from 'react-icons/fi'
 import { AiFillThunderbolt } from 'react-icons/ai'
-import { NotificationPostItemType } from '@/global/types'
-import PostItem from '@/components/PostItem/PostItem'
+import { NotificationNoteItemType } from '@/global/types'
+import NoteItem from '@/components/NoteItem/NoteItem'
 import notificationList from '@/data/dummy-notifications'
 import { BsHeartFill } from 'react-icons/bs'
 import UserIdLink from '@/components/ui-elements/UserIdLink'
@@ -16,11 +16,11 @@ const NotificationPage: React.FC = () => {
       acc[notification.content].push(notification)
       return acc
     },
-    {} as { [key: string]: NotificationPostItemType[] }
+    {} as { [key: string]: NotificationNoteItemType[] }
   )
 
   const renderNotificationContent = (
-    notifications: NotificationPostItemType[]
+    notifications: NotificationNoteItemType[]
   ) => {
     switch (notifications[0].type) {
       case 'like':
@@ -100,7 +100,7 @@ const NotificationPage: React.FC = () => {
       case 'reply':
         return (
           <div>
-            <PostItem post={notifications[0]} onToggleFollow={() => false} />
+            <NoteItem note={notifications[0]} onToggleFollow={() => false} />
           </div>
         )
       default:

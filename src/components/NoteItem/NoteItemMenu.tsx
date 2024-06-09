@@ -2,14 +2,14 @@ import React, { useRef } from 'react'
 import { FiUserPlus, FiUserX, FiVolumeX } from 'react-icons/fi'
 import { useClickAway } from 'react-use'
 
-interface PostItemMenuProps {
+interface NoteItemMenuProps {
   userId: string
   following: boolean
   onToggleFollow: (userId: string) => boolean
   onClose: () => void
 }
 
-const PostItemMenu: React.FC<PostItemMenuProps> = ({
+const NoteItemMenu: React.FC<NoteItemMenuProps> = ({
   userId,
   following,
   onToggleFollow,
@@ -49,4 +49,4 @@ const PostItemMenu: React.FC<PostItemMenuProps> = ({
   )
 }
 
-export default PostItemMenu
+export default NoteItemMenu

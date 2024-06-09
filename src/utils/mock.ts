@@ -1,8 +1,8 @@
-import { PostItemType } from '@/global/types'
+import { NoteItemType } from '@/global/types'
 
 export const createDummyNewReply = (
   text: string
-): PostItemType & { id: string } => {
+): NoteItemType & { id: string } => {
   return {
     id: '109',
     userName: 'moti',

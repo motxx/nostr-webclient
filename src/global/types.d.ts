@@ -1,4 +1,4 @@
-export type PostItemType = {
+export type NoteItemType = {
   userId: string
   userName: string
   verified: boolean
@@ -14,7 +14,7 @@ export type PostItemType = {
   following: boolean // TODO: ユーザデータなので消す
 }
 
-export type NotificationPostItemType = PostItemType & {
+export type NotificationNoteItemType = NoteItemType & {
   id: string
   type: 'like' | 'reply' | 'repost' | 'zap'
 }

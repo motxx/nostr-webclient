@@ -1,16 +1,16 @@
 import { FiMoreHorizontal } from 'react-icons/fi'
 import { RiVerifiedBadgeFill } from 'react-icons/ri'
-import PostItemMenu from './PostItemMenu'
+import NoteItemMenu from './NoteItemMenu'
 import { useState } from 'react'
-import { PostItemType } from '@/global/types'
+import { NoteItemType } from '@/global/types'
 import { useNavigate } from 'react-router-dom'
 
-interface PostItemHeaderProps {
-  post: PostItemType
+interface NoteItemHeaderProps {
+  post: NoteItemType
   onToggleFollow: (userId: string) => boolean
 }
 
-const PostItemHeader: React.FC<PostItemHeaderProps> = ({
+const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
   post,
   onToggleFollow,
 }) => {
@@ -54,7 +54,7 @@ const PostItemHeader: React.FC<PostItemHeaderProps> = ({
         />
       </div>
       {showMenu && (
-        <PostItemMenu
+        <NoteItemMenu
           userId={post.userId}
           following={post.following}
           onToggleFollow={onToggleFollow}
@@ -65,4 +65,4 @@ const PostItemHeader: React.FC<PostItemHeaderProps> = ({
   )
 }
 
-export default PostItemHeader
+export default NoteItemHeader

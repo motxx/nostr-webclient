@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { TextConverter } from '@/components/functional/TextConverter'
 
-interface PostItemTextProps {
+interface NoteItemTextProps {
   text: string
 }
 
-const PostItemText: React.FC<PostItemTextProps> = ({ text }) => {
+const NoteItemText: React.FC<NoteItemTextProps> = ({ text }) => {
   const [showMore, setShowMore] = useState(false)
   const toggleShowMore = () => setShowMore(!showMore)
 
@@ -27,4 +27,4 @@ const PostItemText: React.FC<PostItemTextProps> = ({ text }) => {
   )
 }
 
-export default PostItemText
+export default NoteItemText

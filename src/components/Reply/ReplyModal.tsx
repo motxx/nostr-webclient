@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { FiSend } from 'react-icons/fi'
-import { PostItemType } from '@/global/types'
-import PostItem from '@/components/PostItem/PostItem'
+import { NoteItemType } from '@/global/types'
+import NoteItem from '@/components/NoteItem/NoteItem'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 
 interface ReplyModalProps {
-  originalPost: PostItemType
+  originalNote: NoteItemType
   isOpen: boolean
   onClose: () => void
   onSubmit: (replyContent: string) => void
@@ -15,7 +15,7 @@ interface ReplyModalProps {
 const ReplyModal: React.FC<ReplyModalProps> = ({
   isOpen,
   onClose,
-  originalPost,
+  originalNote,
   onSubmit,
   onToggleFollow,
 }) => {
@@ -44,9 +44,9 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
       onClick={handleBackgroundClick}
     >
       <div className="bg-white dark:bg-black p-4 rounded-md shadow-md w-80">
-        <PostItem
+        <NoteItem
           post={{
-            ...originalPost,
+            ...originalNote,
             mediaType: undefined,
             mediaUrl: undefined,
           }}

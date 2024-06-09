@@ -1,22 +1,22 @@
 import React, { useState } from 'react'
 import { FiHeart, FiMessageCircle, FiRepeat } from 'react-icons/fi'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
-import { PostActionType } from '@/components/PostItem/PostItem'
+import { PostActionType } from '@/components/NoteItem/NoteItem'
 import ReplyModal from '@/components/Reply/ReplyModal'
-import { PostItemType } from '@/global/types'
+import { NoteItemType } from '@/global/types'
 import RepliesThreadModal from '@/components/Reply/RepliesThreadModal'
 
-interface PostDetailsActionsProps {
-  originalPost: PostItemType
+interface NoteDetailsActionsProps {
+  originalNote: NoteItemType
   onBackgroundClick?: (event: React.MouseEvent<HTMLDivElement>) => void
   onClickAction: (type: PostActionType) => void
   onToggleFollow: (userId: string) => boolean
 }
 
-const PostDetails: React.FC<PostDetailsActionsProps> = ({
+const NoteDetails: React.FC<NoteDetailsActionsProps> = ({
   onBackgroundClick,
   onClickAction,
-  originalPost,
+  originalNote,
   onToggleFollow,
 }) => {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false)
@@ -58,9 +58,9 @@ const PostDetails: React.FC<PostDetailsActionsProps> = ({
           onClick={(e) => handleActionClick(e, 'reply')}
         >
           <FiMessageCircle className="text-2xl group-hover:text-blue-500 transition" />
-          {originalPost.replies > 0 && (
+          {originalNote.replies > 0 && (
             <span className="text-sm group-hover:text-blue-500 transition">
-              {originalPost.replies}
+              {originalNote.replies}
             </span>
           )}
         </div>
@@ -69,9 +69,9 @@ const PostDetails: React.FC<PostDetailsActionsProps> = ({
           onClick={(e) => handleActionClick(e, 'repost')}
         >
           <FiRepeat className="text-2xl group-hover:text-green-500 transition" />
-          {originalPost.reposts > 0 && (
+          {originalNote.reposts > 0 && (
             <span className="text-sm group-hover:text-green-500 transition">
-              {originalPost.reposts}
+              {originalNote.reposts}
             </span>
           )}
         </div>
@@ -80,9 +80,9 @@ const PostDetails: React.FC<PostDetailsActionsProps> = ({
           onClick={(e) => handleActionClick(e, 'like')}
         >
           <FiHeart className="text-2xl group-hover:text-red-500 transition" />
-          {originalPost.likes > 0 && (
+          {originalNote.likes > 0 && (
             <span className="text-sm group-hover:text-red-500 transition">
-              {originalPost.likes}
+              {originalNote.likes}
             </span>
           )}
         </div>
@@ -91,22 +91,22 @@ const PostDetails: React.FC<PostDetailsActionsProps> = ({
           onClick={(e) => handleActionClick(e, 'zap')}
         >
           <AiOutlineThunderbolt className="text-2xl group-hover:text-yellow-500 transition" />
-          {originalPost.zaps > 0 && (
+          {originalNote.zaps > 0 && (
             <span className="text-sm group-hover:text-yellow-500 transition">
-              {originalPost.zaps}
+              {originalNote.zaps}
             </span>
           )}
         </div>
       </div>
       <ReplyModal
-        originalPost={originalPost}
+        originalNote={originalNote}
         isOpen={isReplyModalOpen}
         onClose={() => setIsReplyModalOpen(false)}
         onSubmit={handleReplySubmit}
         onToggleFollow={onToggleFollow}
       />
       <RepliesThreadModal
-        originalPost={originalPost}
+        originalNote={originalNote}
         onClose={() => setIsRepliesThreadModalOpen(false)}
         showModal={isRepliesThreadModalOpen}
         onToggleFollow={onToggleFollow}
@@ -115,4 +115,4 @@ const PostDetails: React.FC<PostDetailsActionsProps> = ({
   )
 }
 
-export default PostDetails
+export default NoteDetails

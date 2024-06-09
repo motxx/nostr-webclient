@@ -1,25 +1,25 @@
 import React from 'react'
-import PostDetailsMediaContent from './PostDetailsMediaContent'
-import PostDetailsActions from './PostDetailsActions'
+import NoteDetailsMediaContent from './NoteDetailsMediaContent'
+import NoteDetailsActions from './NoteDetailsActions'
 import RepliesThread from '@/components/Reply/RepliesThread'
-import { PostItemType } from '@/global/types'
-import { PostActionType } from '@/components/PostItem/PostItem'
+import { NoteItemType } from '@/global/types'
+import { PostActionType } from '@/components/NoteItem/NoteItem'
 import { PiCaretLeftBold, PiCaretRightBold } from 'react-icons/pi'
 
-interface PostDetailsProps {
+interface NoteDetailsProps {
   isOpen: boolean
   onClose: () => void
-  originalPost: PostItemType
+  originalNote: NoteItemType
   onClickAction: (type: PostActionType) => void
   onToggleFollow: (userId: string) => boolean
   onClickPrevPost?: () => void
   onClickNextPost?: () => void
 }
 
-const PostDetails: React.FC<PostDetailsProps> = ({
+const NoteDetails: React.FC<NoteDetailsProps> = ({
   isOpen,
   onClose,
-  originalPost,
+  originalNote,
   onClickAction,
   onToggleFollow,
   onClickPrevPost,
@@ -58,10 +58,10 @@ const PostDetails: React.FC<PostDetailsProps> = ({
           className="relative flex-1 h-full z-10"
           onClick={handleBackgroundClick}
         >
-          {originalPost.mediaUrl && originalPost.mediaType && (
-            <PostDetailsMediaContent
-              mediaUrl={originalPost.mediaUrl}
-              mediaType={originalPost.mediaType}
+          {originalNote.mediaUrl && originalNote.mediaType && (
+            <NoteDetailsMediaContent
+              mediaUrl={originalNote.mediaUrl}
+              mediaType={originalNote.mediaType}
               onBackgroundClick={handleBackgroundClick}
             />
           )}
@@ -70,8 +70,8 @@ const PostDetails: React.FC<PostDetailsProps> = ({
           className="absolute bottom-0 w-full z-30"
           onClick={handleBackgroundClick}
         >
-          <PostDetailsActions
-            originalPost={originalPost}
+          <NoteDetailsActions
+            originalNote={originalNote}
             onBackgroundClick={handleBackgroundClick}
             onClickAction={onClickAction}
             onToggleFollow={onToggleFollow}
@@ -88,7 +88,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
       </div>
       <div className="hidden md:block w-[35%] h-full z-10 overflow-y-auto">
         <RepliesThread
-          originalPost={originalPost}
+          originalNote={originalNote}
           onToggleFollow={onToggleFollow}
         />
       </div>
@@ -96,4 +96,4 @@ const PostDetails: React.FC<PostDetailsProps> = ({
   )
 }
 
-export default PostDetails
+export default NoteDetails

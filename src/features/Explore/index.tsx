@@ -3,7 +3,7 @@ import SearchBar from '@/components/ui-parts/SearchBar'
 import Widgets from '@/components/Widgets/Widgets'
 import ExploreFilters from './components/ExploreFilters'
 import ExploreOutput from './components/ExploreOutput'
-import { posts } from '@/data/dummy-posts'
+import { notes } from '@/data/dummy-notes'
 import { ExploreMetricWithNull } from './types'
 
 const ExplorePage: React.FC = () => {
@@ -20,7 +20,7 @@ const ExplorePage: React.FC = () => {
     setFinalSearchTerm(term)
   }
 
-  const filteredPosts = posts.filter((post) => {
+  const filteredNotes = notes.filter((post) => {
     const matchesSearchTerm = post.content.includes(finalSearchTerm)
     const matchesAccountFilter =
       accountFilter === 'all' || post.accountType === accountFilter
@@ -36,10 +36,10 @@ const ExplorePage: React.FC = () => {
     )
   })
 
-  const sortedPosts =
+  const sortedNotes =
     sortByMetric && metric
-      ? filteredPosts.sort((a, b) => b[metric] - a[metric])
-      : filteredPosts
+      ? filteredNotes.sort((a, b) => b[metric] - a[metric])
+      : filteredNotes
 
   return (
     <div className="flex flex-col lg:flex-row justify-center">
@@ -68,7 +68,7 @@ const ExplorePage: React.FC = () => {
         <div className="flex items-center justify-center">
           <ExploreOutput
             outputFormat={outputFormat}
-            sortedPosts={sortedPosts}
+            sortedNotes={sortedNotes}
             metric={metric}
           />
         </div>

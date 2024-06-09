@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
 import TimelineImageGrid from './TimelineImageGrid'
-import { posts } from '@/data/dummy-posts'
+import { notes } from '@/data/dummy-notes'
 
 interface TimelineProps {
   onScrollUp: () => void
@@ -64,12 +64,12 @@ const Timeline: React.FC<TimelineProps> = ({
         return (
           <TimelineStandard
             className="pt-4 sm:pt-8"
-            posts={posts}
+            notes={notes}
             onToggleFollow={onToggleFollow}
           />
         )
       case 'image-grid':
-        return <TimelineImageGrid className="pt-0 sm:pt-4" posts={posts} />
+        return <TimelineImageGrid className="pt-0 sm:pt-4" notes={notes} />
       default:
         return null
     }

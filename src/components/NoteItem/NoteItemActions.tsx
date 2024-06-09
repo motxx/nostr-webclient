@@ -1,7 +1,7 @@
 import React from 'react'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
 import { FiHeart, FiMessageCircle, FiRepeat } from 'react-icons/fi'
-import { PostActionType } from './PostItem'
+import { PostActionType } from './NoteItem'
 
 interface PostActionsProps {
   replies: number
@@ -11,7 +11,7 @@ interface PostActionsProps {
   onClickAction: (id: PostActionType) => void
 }
 
-const PostItemActions: React.FC<PostActionsProps> = ({
+const NoteItemActions: React.FC<PostActionsProps> = ({
   replies,
   reposts,
   likes,
@@ -68,4 +68,4 @@ const PostItemActions: React.FC<PostActionsProps> = ({
   )
 }
 
-export default PostItemActions
+export default NoteItemActions

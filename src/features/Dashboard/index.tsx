@@ -6,7 +6,7 @@ import { DashboardCard } from './components/DashboardCard'
 import { DashboardTotalEarnings } from './components/DashboardTotalEarnings'
 import { DarshboardZapEarnings } from './components/DashboardZapEarnings'
 import { DarshboardPaidContentSales } from './components/DashboardPaidContentSales'
-import { DashboardPostsEngagement } from './components/DashboardPostsEngagement'
+import { DashboardNotesEngagement } from './components/DashboardNotesEngagement'
 import { DarshboardUserDemographics } from './components/DashboardUserDemographics'
 import './style.css'
 
@@ -20,7 +20,7 @@ const DashboardPage: React.FC = () => {
     { id: 2, content: <DashboardTotalEarnings /> },
     { id: 3, content: <DarshboardZapEarnings /> },
     { id: 4, content: <DarshboardPaidContentSales /> },
-    { id: 5, content: <DashboardPostsEngagement /> },
+    { id: 5, content: <DashboardNotesEngagement /> },
     { id: 6, content: <DarshboardUserDemographics /> },
   ])
 

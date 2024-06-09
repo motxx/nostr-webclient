@@ -1,23 +1,23 @@
 import React, { useState } from 'react'
-import { PostItemType } from '@/global/types'
-import PostDetails from '@/components/PostDetails/PostDetails'
+import { NoteItemType } from '@/global/types'
+import NoteDetails from '@/components/NoteDetails/NoteDetails'
 
 interface TimelineImageGridProps {
-  posts: PostItemType[]
+  notes: NoteItemType[]
   className?: string
 }
 
 const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
-  posts,
+  notes,
   className,
 }) => {
-  const [selectedPost, setSelectedPost] = useState<PostItemType | null>(null)
+  const [selectedPost, setSelectedPost] = useState<NoteItemType | null>(null)
 
-  const imagePosts = posts.filter(
+  const imageNotes = notes.filter(
     (post) => post.mediaType === 'image' && post.mediaUrl
   )
 
-  const handleImageClick = (post: PostItemType) => {
+  const handleImageClick = (post: NoteItemType) => {
     setSelectedPost(post)
   }
 
@@ -27,7 +27,7 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
 
   const selectPrevPost = () => {
     if (!selectedPost) return
-    const currentIndex = imagePosts.findIndex(
+    const currentIndex = imageNotes.findIndex(
       // TODO: Use eventId instead of userId and timestamp
       (post) =>
         post.userId === selectedPost.userId &&
@@ -35,28 +35,28 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
     )
     const prevIndex = currentIndex - 1
     if (prevIndex >= 0) {
-      setSelectedPost(imagePosts[prevIndex])
+      setSelectedPost(imageNotes[prevIndex])
     }
   }
 
   const selectNextPost = () => {
     if (!selectedPost) return
-    const currentIndex = imagePosts.findIndex(
+    const currentIndex = imageNotes.findIndex(
       // TODO: Use eventId instead of userId and timestamp
       (post) =>
         post.userId === selectedPost.userId &&
         post.timestamp === selectedPost.timestamp
     )
     const nextIndex = currentIndex + 1
-    if (nextIndex < imagePosts.length) {
-      setSelectedPost(imagePosts[nextIndex])
+    if (nextIndex < imageNotes.length) {
+      setSelectedPost(imageNotes[nextIndex])
     }
   }
 
   return (
     <div className={className}>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2 p-0 md:px-4">
-        {imagePosts.map((post) => (
+        {imageNotes.map((post) => (
           <div
             key={post.userId + post.timestamp}
             className="relative overflow-hidden cursor-pointer aspect-square md:rounded-md"
@@ -71,10 +71,10 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
         ))}
       </div>
       {selectedPost && (
-        <PostDetails
+        <NoteDetails
           isOpen={!!selectedPost}
           onClose={closeDetails}
-          originalPost={selectedPost}
+          originalNote={selectedPost}
           onClickAction={() => {}}
           onToggleFollow={() => false}
           onClickPrevPost={selectPrevPost}

@@ -6,13 +6,13 @@ import { ExploreMetricWithNull } from '../types'
 
 interface ExploreOutputProps {
   outputFormat: string
-  sortedPosts: any[]
+  sortedNotes: any[]
   metric: ExploreMetricWithNull
 }
 
 const ExploreOutput: React.FC<ExploreOutputProps> = ({
   outputFormat,
-  sortedPosts,
+  sortedNotes,
   metric,
 }) => {
   const renderOutput = () => {
@@ -20,11 +20,11 @@ const ExploreOutput: React.FC<ExploreOutputProps> = ({
       case 'timeline':
         return (
           <div className="pt-4 sm:pt-8">
-            <TimelineStandard posts={sortedPosts} />
+            <TimelineStandard notes={sortedNotes} />
           </div>
         )
       case 'image-grid':
-        return <TimelineImageGrid posts={sortedPosts} />
+        return <TimelineImageGrid notes={sortedNotes} />
       case 'influence-map':
         return (
           <ExploreUserInfluenceGraph

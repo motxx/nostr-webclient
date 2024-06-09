@@ -1,6 +1,6 @@
 import { DarshboardBarChart } from './Charts/DashboardBarChart'
 
-export const DashboardPostsEngagement: React.FC = () => {
+export const DashboardNotesEngagement: React.FC = () => {
   const labels = [
     'January',
     'February',
@@ -12,7 +12,7 @@ export const DashboardPostsEngagement: React.FC = () => {
   ]
   const datasets = [
     {
-      label: 'Posts Engagement',
+      label: 'Notes Engagement',
       backgroundColor: 'rgba(75,192,192,0.2)',
       borderColor: 'rgba(75,192,192,1)',
       borderWidth: 1,

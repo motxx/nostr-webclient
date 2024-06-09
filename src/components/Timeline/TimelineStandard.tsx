@@ -1,24 +1,24 @@
 import React from 'react'
-import PostItem from '@/components/PostItem/PostItem'
-import { PostItemType } from '@/global/types'
+import NoteItem from '@/components/NoteItem/NoteItem'
+import { NoteItemType } from '@/global/types'
 import classNames from 'classnames'
 
 interface TimelineStandardProps {
-  posts: Array<PostItemType & { id: string }>
+  notes: Array<NoteItemType & { id: string }>
   onToggleFollow: (userId: string) => boolean
   className?: string
 }
 
 const TimelineStandard: React.FC<TimelineStandardProps> = ({
-  posts,
+  notes,
   onToggleFollow,
   className,
 }) => {
   return (
     <div className={classNames('sm:px-6 mb-20 max-w-xl', className)}>
-      {posts.map(({ id, ...post }) => (
+      {notes.map(({ id, ...note }) => (
         <div key={id} className="mb-8 sm:mb-10">
-          <PostItem post={post} onToggleFollow={onToggleFollow} />
+          <NoteItem note={note} onToggleFollow={onToggleFollow} />
         </div>
       ))}
     </div>

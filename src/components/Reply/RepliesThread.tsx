@@ -1,17 +1,17 @@
 import React, { useState } from 'react'
 import { FiSend } from 'react-icons/fi'
 import replyData from '@/data/dummy-reply-data'
-import PostItem from '@/components/PostItem/PostItem'
-import { PostItemType } from '@/global/types'
+import NoteItem from '@/components/NoteItem/NoteItem'
+import { NoteItemType } from '@/global/types'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 
 interface RepliesThreadProps {
-  originalPost: PostItemType
+  originalNote: NoteItemType
   onToggleFollow: (userId: string) => boolean
 }
 
 const RepliesThread: React.FC<RepliesThreadProps> = ({
-  originalPost,
+  originalNote,
   onToggleFollow,
 }) => {
   const [newReply, setNewReply] = useState('')
@@ -47,9 +47,9 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
   return (
     <div className="h-full p-4 overflow-y-auto bg-white dark:bg-black border-gray-200 dark:border-gray-700 border-l">
       <div className="mb-6">
-        <PostItem
+        <NoteItem
           post={{
-            ...originalPost,
+            ...originalNote,
             mediaType: undefined,
             mediaUrl: undefined,
           }}
@@ -77,7 +77,7 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
       <div className="text-gray-700 dark:text-gray-300">
         {replyData.map((reply, index) => (
           <div key={index} className="mb-4">
-            <PostItem
+            <NoteItem
               post={reply}
               onToggleFollow={onToggleFollow}
               onReply={handleReplyToReply}

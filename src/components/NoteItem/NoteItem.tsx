@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import PostDetails from '@/components/PostDetails/PostDetails'
-import PostItemMedia from './PostItemMedia'
-import PostItemActions from './PostItemActions'
-import { PostItemType } from '@/global/types'
+import NoteDetails from '@/components/NoteDetails/NoteDetails'
+import NoteItemMedia from './NoteItemMedia'
+import NoteItemActions from './NoteItemActions'
+import { NoteItemType } from '@/global/types'
 import RepliesThreadModal from '@/components/Reply/RepliesThreadModal'
-import PostItemHeader from './PostItemHeader'
-import PostItemText from './PostItemText'
+import NoteItemHeader from './NoteItemHeader'
+import NoteItemText from './NoteItemText'
 
-type PostItemProps = {
-  post: PostItemType
+type NoteItemProps = {
+  note: NoteItemType
   onToggleFollow: (userId: string) => boolean
   onReply?: (userId: string) => void
 }
 
 export type PostActionType = 'reply' | 'repost' | 'like' | 'zap'
 
-const PostItem: React.FC<PostItemProps> = ({
-  post,
+const NoteItem: React.FC<NoteItemProps> = ({
+  note,
   onToggleFollow,
   onReply,
 }) => {
@@ -35,7 +35,7 @@ const PostItem: React.FC<PostItemProps> = ({
   const onClickAction = (type: PostActionType) => {
     if (type === 'reply') {
       if (onReply) {
-        onReply(post.userId)
+        onReply(note.userId)
       } else if (isMobile()) {
         openRepliesThreadModal()
       } else {
@@ -83,39 +83,39 @@ const PostItem: React.FC<PostItemProps> = ({
   return (
     <div className="relative">
       <div className="px-2 pb-2 sm:px-0">
-        <PostItemHeader post={post} onToggleFollow={onToggleFollow} />
+        <NoteItemHeader post={note} onToggleFollow={onToggleFollow} />
       </div>
-      {post.mediaType && post.mediaUrl && (
+      {note.mediaType && note.mediaUrl && (
         <div className="mb-4">
-          <PostItemMedia
-            mediaType={post.mediaType}
-            mediaUrl={post.mediaUrl}
-            content={post.content}
+          <NoteItemMedia
+            mediaType={note.mediaType}
+            mediaUrl={note.mediaUrl}
+            content={note.content}
             openDetails={openDetails}
             youtubeIFrameRef={youtubeIFrameRef}
           />
         </div>
       )}
       <div className="px-2 sm:px-0 space-y-2 sm:space-y-4">
-        <PostItemText text={post.content} />
-        <PostItemActions
+        <NoteItemText text={note.content} />
+        <NoteItemActions
           replies={0}
-          reposts={post.reposts}
-          likes={post.likes}
-          zaps={post.zaps}
+          reposts={note.reposts}
+          likes={note.likes}
+          zaps={note.zaps}
           onClickAction={onClickAction}
         />
       </div>
 
-      <PostDetails
+      <NoteDetails
         isOpen={isDetailsOpen}
         onClose={closeDetails}
-        originalPost={post}
+        originalNote={note}
         onClickAction={onClickAction}
         onToggleFollow={onToggleFollow}
       />
       <RepliesThreadModal
-        originalPost={post}
+        originalNote={note}
         onClose={closeRepliesThreadModal}
         showModal={isRepliesThreadModalOpen}
         onToggleFollow={onToggleFollow}
@@ -124,4 +124,4 @@ const PostItem: React.FC<PostItemProps> = ({
   )
 }
 
-export default PostItem
+export default NoteItem

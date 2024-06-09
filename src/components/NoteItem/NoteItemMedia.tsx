@@ -1,7 +1,7 @@
 import React from 'react'
 import { convertToEmbedUrl } from '@/utils/contentConverter'
 
-interface PostItemMediaProps {
+interface NoteItemMediaProps {
   mediaType: string
   mediaUrl: string
   content: string
@@ -9,7 +9,7 @@ interface PostItemMediaProps {
   youtubeIFrameRef?: React.RefObject<HTMLIFrameElement>
 }
 
-const PostItemMedia: React.FC<PostItemMediaProps> = ({
+const NoteItemMedia: React.FC<NoteItemMediaProps> = ({
   mediaType,
   mediaUrl,
   content,
@@ -60,4 +60,4 @@ const PostItemMedia: React.FC<PostItemMediaProps> = ({
   )
 }
 
-export default PostItemMedia
+export default NoteItemMedia

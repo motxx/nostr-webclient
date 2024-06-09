@@ -1,13 +1,13 @@
 import React from 'react'
 import { convertToEmbedUrl } from '@/utils/contentConverter'
 
-interface PostDetailsMediaContentProps {
+interface NoteDetailsMediaContentProps {
   mediaUrl: string
   mediaType: 'image' | 'video-file' | 'video-youtube'
   onBackgroundClick?: (event: React.MouseEvent<HTMLDivElement>) => void
 }
 
-const PostDetailsMediaContent: React.FC<PostDetailsMediaContentProps> = ({
+const NoteDetailsMediaContent: React.FC<NoteDetailsMediaContentProps> = ({
   mediaUrl,
   mediaType,
   onBackgroundClick,
@@ -69,4 +69,4 @@ const PostDetailsMediaContent: React.FC<PostDetailsMediaContentProps> = ({
   }
 }
 
-export default PostDetailsMediaContent
+export default NoteDetailsMediaContent
