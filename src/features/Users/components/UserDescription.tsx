@@ -58,7 +58,7 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
             <span className="font-bold">{user.followersCount}</span> フォロワー
           </div>
         </div>
-        <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
+        <p className="mt-4 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
           <TextConverter text={user.bio} />
         </p>
       </div>
