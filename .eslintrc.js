@@ -9,5 +9,6 @@ module.exports = {
         patterns: ['@/features/*/*'],
       },
     ],
+    'import/no-unresolved': 'off',
   },
 }
