@@ -2,8 +2,8 @@ import React from 'react'
 import { PiNotePencil } from 'react-icons/pi'
 import NavigationBottomTabItem from './NavigationBottomTabItem'
 import { NavigationItem, NavigationItemId } from './Navigation'
-import { User } from '@/models/user'
 import { useNavigate } from 'react-router-dom'
+import { User } from '@/domain/entities/User'
 
 interface NavigationBottomTabProps {
   navigationItems: NavigationItem[]
@@ -45,10 +45,12 @@ const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
           ))}
         <div
           className="flex flex-col items-center cursor-pointer p-1 rounded-md transition active:bg-gray-200 dark:active:bg-gray-700"
-          onClick={() => navigate(`/user/${user.nostrAddress || user.npub}`)}
+          onClick={() =>
+            navigate(`/user/${user.profile?.nostrAddress || user.npub}`)
+          }
         >
           <img
-            src={user.image}
+            src={user.profile?.image}
             alt="User profile"
             className="w-8 h-8 rounded-full"
           />

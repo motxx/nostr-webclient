@@ -1,16 +1,19 @@
-import { NoteItemType } from '@/global/types'
+import { NoteType } from '@/domain/entities/Note'
 
-export const createDummyNewReply = (
-  text: string
-): NoteItemType & { id: string } => {
+export const createDummyNewReply = (text: string): NoteType => {
   return {
     id: '109',
-    userName: 'moti',
-    content: text,
-    userImage: 'https://randomuser.me/api/portraits/men/5.jpg',
-    timestamp: 'just now',
-    userId: 'riel.pages.dev',
-    verified: false,
+    text,
+    author: {
+      npub: 'npubexample',
+      pubkey: 'pubkeyexample',
+      profile: {
+        name: 'moti',
+        nostrAddress: '_@motxx.pages.dev',
+        image: 'https://randomuser.me/api/portraits/men/5.jpg',
+      },
+    },
+    created_at: new Date(),
     replies: 0,
     likes: 0,
     reposts: 0,

@@ -1,6 +1,5 @@
 import React, { useState, DragEvent } from 'react'
 import Avatar from 'boring-avatars'
-import TertiaryButton from '@/components/ui-parts/TertiaryButton'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 
 const SettingProfile: React.FC = () => {

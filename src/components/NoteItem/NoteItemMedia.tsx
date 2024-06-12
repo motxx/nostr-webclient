@@ -1,24 +1,31 @@
 import React from 'react'
 import { convertToEmbedUrl } from '@/utils/contentConverter'
+import { MediaType } from '@/domain/entities/Note'
 
 interface NoteItemMediaProps {
-  mediaType: string
-  mediaUrl: string
-  content: string
+  mediaTypes: Set<MediaType>
+  imageUrl?: string
+  videoUrl?: string
+  youtubeUrl?: string
+  text: string
   openDetails: () => void
   youtubeIFrameRef?: React.RefObject<HTMLIFrameElement>
 }
 
 const NoteItemMedia: React.FC<NoteItemMediaProps> = ({
-  mediaType,
-  mediaUrl,
-  content,
+  mediaTypes,
+  imageUrl,
+  videoUrl,
+  youtubeUrl,
+  text,
   openDetails,
   youtubeIFrameRef,
 }) => {
   const isMobile = () => window.matchMedia('(max-width: 640px)').matches
   const embedUrl =
-    mediaType === 'video-youtube' ? convertToEmbedUrl(mediaUrl) : mediaUrl
+    mediaTypes.has('youtube') && youtubeUrl
+      ? convertToEmbedUrl(youtubeUrl)
+      : undefined
 
   const handleOnClick = () => {
     if (!isMobile()) {
@@ -28,17 +35,17 @@ const NoteItemMedia: React.FC<NoteItemMediaProps> = ({
 
   return (
     <div>
-      {mediaType === 'image' && (
+      {mediaTypes.has('image') && (
         <img
-          src={mediaUrl}
+          src={imageUrl}
           alt="Post media"
           className={`w-full ${isMobile() ? 'h-full' : 'max-h-[500px]'} object-cover sm:rounded sm:border border-gray-200 dark:border-gray-700 cursor-pointer`}
           onClick={handleOnClick}
         />
       )}
-      {mediaType === 'video-file' && (
+      {mediaTypes.has('video') && (
         <video
-          src={mediaUrl}
+          src={videoUrl}
           controls
           autoPlay
           muted
@@ -46,11 +53,11 @@ const NoteItemMedia: React.FC<NoteItemMediaProps> = ({
           className={`w-full ${isMobile() ? 'h-full' : 'max-h-[500px]'} object-cover sm:rounded sm:border border-gray-200 dark:border-gray-700 cursor-pointer`}
         />
       )}
-      {mediaType === 'video-youtube' && (
+      {mediaTypes.has('youtube') && (
         <iframe
           ref={youtubeIFrameRef}
           className="w-full aspect-video sm:rounded sm:border border-gray-200 dark:border-gray-700 cursor-pointer"
-          title={content}
+          title={text}
           src={`${embedUrl}?enablejsapi=1`}
           allow="autoplay; encrypted-media"
           allowFullScreen

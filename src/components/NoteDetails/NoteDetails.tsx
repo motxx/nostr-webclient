@@ -2,14 +2,14 @@ import React from 'react'
 import NoteDetailsMediaContent from './NoteDetailsMediaContent'
 import NoteDetailsActions from './NoteDetailsActions'
 import RepliesThread from '@/components/Reply/RepliesThread'
-import { NoteItemType } from '@/global/types'
 import { PostActionType } from '@/components/NoteItem/NoteItem'
 import { PiCaretLeftBold, PiCaretRightBold } from 'react-icons/pi'
+import { NoteType } from '@/domain/entities/Note'
 
 interface NoteDetailsProps {
   isOpen: boolean
   onClose: () => void
-  originalNote: NoteItemType
+  originalNote: NoteType
   onClickAction: (type: PostActionType) => void
   onToggleFollow: (userId: string) => boolean
   onClickPrevPost?: () => void
@@ -58,10 +58,9 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({
           className="relative flex-1 h-full z-10"
           onClick={handleBackgroundClick}
         >
-          {originalNote.mediaUrl && originalNote.mediaType && (
+          {originalNote.mediaTypes && (
             <NoteDetailsMediaContent
-              mediaUrl={originalNote.mediaUrl}
-              mediaType={originalNote.mediaType}
+              note={originalNote}
               onBackgroundClick={handleBackgroundClick}
             />
           )}

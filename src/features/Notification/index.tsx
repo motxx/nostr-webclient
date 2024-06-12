@@ -1,11 +1,13 @@
 import React from 'react'
 import { FiRepeat } from 'react-icons/fi'
 import { AiFillThunderbolt } from 'react-icons/ai'
-import { NotificationNoteItemType } from '@/global/types'
 import NoteItem from '@/components/NoteItem/NoteItem'
 import notificationList from '@/data/dummy-notifications'
 import { BsHeartFill } from 'react-icons/bs'
 import UserIdLink from '@/components/ui-elements/UserIdLink'
+import { NoteType, NotificationNoteType } from '@/domain/entities/Note'
+import { userNameForDisplay } from '@/utils/addressConverter'
+import { formatDateAsString } from '@/utils/timeConverter'
 
 const NotificationPage: React.FC = () => {
   const groupedNotifications = notificationList.reduce(
@@ -16,33 +18,35 @@ const NotificationPage: React.FC = () => {
       acc[notification.content].push(notification)
       return acc
     },
-    {} as { [key: string]: NotificationNoteItemType[] }
+    {} as { [key: string]: NotificationNoteType[] }
   )
 
-  const renderNotificationContent = (
-    notifications: NotificationNoteItemType[]
-  ) => {
-    switch (notifications[0].type) {
+  const renderNotificationContent = (notes: NotificationNoteType[]) => {
+    const majorNote = notes[0]
+    const majorUserId =
+      majorNote.author.profile?.nostrAddress ?? majorNote.author.npub
+    const majorUserName = userNameForDisplay(majorNote.author)
+    const majorCreatedAt = formatDateAsString(majorNote.created_at)
+    switch (majorNote.type) {
       case 'like':
         return (
           <div>
             <p className="text-gray-700 dark:text-gray-300 text-sm">
-              {notifications.length > 1 ? (
+              {notes.length > 1 ? (
                 <>
-                  <UserIdLink userId={notifications[0].userName} />
-                  さんと他{notifications.length - 1}
+                  <UserIdLink userId={majorUserId} />
+                  さんと他{notes.length - 1}
                   人があなたの投稿をいいねしました
                 </>
               ) : (
                 <>
-                  <UserIdLink userId={notifications[0].userName} />
-                  さんがあなたの投稿をいいねしました (
-                  {notifications[0].timestamp})
+                  <UserIdLink userId={majorUserName} />
+                  さんがあなたの投稿をいいねしました ({majorCreatedAt})
                 </>
               )}
             </p>
             <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-              {notifications[0].content}
+              {majorNote.text}
             </div>
           </div>
         )
@@ -50,22 +54,21 @@ const NotificationPage: React.FC = () => {
         return (
           <div>
             <p className="text-gray-700 dark:text-gray-300 text-sm">
-              {notifications.length > 1 ? (
+              {notes.length > 1 ? (
                 <>
-                  <UserIdLink userId={notifications[0].userName} />
-                  さんと他{notifications.length - 1}
-                  人があなたの投稿をリノートしました
+                  <UserIdLink userId={majorUserName} />
+                  さんと他{notes.length - 1}
+                  人があなたの投稿をリポストしました
                 </>
               ) : (
                 <>
-                  <UserIdLink userId={notifications[0].userName} />
-                  さんがあなたの投稿をリノートしました (
-                  {notifications[0].timestamp})
+                  <UserIdLink userId={majorUserName} />
+                  さんがあなたの投稿をリポストしました ({majorCreatedAt})
                 </>
               )}
             </p>
             <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-              {notifications[0].content}
+              {majorNote.text}
             </div>
           </div>
         )
@@ -73,34 +76,35 @@ const NotificationPage: React.FC = () => {
         return (
           <div>
             <p className="text-gray-700 dark:text-gray-300 text-sm">
-              {notifications.length > 1 ? (
+              {notes.length > 1 ? (
                 <>
-                  <UserIdLink userId={notifications[0].userName} />
-                  さんと他{notifications.length - 1}
+                  <UserIdLink userId={majorUserName} />
+                  さんと他{notes.length - 1}
                   人があなたの投稿に合計
-                  {notifications.reduce((acc, notification) => {
-                    return acc + notification.zaps
+                  {notes.reduce((acc, note) => {
+                    return acc + note.zaps
                   }, 0)}
                   satsをzapしました
                 </>
               ) : (
                 <>
-                  <UserIdLink userId={notifications[0].userName} />
+                  <UserIdLink userId={majorUserName} />
                   さんがあなたの投稿に
-                  {notifications[0].zaps}
-                  satsをzapしました ({notifications[0].timestamp})
+                  {majorNote.zaps}
+                  satsをzapしました ({majorCreatedAt})
                 </>
               )}
             </p>
             <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-              {notifications[0].content}
+              {majorNote.text}
             </div>
           </div>
         )
       case 'reply':
+        const note: NoteType = { ...majorNote }
         return (
           <div>
-            <NoteItem note={notifications[0]} onToggleFollow={() => false} />
+            <NoteItem note={note} onToggleFollow={() => false} />
           </div>
         )
       default:

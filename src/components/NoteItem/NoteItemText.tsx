@@ -11,8 +11,8 @@ const NoteItemText: React.FC<NoteItemTextProps> = ({ text }) => {
 
   return (
     <div className="text-sm text-gray-700 dark:text-gray-300 font-noto-sans">
-      <TextConverter text={showMore ? text : text.substring(0, 100)} />
-      {text.length > 100 && (
+      <TextConverter text={showMore ? text : text.substring(0, 300)} />
+      {text.length > 300 && (
         <span>
           {!showMore && <span>...</span>}
           <button

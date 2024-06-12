@@ -3,11 +3,11 @@ import { FiHeart, FiMessageCircle, FiRepeat } from 'react-icons/fi'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
 import { PostActionType } from '@/components/NoteItem/NoteItem'
 import ReplyModal from '@/components/Reply/ReplyModal'
-import { NoteItemType } from '@/global/types'
 import RepliesThreadModal from '@/components/Reply/RepliesThreadModal'
+import { NoteType } from '@/domain/entities/Note'
 
 interface NoteDetailsActionsProps {
-  originalNote: NoteItemType
+  originalNote: NoteType
   onBackgroundClick?: (event: React.MouseEvent<HTMLDivElement>) => void
   onClickAction: (type: PostActionType) => void
   onToggleFollow: (userId: string) => boolean

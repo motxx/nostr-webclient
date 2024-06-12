@@ -17,7 +17,7 @@ const UnsafeReactComponent: React.FC<UnsafeReactComponentProps> = ({
         (domNode as Element).name?.toLowerCase() === 'routerlink' &&
         (domNode as Element).attribs?.to
       ) {
-        const { to, ...rest } = (domNode as Element).attribs
+        const { to } = (domNode as Element).attribs
         return (
           <RouterLink to={to}>
             {domToReact((domNode as Element).children as DOMNode[])}
@@ -28,7 +28,7 @@ const UnsafeReactComponent: React.FC<UnsafeReactComponentProps> = ({
         (domNode as Element).name?.toLowerCase() === 'externallink' &&
         (domNode as Element).attribs?.href
       ) {
-        const { href, ...rest } = (domNode as Element).attribs
+        const { href } = (domNode as Element).attribs
         return (
           <ExternalLink href={href}>
             {domToReact((domNode as Element).children as DOMNode[])}
@@ -45,7 +45,7 @@ const UnsafeReactComponent: React.FC<UnsafeReactComponentProps> = ({
     },
   }
 
-  return <div>{parse(jsxString, options)}</div>
+  return <div className="break-all">{parse(jsxString, options)}</div>
 }
 
 export default UnsafeReactComponent

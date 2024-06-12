@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
 import TimelineImageGrid from './TimelineImageGrid'
-import { notes } from '@/data/dummy-notes'
+import { useSubscribeNotes } from './hooks/useSubscribeNotes'
+import { HomeTimelineTabs, TimelineTabId } from './types'
+import { Note } from '@/domain/entities/Note'
 
 interface TimelineProps {
   onScrollUp: () => void
@@ -10,30 +12,31 @@ interface TimelineProps {
   onToggleFollow: (userId: string) => boolean
 }
 
-export type TimelineTabId = 'following' | 'recommended' | 'images' | 'clips'
-export type TimelineFeedType = 'standard' | 'image-grid' | 'video-swipe'
-export type TimelineTabType = {
-  id: TimelineTabId
-  feedType: TimelineFeedType
-  name: string
-}
-
 const Timeline: React.FC<TimelineProps> = ({
   onScrollUp,
   onScrollDown,
   onToggleFollow,
 }) => {
+  const { subscribe } = useSubscribeNotes()
   const tabRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
   const [activeTabId, setActiveTabId] = useState<TimelineTabId>('following')
   const [lastScrollTop, setLastScrollTop] = useState(0)
+  const [notes, setNotes] = useState<Note[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const tabs: TimelineTabType[] = [
-    { id: 'following', feedType: 'standard', name: 'フォロー中' },
-    { id: 'recommended', feedType: 'standard', name: 'おすすめ' },
-    { id: 'images', feedType: 'image-grid', name: 'ピクチャー' },
-    { id: 'clips', feedType: 'video-swipe', name: 'クリップ' },
-  ]
+  useEffect(() => {
+    subscribe(
+      (note) => {
+        setNotes((prevNotes: Note[]) => [...prevNotes, note])
+        setIsLoading(false)
+      },
+      { image: true }
+    )
+
+    // Cleanup subscription on unmount
+    //return () => unsubscribe()
+  }, [subscribe])
 
   const handleTabClick = (tabId: TimelineTabId) => {
     setActiveTabId(tabId)
@@ -58,7 +61,15 @@ const Timeline: React.FC<TimelineProps> = ({
   }
 
   const renderFeed = () => {
-    const activeTab = tabs.find((tab) => tab.id === activeTabId)
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+        </div>
+      )
+    }
+
+    const activeTab = HomeTimelineTabs.find((tab) => tab.id === activeTabId)
     switch (activeTab?.feedType) {
       case 'standard':
         return (
@@ -85,7 +96,7 @@ const Timeline: React.FC<TimelineProps> = ({
       <TimelineTab
         ref={tabRef}
         onTabItemClick={handleTabClick}
-        tabs={tabs}
+        tabs={HomeTimelineTabs}
         activeTabId={activeTabId}
       />
       <div className="flex justify-center w-full">{renderFeed()}</div>

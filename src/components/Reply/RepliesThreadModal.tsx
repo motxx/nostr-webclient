@@ -4,12 +4,12 @@ import { useDrag } from 'react-use-gesture'
 import { FiMessageCircle } from 'react-icons/fi'
 import replyData from '@/data/dummy-reply-data'
 import NoteItem from '@/components/NoteItem/NoteItem'
-import { NoteItemType } from '@/global/types'
 import { createDummyNewReply } from '@/utils/mock'
 import './RepliesThreadModal.css'
+import { NoteType } from '@/domain/entities/Note'
 
 interface RepliesThreadModalProps {
-  originalNote: NoteItemType
+  originalNote: NoteType
   showModal: boolean
   onClose: () => void
   onToggleFollow: (userId: string) => boolean
@@ -110,10 +110,13 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
             <div className="overflow-y-auto p-4 flex-grow">
               <div className="mb-6">
                 <NoteItem
-                  post={{
+                  note={{
                     ...originalNote,
-                    mediaType: undefined,
-                    mediaUrl: undefined,
+                    mediaTypes: undefined,
+                    imageUrl: undefined,
+                    audioUrl: undefined,
+                    videoUrl: undefined,
+                    youtubeUrl: undefined,
                   }}
                   onToggleFollow={onToggleFollow}
                   onReply={handleReplyToReply}
@@ -126,7 +129,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
                 {replyData.map((reply, index) => (
                   <div key={index} className="mb-4">
                     <NoteItem
-                      post={reply}
+                      note={reply}
                       onToggleFollow={onToggleFollow}
                       onReply={handleReplyToReply}
                     />

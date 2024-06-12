@@ -1,8 +1,6 @@
 import { UserSettings } from '@/domain/entities/UserSettings'
-import {
-  UserRepository,
-  UserSettingsRepository,
-} from '@/domain/repositories/UserRepository'
+import { UserRepository } from '@/domain/repositories/UserRepository'
+import { UserSettingsRepository } from '@/domain/repositories/UserSettingsRepository'
 
 export class UpdateMyUserSettings {
   constructor(
