@@ -21,7 +21,7 @@ export class UserProfileService implements UserProfileRepository {
     const profile = await user.fetchProfile().catch(() => null)
 
     const userProfile = new UserProfile({
-      name: profile?.name,
+      name: profile?.displayName || profile?.name,
       nostrAddress: profile?.nip05,
       lightningAddress: profile?.lud16,
       image: profile?.image,
