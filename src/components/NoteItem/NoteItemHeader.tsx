@@ -30,40 +30,6 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
     verified: User.verified(note.author),
   }
 
-  /*
-  // 遅延読み込みに対応する場合に使う
-  const observer = useMemo(
-    () =>
-      new IntersectionObserver(async ([entry]) => {
-        if (
-          entry.isIntersecting &&
-          noteItemHeaderRef.current &&
-          nostrClient &&
-          !note.author.profile?.name
-        ) {
-          console.log('fetching profile:', note.author.npub)
-          const userProfileService = new UserProfileService(nostrClient)
-          const profile = await new FetchUserProfile(
-            userProfileService
-          ).execute(note.author.npub)
-          if (profile) {
-            note.author.profile = profile
-          }
-        }
-      }),
-    [note.author, nostrClient]
-  )
-
-  useEffect(() => {
-    const headerRef = noteItemHeaderRef.current
-    if (headerRef) observer.observe(headerRef)
-
-    return () => {
-      if (headerRef) observer.unobserve(headerRef)
-    }
-  }, [observer])
-  */
-
   return (
     <div>
       <div className="flex justify-between items-center font-noto-sans">

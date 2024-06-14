@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
 import { FiHeart, FiMessageCircle, FiRepeat } from 'react-icons/fi'
 import { PostActionType } from './NoteItem'
+import { useNostrClient } from '@/hooks/useNostrClient'
 
 interface PostActionsProps {
   replies: number
@@ -18,8 +19,32 @@ const NoteItemActions: React.FC<PostActionsProps> = ({
   zaps,
   onClickAction,
 }) => {
+  const nostrClient = useNostrClient()
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const observer = useMemo(
+    () =>
+      new IntersectionObserver(async ([entry]) => {
+        if (entry.isIntersecting && actionsRef.current && nostrClient) {
+          // TODO: fetch reactions count
+        }
+      }),
+    [nostrClient]
+  )
+
+  useEffect(() => {
+    const ref = actionsRef.current
+    if (ref) observer.observe(ref)
+
+    return () => {
+      if (ref) observer.unobserve(ref)
+    }
+  }, [observer])
+
   return (
-    <div className="flex space-x-4 text-gray-500 dark:text-gray-400 font-noto-sans">
+    <div
+      className="flex space-x-4 text-gray-500 dark:text-gray-400 font-noto-sans"
+      ref={actionsRef}
+    >
       <div
         className="flex items-center space-x-1 cursor-pointer group"
         onClick={() => onClickAction('reply')}
