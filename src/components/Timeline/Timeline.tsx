@@ -5,6 +5,8 @@ import TimelineImageGrid from './TimelineImageGrid'
 import { useSubscribeNotes } from './hooks/useSubscribeNotes'
 import { HomeTimelineTabs, TimelineTabId } from './types'
 import { Note } from '@/domain/entities/Note'
+import { useAtom } from 'jotai'
+import { followingTimelineAtom } from '@/state/atoms'
 
 interface TimelineProps {
   onScrollUp: () => void
@@ -22,21 +24,21 @@ const Timeline: React.FC<TimelineProps> = ({
   const timelineRef = useRef<HTMLDivElement>(null)
   const [activeTabId, setActiveTabId] = useState<TimelineTabId>('following')
   const [lastScrollTop, setLastScrollTop] = useState(0)
-  const [notes, setNotes] = useState<Note[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [notes, setNotes] = useAtom(followingTimelineAtom)
 
   useEffect(() => {
     subscribe(
       (note) => {
         setNotes((prevNotes: Note[]) => [...prevNotes, note])
         setIsLoading(false)
-      },
-      { image: true }
+      }
+      //{ image: true }
     )
 
     // Cleanup subscription on unmount
     //return () => unsubscribe()
-  }, [subscribe])
+  }, [subscribe, setNotes])
 
   const handleTabClick = (tabId: TimelineTabId) => {
     setActiveTabId(tabId)
