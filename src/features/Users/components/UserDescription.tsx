@@ -70,9 +70,9 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
           </div>
         </div>
         {user.profile?.bio && (
-          <p className="mt-4 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
+          <div className="mt-4 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
             <TextConverter text={user.profile.bio} />
-          </p>
+          </div>
         )}
       </div>
     </>
