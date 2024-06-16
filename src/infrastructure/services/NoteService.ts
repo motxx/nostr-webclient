@@ -44,7 +44,9 @@ export class NoteService implements NoteRepository {
       limit: options?.limit ?? 100,
       // NIP-50: Search Capability - https://scrapbox.io/nostr/NIP-50
       // search文字列の仕様はRelayer依存
-      search: `http.+(${imageExtensions.join('|')})`,
+      search: options?.image
+        ? `http.+(${imageExtensions.join('|')})`
+        : undefined,
     }
 
     await this.#nostrClient.subscribeEvents(
