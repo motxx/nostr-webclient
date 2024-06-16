@@ -32,8 +32,8 @@ const Timeline: React.FC<TimelineProps> = ({
       (note) => {
         setNotes((prevNotes: Note[]) => [...prevNotes, note])
         setIsLoading(false)
-      }
-      // { image: true }
+      },
+      { image: true }
     )
 
     // Cleanup subscription on unmount
