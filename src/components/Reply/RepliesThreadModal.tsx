@@ -112,11 +112,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
                 <NoteItem
                   note={{
                     ...originalNote,
-                    mediaTypes: undefined,
-                    imageUrl: undefined,
-                    audioUrl: undefined,
-                    videoUrl: undefined,
-                    youtubeUrl: undefined,
+                    media: undefined,
                   }}
                   onToggleFollow={onToggleFollow}
                   onReply={handleReplyToReply}

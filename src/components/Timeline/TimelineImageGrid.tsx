@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import NoteDetails from '@/components/NoteDetails/NoteDetails'
-import { Note } from '@/domain/entities/Note'
+import { NoteType } from '@/domain/entities/Note'
 import { userIdForDisplay } from '@/utils/addressConverter'
 
 interface TimelineImageGridProps {
-  notes: Note[]
+  notes: NoteType[]
   className?: string
 }
 
@@ -12,13 +12,14 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
   notes,
   className,
 }) => {
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null)
+  const [selectedNote, setSelectedNote] = useState<NoteType | null>(null)
 
-  const imageNotes = notes.filter(
-    (note) => note.mediaTypes?.has('image') && note.imageUrl
+  // 画像メディアのみを含むノートをフィルタリング
+  const imageNotes = notes.filter((note) =>
+    note.media?.some((m) => m.type === 'image')
   )
 
-  const handleImageClick = (note: Note) => {
+  const handleImageClick = (note: NoteType) => {
     setSelectedNote(note)
   }
 
@@ -63,7 +64,7 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
             onClick={() => handleImageClick(note)}
           >
             <img
-              src={note.imageUrl}
+              src={note.media?.find((m) => m.type === 'image')?.url}
               alt={`posted by ${userIdForDisplay(note.author)}`}
               className="w-full h-full object-cover transition-opacity duration-300 hover:opacity-75"
             />

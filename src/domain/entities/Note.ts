@@ -2,17 +2,18 @@ import { User } from './User'
 
 export type MediaType = 'image' | 'audio' | 'video' | 'youtube'
 
+export type Media = {
+  type: MediaType
+  url: string
+}
+
 export interface NoteType {
   id: string
   author: User
   text: string
+  media?: Media[]
+  json: string
   created_at: Date
-
-  imageUrl?: string
-  audioUrl?: string
-  videoUrl?: string
-  youtubeUrl?: string
-  mediaTypes?: Set<MediaType>
 
   // TODO: NoteReactions
   replies: number
@@ -31,13 +32,9 @@ export class Note implements NoteType {
   id: string = ''
   author: User = { npub: '', pubkey: '' }
   text: string = ''
+  media?: Media[]
+  json: string = ''
   created_at: Date = new Date('1970-01-01T00:00:00Z')
-
-  imageUrl?: string
-  audioUrl?: string
-  videoUrl?: string
-  youtubeUrl?: string
-  mediaTypes?: Set<MediaType>
 
   // TODO: NoteReactions
   replies: number = 0

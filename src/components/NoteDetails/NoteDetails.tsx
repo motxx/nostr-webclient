@@ -58,7 +58,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({
           className="relative flex-1 h-full z-10"
           onClick={handleBackgroundClick}
         >
-          {originalNote.mediaTypes && (
+          {originalNote.media && (
             <NoteDetailsMediaContent
               note={originalNote}
               onBackgroundClick={handleBackgroundClick}

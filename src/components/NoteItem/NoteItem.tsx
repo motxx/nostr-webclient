@@ -85,13 +85,10 @@ const NoteItem: React.FC<NoteItemProps> = ({
       <div className="px-2 pb-2 sm:px-0">
         <NoteItemHeader note={note} onToggleFollow={onToggleFollow} />
       </div>
-      {note.mediaTypes && (
+      {note.media && (
         <div className="mb-4">
           <NoteItemMedia
-            mediaTypes={note.mediaTypes}
-            imageUrl={note.imageUrl}
-            videoUrl={note.videoUrl}
-            youtubeUrl={note.youtubeUrl}
+            media={note.media}
             text={note.text}
             openDetails={openDetails}
             youtubeIFrameRef={youtubeIFrameRef}

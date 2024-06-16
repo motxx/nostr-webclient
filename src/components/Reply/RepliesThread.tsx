@@ -3,10 +3,10 @@ import { FiSend } from 'react-icons/fi'
 import replyData from '@/data/dummy-reply-data'
 import NoteItem from '@/components/NoteItem/NoteItem'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
-import { Note } from '@/domain/entities/Note'
+import { NoteType } from '@/domain/entities/Note'
 
 interface RepliesThreadProps {
-  originalNote: Note
+  originalNote: NoteType
   onToggleFollow: (userId: string) => boolean
 }
 
@@ -28,16 +28,23 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
     if (newReply.trim()) {
       replyData.push({
         id: '109',
-        userName: 'moti',
-        content: newReply,
-        userImage: 'https://randomuser.me/api/portraits/men/5.jpg',
-        timestamp: 'just now',
-        userId: 'riel.pages.dev',
+        author: {
+          npub: 'npubexample',
+          pubkey: 'pubkeyexample',
+          profile: {
+            name: 'moti',
+            image: 'https://randomuser.me/api/portraits/men/5.jpg',
+            nostrAddress: '_@motxx.pages.dev',
+          },
+        },
+        text: newReply,
+        created_at: new Date(),
         replies: 0,
         likes: 0,
         reposts: 0,
         zaps: 0,
         following: true,
+        json: '{"example":"json"}',
       })
       setNewReply('')
     }
@@ -49,11 +56,7 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
         <NoteItem
           note={{
             ...originalNote,
-            mediaTypes: undefined,
-            imageUrl: undefined,
-            audioUrl: undefined,
-            videoUrl: undefined,
-            youtubeUrl: undefined,
+            media: undefined,
           }}
           onToggleFollow={onToggleFollow}
           onReply={handleReplyToReply}

@@ -1,33 +1,26 @@
 import React from 'react'
 import { convertToEmbedUrl } from '@/utils/contentConverter'
-import { MediaType, NoteType } from '@/domain/entities/Note'
+import { NoteType } from '@/domain/entities/Note'
 
 interface NoteDetailsMediaContentProps {
   note: NoteType
-  mediaType?: MediaType
   onBackgroundClick?: (event: React.MouseEvent<HTMLDivElement>) => void
 }
 
 const NoteDetailsMediaContent: React.FC<NoteDetailsMediaContentProps> = ({
   note,
-  mediaType: _mediaType,
   onBackgroundClick,
 }) => {
-  const mediaType = _mediaType
-    ? _mediaType
-    : note.mediaTypes?.size
-      ? note.mediaTypes?.has('youtube')
-        ? 'youtube'
-        : note.mediaTypes?.has('video')
-          ? 'video'
-          : note.mediaTypes?.has('audio')
-            ? 'audio'
-            : 'image'
-      : undefined
+  const media =
+    note.media?.find((m) => m.type === 'youtube') ||
+    note.media?.find((m) => m.type === 'video') ||
+    note.media?.find((m) => m.type === 'image')
+
+  const mediaType = media?.type
 
   const embedUrl =
-    mediaType === 'youtube' && note.youtubeUrl
-      ? convertToEmbedUrl(note.youtubeUrl)
+    mediaType === 'youtube' && media?.url
+      ? convertToEmbedUrl(media.url)
       : undefined
 
   const handleMediaClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -42,7 +35,7 @@ const NoteDetailsMediaContent: React.FC<NoteDetailsMediaContentProps> = ({
           onClick={onBackgroundClick}
         >
           <img
-            src={note.imageUrl}
+            src={media?.url}
             alt="Overlay"
             className="max-w-full max-h-full object-contain"
             onClick={handleMediaClick}
@@ -59,7 +52,7 @@ const NoteDetailsMediaContent: React.FC<NoteDetailsMediaContentProps> = ({
             onClick={handleMediaClick}
             className="max-w-full max-h-full object-contain"
           >
-            <video src={note.videoUrl} controls autoPlay muted playsInline />
+            <video src={media?.url} controls autoPlay muted playsInline />
           </div>
         </div>
       )

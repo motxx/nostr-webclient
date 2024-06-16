@@ -47,11 +47,7 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
         <NoteItem
           note={{
             ...originalNote,
-            mediaTypes: undefined,
-            imageUrl: undefined,
-            audioUrl: undefined,
-            videoUrl: undefined,
-            youtubeUrl: undefined,
+            media: undefined,
           }}
           onToggleFollow={onToggleFollow}
         />

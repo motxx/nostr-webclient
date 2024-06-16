@@ -1,5 +1,5 @@
 import { NDKEvent, NDKFilter, NDKKind } from '@nostr-dev-kit/ndk'
-import { MediaType, Note } from '@/domain/entities/Note'
+import { Media, Note } from '@/domain/entities/Note'
 import {
   NoteRepository,
   SubscribeNotesOptions,
@@ -8,6 +8,8 @@ import { UserProfileRepository } from '@/domain/repositories/UserProfileReposito
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { unixtimeOf } from '../nostr/utils'
+
+const imageExtensions = ['jpg', 'png']
 
 export class NoteService implements NoteRepository {
   #nostrClient: NostrClient
@@ -39,18 +41,17 @@ export class NoteService implements NoteRepository {
       kinds: [NDKKind.Text],
       authors,
       since: options?.since ? unixtimeOf(options.since) : undefined,
-      limit: options?.limit ?? 20,
+      limit: options?.limit ?? 100,
+      //or: [{ '#t': ['r'] }, { '#t': ['imeta'] }],
+      //...(options?.image && { '#r': ['http.*'] }),
       // NIP-50: Search Capability - https://scrapbox.io/nostr/NIP-50
       // search文字列の仕様はRelayer依存
-      search: 'https?.+\\.(png|jpg)',
+      // search: `https?.+\\.(${imageExtensions.join('|')})`,
     }
 
     await this.#nostrClient.subscribeEvents(
       filterOptions,
       async (event: NDKEvent) => {
-        if (this.isFilteredOut(event.content, options)) return
-
-        const mediaTypes = this.getMediaTypes(event.content)
         const profile = await this.#userProfileRepository.fetchProfile(
           event.author.npub
         )
@@ -60,7 +61,7 @@ export class NoteService implements NoteRepository {
           profile,
         })
 
-        const note = this.createNoteFromEvent(event, author, mediaTypes)
+        const note = await this.createNoteFromEvent(event, author)
         onNote(note)
       }
     )
@@ -70,53 +71,71 @@ export class NoteService implements NoteRepository {
     throw new Error('Method not implemented.')
   }
 
-  private isFilteredOut(
-    content: string,
-    options?: SubscribeNotesOptions
-  ): boolean {
-    const imageUrls = content.match(/(https?.+\.(png|jpg))/)
-    const audioUrls = content.match(/(https?.+\.mp3)/)
-    const videoUrls = content.match(/(https?.+\.mp4)/)
-    const youtubeUrls = content.match(/https?:\/\/www.youtube.com\//)
+  private async isImageUrl(url: string): Promise<boolean> {
+    const cleanUrl = url.split('?')[0]
+    const urlExtension = cleanUrl.split('.').pop()?.toLowerCase()
+    const isExtensionImage =
+      urlExtension && imageExtensions.includes(urlExtension)
+    if (isExtensionImage) {
+      return true
+    }
 
-    if (options?.audio && !audioUrls) return true
-    if (options?.image && !imageUrls) return true
-    if (options?.video && !videoUrls) return true
-    if (options?.youtube && !youtubeUrls) return true
-
-    return false
+    try {
+      const response = await fetch(url, { method: 'HEAD' })
+      const contentType = response.headers.get('Content-Type')
+      return contentType ? contentType.startsWith('image') : false
+    } catch (error) {
+      console.error('Error fetching the URL:', error)
+      return false
+    }
   }
 
-  private getMediaTypes(content: string): Set<MediaType> | undefined {
-    const mediaTypes = new Set<MediaType>()
-
-    if (content.match(/(https?.+\.(png|jpg))/)) mediaTypes.add('image')
+  private async extractMedia(event: NDKEvent) {
+    /*
+    for (const tag of event.tags) {
+      if (tag.length > 1 && tag[0] === 'r') {
+        const url = tag[1]
+        if (await this.isImageUrl(url)) {
+          media.push({ type: 'image', url })
+        }
+      } else if (tag.length > 1 && tag[0] === 'imeta') {
+        for (const data of tag.slice(1)) {
+          if (data.startsWith('url ')) {
+            const url = data.split('url ')[1]
+            media.push({ type: 'image', url })
+          }
+        }
+      }
+    }
+*/
+    const content = event.content
+    const extensionsPattern = imageExtensions.join('|')
+    const urlPattern = new RegExp(
+      `http.*\\.(${extensionsPattern})(\\?[^\\s]*)?`
+    )
+    const matches = content.match(urlPattern) || []
+    const media = matches.map((url) => ({ type: 'image', url }) as Media)
+    /*
     if (content.match(/(https?.+\.mp3)/)) mediaTypes.add('audio')
     if (content.match(/(https?.+\.mp4)/)) mediaTypes.add('video')
     if (content.match(/https?:\/\/www.youtube.com\//)) mediaTypes.add('youtube')
+    */
 
-    return mediaTypes.size > 0 ? mediaTypes : undefined
+    return media
   }
 
-  private createNoteFromEvent(
+  private async createNoteFromEvent(
     event: NDKEvent,
-    author: User,
-    mediaTypes: Set<MediaType> | undefined
-  ): Note {
-    const imageUrl = event.content.match(/(https?.+\.(png|jpg))/)?.[0]
-    const audioUrl = event.content.match(/(https?.+\.mp3)/)?.[0]
-    const videoUrl = event.content.match(/(https?.+\.mp4)/)?.[0]
-    const youtubeUrl = event.content.match(/https?:\/\/www.youtube.com\//)?.[0]
-
+    author: User
+  ): Promise<Note> {
+    const media = await this.extractMedia(event)
+    const json = JSON.stringify(event.rawEvent())
     return new Note({
       id: event.id,
       author,
       text: event.content,
-      mediaTypes,
-      imageUrl,
-      videoUrl,
-      audioUrl,
-      youtubeUrl,
+      media,
+      json,
       replies: 0,
       likes: 0,
       reposts: 0,
