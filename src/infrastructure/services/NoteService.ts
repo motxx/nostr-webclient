@@ -42,8 +42,6 @@ export class NoteService implements NoteRepository {
       authors,
       since: options?.since ? unixtimeOf(options.since) : undefined,
       limit: options?.limit ?? 100,
-      //or: [{ '#t': ['r'] }, { '#t': ['imeta'] }],
-      //...(options?.image && { '#r': ['http.*'] }),
       // NIP-50: Search Capability - https://scrapbox.io/nostr/NIP-50
       // search文字列の仕様はRelayer依存
       // search: `https?.+\\.(${imageExtensions.join('|')})`,
@@ -91,23 +89,6 @@ export class NoteService implements NoteRepository {
   }
 
   private async extractMedia(event: NDKEvent) {
-    /*
-    for (const tag of event.tags) {
-      if (tag.length > 1 && tag[0] === 'r') {
-        const url = tag[1]
-        if (await this.isImageUrl(url)) {
-          media.push({ type: 'image', url })
-        }
-      } else if (tag.length > 1 && tag[0] === 'imeta') {
-        for (const data of tag.slice(1)) {
-          if (data.startsWith('url ')) {
-            const url = data.split('url ')[1]
-            media.push({ type: 'image', url })
-          }
-        }
-      }
-    }
-*/
     const content = event.content
     const extensionsPattern = imageExtensions.join('|')
     const urlPattern = new RegExp(
@@ -115,12 +96,6 @@ export class NoteService implements NoteRepository {
     )
     const matches = content.match(urlPattern) || []
     const media = matches.map((url) => ({ type: 'image', url }) as Media)
-    /*
-    if (content.match(/(https?.+\.mp3)/)) mediaTypes.add('audio')
-    if (content.match(/(https?.+\.mp4)/)) mediaTypes.add('video')
-    if (content.match(/https?:\/\/www.youtube.com\//)) mediaTypes.add('youtube')
-    */
-
     return media
   }
 
