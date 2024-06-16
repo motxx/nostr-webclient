@@ -9,7 +9,7 @@ import { User } from '@/domain/entities/User'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { unixtimeOf } from '../nostr/utils'
 
-const imageExtensions = ['jpg', 'png']
+const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 
 export class NoteService implements NoteRepository {
   #nostrClient: NostrClient
@@ -44,7 +44,7 @@ export class NoteService implements NoteRepository {
       limit: options?.limit ?? 100,
       // NIP-50: Search Capability - https://scrapbox.io/nostr/NIP-50
       // search文字列の仕様はRelayer依存
-      // search: `https?.+\\.(${imageExtensions.join('|')})`,
+      search: `http.+(${imageExtensions.join('|')})`,
     }
 
     await this.#nostrClient.subscribeEvents(
