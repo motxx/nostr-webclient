@@ -35,7 +35,7 @@ const NoteItemMedia: React.FC<NoteItemMediaProps> = ({
               <img
                 key={index}
                 src={item.url}
-                alt="Post media"
+                alt={text}
                 className={`w-full ${isMobile() ? 'h-full' : 'max-h-[500px]'} object-cover sm:rounded sm:border border-gray-200 dark:border-gray-700 cursor-pointer`}
                 onClick={handleOnClick}
               />

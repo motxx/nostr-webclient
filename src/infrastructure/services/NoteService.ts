@@ -94,7 +94,8 @@ export class NoteService implements NoteRepository {
     const content = event.content
     const extensionsPattern = imageExtensions.join('|')
     const urlPattern = new RegExp(
-      `http.*\\.(${extensionsPattern})(\\?[^\\s]*)?`
+      `http.*\\.(${extensionsPattern})(\\?[^\\s]*)?`,
+      'gi'
     )
     const matches = content.match(urlPattern) || []
     const media = matches.map((url) => ({ type: 'image', url }) as Media)
