@@ -6,16 +6,16 @@ import notificationList from '@/data/dummy-notifications'
 import { BsHeartFill } from 'react-icons/bs'
 import UserIdLink from '@/components/ui-elements/UserIdLink'
 import { NoteType, NotificationNoteType } from '@/domain/entities/Note'
-import { userNameForDisplay } from '@/utils/addressConverter'
+import { userIdForDisplay, userNameForDisplay } from '@/utils/addressConverter'
 import { formatDateAsString } from '@/utils/timeConverter'
 
 const NotificationPage: React.FC = () => {
   const groupedNotifications = notificationList.reduce(
     (acc, notification) => {
-      if (!acc[notification.content]) {
-        acc[notification.content] = []
+      if (!acc[notification.text]) {
+        acc[notification.text] = []
       }
-      acc[notification.content].push(notification)
+      acc[notification.text].push(notification)
       return acc
     },
     {} as { [key: string]: NotificationNoteType[] }
@@ -23,8 +23,6 @@ const NotificationPage: React.FC = () => {
 
   const renderNotificationContent = (notes: NotificationNoteType[]) => {
     const majorNote = notes[0]
-    const majorUserId =
-      majorNote.author.profile?.nostrAddress ?? majorNote.author.npub
     const majorUserName = userNameForDisplay(majorNote.author)
     const majorCreatedAt = formatDateAsString(majorNote.created_at)
     switch (majorNote.type) {
@@ -34,7 +32,7 @@ const NotificationPage: React.FC = () => {
             <p className="text-gray-700 dark:text-gray-300 text-sm">
               {notes.length > 1 ? (
                 <>
-                  <UserIdLink userId={majorUserId} />
+                  <UserIdLink userId={majorUserName} />
                   さんと他{notes.length - 1}
                   人があなたの投稿をいいねしました
                 </>
@@ -145,8 +143,8 @@ const NotificationPage: React.FC = () => {
                   {notifications.map((notification, idx) => (
                     <img
                       key={idx}
-                      src={notification.userImage}
-                      alt={`${notification.userName}'s profile`}
+                      src={notification.author.profile?.image ?? ''}
+                      alt={`${notification.author.npub}'s profile`}
                       className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800"
                       style={{ zIndex: notifications.length - idx }}
                     />
