@@ -3,10 +3,13 @@ import SearchBar from '@/components/ui-parts/SearchBar'
 import Widgets from '@/components/Widgets/Widgets'
 import ExploreFilters from './components/ExploreFilters'
 import ExploreOutput from './components/ExploreOutput'
-import { notes } from '@/data/dummy-notes'
 import { ExploreMetricWithNull } from './types'
+import { useSubscribeNotes } from '@/components/Timeline/hooks/useSubscribeNotes'
+import { NoteType } from '@/domain/entities/Note'
 
 const ExplorePage: React.FC = () => {
+  const { subscribe } = useSubscribeNotes()
+  const [notes, setNotes] = useState<NoteType[]>([])
   const [accountFilter, setAccountFilter] = useState('all')
   const [metric, setMetric] = useState(null as ExploreMetricWithNull)
   const [timeframe, setTimeframe] = useState('all')
@@ -20,26 +23,32 @@ const ExplorePage: React.FC = () => {
     setFinalSearchTerm(term)
   }
 
-  const filteredNotes = notes.filter((post) => {
-    const matchesSearchTerm = post.content.includes(finalSearchTerm)
-    const matchesAccountFilter =
-      accountFilter === 'all' || post.accountType === accountFilter
-    const matchesTimeframe = true // Implement your timeframe filtering logic here
-    const matchesLanguageGroupFilter =
-      languageGroupFilter === 'all' ||
-      post.languageGroup === languageGroupFilter
-    return (
-      matchesSearchTerm &&
-      matchesAccountFilter &&
-      matchesTimeframe &&
-      matchesLanguageGroupFilter
-    )
-  })
+  subscribe((note) => {
+    const newNotes = notes.concat(note)
 
-  const sortedNotes =
-    sortByMetric && metric
-      ? filteredNotes.sort((a, b) => b[metric] - a[metric])
-      : filteredNotes
+    const filteredNotes = newNotes.filter((note) => {
+      const matchesSearchTerm = note.text.includes(finalSearchTerm)
+      const matchesAccountFilter =
+        accountFilter === 'all' || note.accountType === accountFilter
+      const matchesTimeframe = true // Implement your timeframe filtering logic here
+      const matchesLanguageGroupFilter =
+        languageGroupFilter === 'all' ||
+        note.languageGroup === languageGroupFilter
+      return (
+        matchesSearchTerm &&
+        matchesAccountFilter &&
+        matchesTimeframe &&
+        matchesLanguageGroupFilter
+      )
+    })
+
+    const sortedNotes =
+      sortByMetric && metric
+        ? filteredNotes.sort((a, b) => b[metric] - a[metric])
+        : filteredNotes
+
+    setNotes(sortedNotes)
+  })
 
   return (
     <div className="flex flex-col lg:flex-row justify-center">
@@ -68,7 +77,7 @@ const ExplorePage: React.FC = () => {
         <div className="flex items-center justify-center">
           <ExploreOutput
             outputFormat={outputFormat}
-            sortedNotes={sortedNotes}
+            sortedNotes={notes}
             metric={metric}
           />
         </div>

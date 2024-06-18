@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import { FiSend } from 'react-icons/fi'
 import replyData from '@/data/dummy-reply-data'
 import NoteItem from '@/components/NoteItem/NoteItem'
-import { NoteItemType } from '@/global/types'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
+import { NoteType } from '@/domain/entities/Note'
 
 interface RepliesThreadProps {
-  originalNote: NoteItemType
+  originalNote: NoteType
   onToggleFollow: (userId: string) => boolean
 }
 
@@ -28,17 +28,23 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
     if (newReply.trim()) {
       replyData.push({
         id: '109',
-        userName: 'moti',
-        content: newReply,
-        userImage: 'https://randomuser.me/api/portraits/men/5.jpg',
-        timestamp: 'just now',
-        userId: 'riel.pages.dev',
-        verified: false,
+        author: {
+          npub: 'npubexample',
+          pubkey: 'pubkeyexample',
+          profile: {
+            name: 'moti',
+            image: 'https://randomuser.me/api/portraits/men/5.jpg',
+            nostrAddress: '_@motxx.pages.dev',
+          },
+        },
+        text: newReply,
+        created_at: new Date(),
         replies: 0,
         likes: 0,
         reposts: 0,
         zaps: 0,
         following: true,
+        json: '{"example":"json"}',
       })
       setNewReply('')
     }
@@ -48,10 +54,9 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
     <div className="h-full p-4 overflow-y-auto bg-white dark:bg-black border-gray-200 dark:border-gray-700 border-l">
       <div className="mb-6">
         <NoteItem
-          post={{
+          note={{
             ...originalNote,
-            mediaType: undefined,
-            mediaUrl: undefined,
+            media: undefined,
           }}
           onToggleFollow={onToggleFollow}
           onReply={handleReplyToReply}
@@ -78,7 +83,7 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
         {replyData.map((reply, index) => (
           <div key={index} className="mb-4">
             <NoteItem
-              post={reply}
+              note={reply}
               onToggleFollow={onToggleFollow}
               onReply={handleReplyToReply}
             />

@@ -1,4 +1,4 @@
-import { UserSettingsRepository } from '@/domain/repositories/UserRepository'
+import { UserSettingsRepository } from '@/domain/repositories/UserSettingsRepository'
 
 export class SubscribeNWARequest {
   constructor(private userSettingsRepository: UserSettingsRepository) {}

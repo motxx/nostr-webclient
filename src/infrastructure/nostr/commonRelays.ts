@@ -6,7 +6,7 @@ export const CommonRelays = {
     `wss://search.nos.today`,
     `wss://nostrja-kari-nip50.heguro.com`,
     `wss://universe.nostrich.land`,
-    `wss://filter.nostr.wine/REPLACE_WITH_YOUR_NPUB?broadcast=true`,
+    //`wss://filter.nostr.wine/REPLACE_WITH_YOUR_NPUB?broadcast=true`,
   ],
   MutinyWallet: ['wss://relay.mutinywallet.com'],
   Coracle: [

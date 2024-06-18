@@ -9,9 +9,7 @@ import MessagePage from '@/features/Message'
 import SettingsPage from '@/features/Settings'
 import DashboardPage from '@/features/Dashboard'
 import toast, { Toaster } from 'react-hot-toast'
-import { User } from './models/user'
 import UserPage from '@/features/Users'
-import { userIdForDisplay } from './utils/addressConverter'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
@@ -20,20 +18,13 @@ const App: React.FC = () => {
   const focusBottomTab = () => setShouldFocusBottomTab(false)
   const unfocusBottomTab = () => setShouldFocusBottomTab(true)
 
-  const mockUser = new User({
-    npub: 'npub1v20e8yj9y7n58q5kfp0fahea9g4p3pmv2ufjgc6c9mcnugyeemyqu6s59g',
-    pubkey: '629f93924527a7438296485e9edf3d2a2a18876c57132463582ef13e2099cec8',
-    name: 'moti',
-    image: 'https://randomuser.me/api/portraits/men/5.jpg',
-  })
-
   const [following, setFollowing] = useState<boolean>(false)
 
-  const toggleFollow = (userId: string) => {
+  const toggleFollow = (userName: string) => {
     const newFollowing = !following
     setFollowing(newFollowing)
     toast(
-      `${userIdForDisplay(userId)}さん${newFollowing ? 'をフォローしました' : 'のフォローを解除しました'}`,
+      `${userName}さん${newFollowing ? 'をフォローしました' : 'のフォローを解除しました'}`,
       {
         position: 'bottom-center',
         duration: 2000,

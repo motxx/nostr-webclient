@@ -41,7 +41,9 @@ export class NostrClient {
   static readonly LoginTimeoutMSec = 60000
   static readonly Relays = [
     ...CommonRelays.NIP50SearchCapabilityCompatibles,
-    ...CommonRelays.JapaneseRelays,
+    //'wss://relay.hakua.xyz',
+    //'wss://relay.damus.io',
+    //...CommonRelays.JapaneseRelays,
     //...CommonRelays.Iris,
   ]
   static #nostrClient?: NostrClient
@@ -95,56 +97,67 @@ export class NostrClient {
         }
         this.#eventIdSet.add(event.id)
         this.#events.push(event)
-        this.#events.sort((a, b) => b.created_at - a.created_at)
+        this.#events.sort((a, b) => (b.created_at || 0) - (a.created_at || 0))
         onEvent(event)
       })
   }
 
   /**
-   * Get user
+   * Get user from npub
    * @returns NDKUser
    */
-  async getUser() {
+  async getUser(npub: string) {
+    if (npub.length !== 63 || !npub.startsWith('npub')) {
+      throw new Error(`Invalid npub: ${npub}`)
+    }
+    return this.#ndk.getUser({ npub })
+  }
+
+  /**
+   * Get logged-in user
+   * @returns NDKUser
+   */
+  async getLoggedInUser() {
     return this.#user
   }
 
   /**
-   * Get user's hex pubkey
+   * Get logged-in user's hex pubkey
    * @returns pubkey
    */
-  async getPublicKey() {
+  async getLoggedInUserPubkey() {
     return this.#user.pubkey
   }
 
   /**
-   * Get user's npub
+   * Get logged-in user's npub
    * @returns npub
    */
-  async getNpub() {
+  async getLoggedInUserNpub() {
     return this.#user.npub
   }
 
   /**
-   * Get user's name
+   * Get logged-in user's name
    * @returns name or undefined
    */
-  async getUserName() {
+  async getLoggedInUserName() {
     return this.#user.profile?.name
   }
 
   /**
-   * Get user's image
+   * Get logged-in user's image
    * @returns image or undefined
    */
-  async getUserImage() {
+  async getLoggedInUserImage() {
     return this.#user.profile?.image
   }
 
   /**
-   * Get user's lud16
+   * Get logged-in user's lud16
    * @returns lud16 or undefined
    */
-  async getLud16() {
+  async getLoggedInUserLud16() {
     return this.#user.profile?.lud16
   }
 

@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { NoteItemType } from '@/global/types'
 import NoteDetails from '@/components/NoteDetails/NoteDetails'
+import { NoteType } from '@/domain/entities/Note'
+import { userIdForDisplay } from '@/utils/addressConverter'
 
 interface TimelineImageGridProps {
-  notes: NoteItemType[]
+  notes: NoteType[]
   className?: string
 }
 
@@ -11,70 +12,70 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
   notes,
   className,
 }) => {
-  const [selectedPost, setSelectedPost] = useState<NoteItemType | null>(null)
+  const [selectedNote, setSelectedNote] = useState<NoteType | null>(null)
 
-  const imageNotes = notes.filter(
-    (post) => post.mediaType === 'image' && post.mediaUrl
+  // 画像メディアのみを含むノートをフィルタリング
+  const imageNotes = notes.filter((note) =>
+    note.media?.some((m) => m.type === 'image')
   )
 
-  const handleImageClick = (post: NoteItemType) => {
-    setSelectedPost(post)
+  const handleImageClick = (note: NoteType) => {
+    setSelectedNote(note)
   }
 
   const closeDetails = () => {
-    setSelectedPost(null)
+    setSelectedNote(null)
   }
 
   const selectPrevPost = () => {
-    if (!selectedPost) return
+    if (!selectedNote) return
     const currentIndex = imageNotes.findIndex(
       // TODO: Use eventId instead of userId and timestamp
-      (post) =>
-        post.userId === selectedPost.userId &&
-        post.timestamp === selectedPost.timestamp
+      (note) =>
+        note.id === selectedNote.id &&
+        note.created_at === selectedNote.created_at
     )
     const prevIndex = currentIndex - 1
     if (prevIndex >= 0) {
-      setSelectedPost(imageNotes[prevIndex])
+      setSelectedNote(imageNotes[prevIndex])
     }
   }
 
   const selectNextPost = () => {
-    if (!selectedPost) return
+    if (!selectedNote) return
     const currentIndex = imageNotes.findIndex(
-      // TODO: Use eventId instead of userId and timestamp
-      (post) =>
-        post.userId === selectedPost.userId &&
-        post.timestamp === selectedPost.timestamp
+      (note) =>
+        note.id === selectedNote.id &&
+        note.created_at === selectedNote.created_at // XXX: idが被ることがある. TODO:subscribeに問題ないか確認.
     )
     const nextIndex = currentIndex + 1
     if (nextIndex < imageNotes.length) {
-      setSelectedPost(imageNotes[nextIndex])
+      setSelectedNote(imageNotes[nextIndex])
     }
   }
 
   return (
     <div className={className}>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2 p-0 md:px-4">
-        {imageNotes.map((post) => (
+        {imageNotes.map((note, index) => (
           <div
-            key={post.userId + post.timestamp}
+            key={index}
             className="relative overflow-hidden cursor-pointer aspect-square md:rounded-md"
-            onClick={() => handleImageClick(post)}
+            onClick={() => handleImageClick(note)}
           >
             <img
-              src={post.mediaUrl}
-              alt={`posted by ${post.userName}`}
+              src={note.media?.find((m) => m.type === 'image')?.url}
+              alt={`posted by ${userIdForDisplay(note.author)}`}
               className="w-full h-full object-cover transition-opacity duration-300 hover:opacity-75"
             />
           </div>
         ))}
       </div>
-      {selectedPost && (
+      {selectedNote && (
         <NoteDetails
-          isOpen={!!selectedPost}
+          isOpen={!!selectedNote}
           onClose={closeDetails}
-          originalNote={selectedPost}
+          originalNote={selectedNote}
           onClickAction={() => {}}
           onToggleFollow={() => false}
           onClickPrevPost={selectPrevPost}

@@ -1,6 +1,7 @@
 import React from 'react'
-import { User } from '@/models/user'
 import Widget from './Widget'
+import { User } from '@/domain/entities/User'
+import { UserProfile } from '@/domain/entities/UserProfile'
 
 type Channel = {
   id: number
@@ -19,20 +20,26 @@ const WidgetRecommendedPublicChannel: React.FC = () => {
         new User({
           npub: 'npubhogefuga',
           pubkey: 'pubhogefuga',
-          name: 'julia',
-          image: 'https://randomuser.me/api/portraits/women/1.jpg',
+          profile: new UserProfile({
+            name: 'julia',
+            image: 'https://randomuser.me/api/portraits/women/1.jpg',
+          }),
         }),
         new User({
           npub: 'npubhogefuga2',
           pubkey: 'pubhogefuga2',
-          name: 'kaori',
-          image: 'https://randomuser.me/api/portraits/women/2.jpg',
+          profile: new UserProfile({
+            name: 'kaori',
+            image: 'https://randomuser.me/api/portraits/women/2.jpg',
+          }),
         }),
         new User({
           npub: 'npubhogefuga3',
           pubkey: 'pubhogefuga3',
-          name: 'nostaro',
-          image: 'https://randomuser.me/api/portraits/men/1.jpg',
+          profile: new UserProfile({
+            name: 'nostaro',
+            image: 'https://randomuser.me/api/portraits/men/1.jpg',
+          }),
         }),
       ],
       channeldId: 'https://channel1.example.com',
@@ -44,14 +51,18 @@ const WidgetRecommendedPublicChannel: React.FC = () => {
         new User({
           npub: 'npubhogefuga',
           pubkey: 'pubhogefuga',
-          name: 'julia',
-          image: 'https://randomuser.me/api/portraits/women/3.jpg',
+          profile: new UserProfile({
+            name: 'julia',
+            image: 'https://randomuser.me/api/portraits/women/3.jpg',
+          }),
         }),
         new User({
           npub: 'npubhogefuga2',
           pubkey: 'pubhogefuga2',
-          name: 'kaori',
-          image: 'https://randomuser.me/api/portraits/women/4.jpg',
+          profile: new UserProfile({
+            name: 'kaori',
+            image: 'https://randomuser.me/api/portraits/women/4.jpg',
+          }),
         }),
       ],
       channeldId: 'https://channel2.example.com',
@@ -87,8 +98,8 @@ const WidgetRecommendedPublicChannel: React.FC = () => {
                         style={{ zIndex: channel.knownUsers.length - index }}
                       >
                         <img
-                          src={user.image}
-                          alt={user.name}
+                          src={user.profile?.image}
+                          alt={user.profile?.name}
                           className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800"
                         />
                       </div>
@@ -96,11 +107,11 @@ const WidgetRecommendedPublicChannel: React.FC = () => {
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 justify-center max-w-[150px] break-words">
                     <p className="truncate whitespace-pre-wrap line-clamp-2">
-                      {channel.knownUsers.map((user: any, index: number) => {
+                      {channel.knownUsers.map((user, index) => {
                         if (index === 0) {
-                          return `${user.name}さん`
+                          return `${user.profile?.name}さん`
                         }
-                        return `、${user.name}さん`
+                        return `、${user.profile?.name}さん`
                       })}
                       が参加しています
                     </p>

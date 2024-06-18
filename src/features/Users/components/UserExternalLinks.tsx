@@ -1,9 +1,9 @@
+import { UserExternalLinksType } from '@/domain/entities/UserExternalLinks'
 import { FaGithub, FaGlobe, FaInstagram } from 'react-icons/fa'
-import { User } from '@/models/user'
 import { SiBluesky, SiX } from 'react-icons/si'
 
 interface UserExternalLinksProps {
-  links: User['links']
+  links: UserExternalLinksType
 }
 
 const renderLinkIcon = (

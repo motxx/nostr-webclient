@@ -1,8 +1,10 @@
-import { User } from '@/models/user'
 import TimelineStandard from '@/components/Timeline/TimelineStandard'
-import { notes as mockAllNotes } from '@/data/dummy-notes'
 import ImageCarousel from '@/components/ui-parts/ImageCarousel'
 import { mockImages, mockMerchants, mockPaidContents } from '../types'
+import { User } from '@/domain/entities/User'
+import { useSubscribeNotes } from '@/components/Timeline/hooks/useSubscribeNotes'
+import { NoteType } from '@/domain/entities/Note'
+import { useState } from 'react'
 
 interface UserContentsProps {
   user: User
@@ -10,13 +12,20 @@ interface UserContentsProps {
 }
 
 const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
-  const notes = mockAllNotes.filter(
-    (post) => post.userId === user.nostrAddress || post.userId === user.npub
+  const { subscribe } = useSubscribeNotes()
+  const [notes, setNotes] = useState<NoteType[]>([])
+  subscribe(
+    (note) => {
+      setNotes((prev) => [...prev, note])
+    },
+    {
+      authorPubkeys: [user.pubkey],
+    }
   )
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-12 sm:px-8">
-      {mockAllNotes.length > 0 && (
+      {notes.length > 0 && (
         <div>
           <h2 className="text-lg font-bold mb-4 ml-2">ピクチャー</h2>
           <ImageCarousel items={mockImages} />

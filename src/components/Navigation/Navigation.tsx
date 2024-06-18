@@ -12,7 +12,8 @@ import {
 import { TbDeviceDesktopAnalytics } from 'react-icons/tb'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
-import { User } from '@/models/user'
+import { User } from '@/domain/entities/User'
+import { UserProfile } from '@/domain/entities/UserProfile'
 
 export type NavigationItemId =
   | 'home'
@@ -36,9 +37,11 @@ export type NavigationItem = {
 const user = new User({
   npub: 'npubexampleexampleexample',
   pubkey: 'pubkeyexampleexampleexample',
-  name: 'moti',
-  nostrAddress: '_@motxx.pages.dev',
-  image: 'https://randomuser.me/api/portraits/men/5.jpg',
+  profile: new UserProfile({
+    name: 'moti',
+    nostrAddress: '_@motxx.pages.dev',
+    image: 'https://randomuser.me/api/portraits/men/5.jpg',
+  }),
 })
 
 const navigationItems: NavigationItem[] = [

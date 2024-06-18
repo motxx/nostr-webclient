@@ -21,7 +21,7 @@ const ExploreUserInfluenceGraph: React.FC<ExploreUserInfluenceGraphProps> = ({
   const networkContainer = useRef<HTMLDivElement>(null)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false)
 
-  const [networkData, setNetworkData] = useState<{
+  const [networkData] = useState<{
     nodes: NodeData[]
     edges: Edge[]
   }>({

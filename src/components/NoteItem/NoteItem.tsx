@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import NoteDetails from '@/components/NoteDetails/NoteDetails'
 import NoteItemMedia from './NoteItemMedia'
 import NoteItemActions from './NoteItemActions'
-import { NoteItemType } from '@/global/types'
 import RepliesThreadModal from '@/components/Reply/RepliesThreadModal'
 import NoteItemHeader from './NoteItemHeader'
 import NoteItemText from './NoteItemText'
+import { NoteType } from '@/domain/entities/Note'
 
 type NoteItemProps = {
-  note: NoteItemType
+  note: NoteType
   onToggleFollow: (userId: string) => boolean
   onReply?: (userId: string) => void
 }
@@ -35,7 +35,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
   const onClickAction = (type: PostActionType) => {
     if (type === 'reply') {
       if (onReply) {
-        onReply(note.userId)
+        onReply('hogeUser')
       } else if (isMobile()) {
         openRepliesThreadModal()
       } else {
@@ -83,21 +83,20 @@ const NoteItem: React.FC<NoteItemProps> = ({
   return (
     <div className="relative">
       <div className="px-2 pb-2 sm:px-0">
-        <NoteItemHeader post={note} onToggleFollow={onToggleFollow} />
+        <NoteItemHeader note={note} onToggleFollow={onToggleFollow} />
       </div>
-      {note.mediaType && note.mediaUrl && (
+      {note.media && (
         <div className="mb-4">
           <NoteItemMedia
-            mediaType={note.mediaType}
-            mediaUrl={note.mediaUrl}
-            content={note.content}
+            media={note.media}
+            text={note.text}
             openDetails={openDetails}
             youtubeIFrameRef={youtubeIFrameRef}
           />
         </div>
       )}
       <div className="px-2 sm:px-0 space-y-2 sm:space-y-4">
-        <NoteItemText text={note.content} />
+        <NoteItemText text={note.text} />
         <NoteItemActions
           replies={0}
           reposts={note.reposts}

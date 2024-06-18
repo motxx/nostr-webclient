@@ -1,19 +1,27 @@
 import React from 'react'
 import { convertToEmbedUrl } from '@/utils/contentConverter'
+import { NoteType } from '@/domain/entities/Note'
 
 interface NoteDetailsMediaContentProps {
-  mediaUrl: string
-  mediaType: 'image' | 'video-file' | 'video-youtube'
+  note: NoteType
   onBackgroundClick?: (event: React.MouseEvent<HTMLDivElement>) => void
 }
 
 const NoteDetailsMediaContent: React.FC<NoteDetailsMediaContentProps> = ({
-  mediaUrl,
-  mediaType,
+  note,
   onBackgroundClick,
 }) => {
+  const media =
+    note.media?.find((m) => m.type === 'youtube') ||
+    note.media?.find((m) => m.type === 'video') ||
+    note.media?.find((m) => m.type === 'image')
+
+  const mediaType = media?.type
+
   const embedUrl =
-    mediaType === 'video-youtube' ? convertToEmbedUrl(mediaUrl) : mediaUrl
+    mediaType === 'youtube' && media?.url
+      ? convertToEmbedUrl(media.url)
+      : undefined
 
   const handleMediaClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation()
@@ -27,14 +35,14 @@ const NoteDetailsMediaContent: React.FC<NoteDetailsMediaContentProps> = ({
           onClick={onBackgroundClick}
         >
           <img
-            src={mediaUrl}
+            src={media?.url}
             alt="Overlay"
             className="max-w-full max-h-full object-contain"
             onClick={handleMediaClick}
           />
         </div>
       )
-    case 'video-file':
+    case 'video':
       return (
         <div
           className="w-full h-full flex items-center justify-center"
@@ -44,11 +52,11 @@ const NoteDetailsMediaContent: React.FC<NoteDetailsMediaContentProps> = ({
             onClick={handleMediaClick}
             className="max-w-full max-h-full object-contain"
           >
-            <video src={mediaUrl} controls autoPlay muted playsInline />
+            <video src={media?.url} controls autoPlay muted playsInline />
           </div>
         </div>
       )
-    case 'video-youtube':
+    case 'youtube':
       return (
         <div
           className="w-full h-full flex items-center justify-center"

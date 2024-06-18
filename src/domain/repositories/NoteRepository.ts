@@ -1,19 +1,21 @@
 import { Note } from '@/domain/entities/Note'
 
-export type SubscribeTimelineOptions = {
+export type SubscribeNotesOptions = {
   since?: Date
   limit?: number
   text?: boolean
   image?: boolean
   audio?: boolean
   video?: boolean
+  youtube?: boolean
+  authorPubkeys?: string[]
 }
 
 export interface NoteRepository {
   postNote(note: Note): Promise<void>
 
-  subscribeTimeline(
+  subscribeNotes(
     onNote: (note: Note) => void,
-    options?: SubscribeTimelineOptions
+    options?: SubscribeNotesOptions
   ): Promise<void>
 }

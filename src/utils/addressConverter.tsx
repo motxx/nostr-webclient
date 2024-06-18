@@ -1,11 +1,23 @@
+import { User } from '@/domain/entities/User'
+
 export const nostrAddressForDisplay = (nostrAddress: string) => {
-  return nostrAddress.substring(0, 2) === '_@'
+  return nostrAddress.startsWith('_@')
     ? nostrAddress.substring(1)
     : nostrAddress
 }
 
-export const userIdForDisplay = (userId: string) => {
-  return userId.length > 3 && userId.substring(0, 3) === 'npub'
-    ? userId.substring(0, 17)
-    : nostrAddressForDisplay(userId)
+const shortenNpub = (npub: string) => {
+  return npub.substring(0, 8) + '...' + npub.substring(npub.length - 4)
+}
+
+export const userIdForDisplay = (user: User) => {
+  const profile = user.profile
+  return profile?.nostrAddress
+    ? nostrAddressForDisplay(profile.nostrAddress)
+    : shortenNpub(user.npub)
+}
+
+export const userNameForDisplay = (user: User) => {
+  const profile = user.profile
+  return profile?.name ? profile.name : shortenNpub(user.npub)
 }

@@ -19,7 +19,7 @@ const nostrNpubToLink = (text: string): string =>
 
 const expandExternalLink = (text: string): string =>
   text.replace(
-    /(https?:\/\/(?:www\.)?(?!(?:x\.com|twitter\.com)\/\S+)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*))/g,
+    /(https?:\/\/(?:www\.)?(?!(?:x\.com|twitter\.com)\/\S+)[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*))/g,
     (match, p1) => `<ExternalLink href='${p1}'>${p1}</ExternalLink>`
   )
 
@@ -35,6 +35,7 @@ const expandExternalLinkForProfileX = (text: string): string =>
     (match, p1, p2, p3) => `<ExternalLink href="${p1}">${p1}</ExternalLink>`
   )
 
+/*
 const expandOEmbedOfTimelineX = (text: string): string => {
   return text.replace(
     /(https:\/\/(x|twitter)\.com\/(\w+)\/?)/g,
@@ -42,6 +43,7 @@ const expandOEmbedOfTimelineX = (text: string): string => {
       `<TwitterTimelineEmbed sourceType="profile" screenName="${p3}" />`
   )
 }
+*/
 
 const applyTransformations = (
   text: string,

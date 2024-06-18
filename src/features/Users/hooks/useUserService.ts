@@ -1,21 +1,22 @@
 import { useState, useEffect, useCallback } from 'react'
 import { UserService } from '@/infrastructure/services/UserService'
 import { User } from '@/domain/entities/User'
-import { UserSettings } from '@/domain/entities/UserSettings'
-
-const userService = new UserService()
+import { useNostrClient } from '@/hooks/useNostrClient'
 
 export const useUserService = () => {
+  const nostrClient = useNostrClient()
   const [user, setUser] = useState<User | null>(null)
-  const [settings, setSettings] = useState<UserSettings | null>(null)
+  const [userService, setUserService] = useState<UserService | null>(null)
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
     const connectUserService = async () => {
+      if (nostrClient === null) return
       try {
+        const userService = new UserService(nostrClient)
         const loggedInUser = await userService.login()
         setUser(loggedInUser)
-        setSettings(loggedInUser.settings)
+        setUserService(userService)
         setIsConnected(true)
       } catch (error) {
         console.error(error)
@@ -23,49 +24,21 @@ export const useUserService = () => {
     }
 
     connectUserService()
-  }, [])
+  }, [nostrClient])
 
   const fetchUser = useCallback(async () => {
+    if (!userService) return
     try {
       const fetchedUser = await userService.fetch()
       setUser(fetchedUser)
     } catch (error) {
       console.error(error)
     }
-  }, [])
-
-  const updateUserSettings = useCallback(
-    async (npub: string, newSettings: UserSettings) => {
-      try {
-        const updatedSettings = await userService.updateSettings(
-          npub,
-          newSettings
-        )
-        setSettings(updatedSettings)
-      } catch (error) {
-        console.error(error)
-      }
-    },
-    []
-  )
-
-  const subscribeNWARequest = useCallback(
-    (onNWARequest: (connectionUri: string) => void) => {
-      try {
-        userService.subscribeNWARequest(onNWARequest)
-      } catch (error) {
-        console.error(error)
-      }
-    },
-    []
-  )
+  }, [userService])
 
   return {
     user,
-    settings,
     isConnected,
     fetchUser,
-    updateUserSettings,
-    subscribeNWARequest,
   }
 }

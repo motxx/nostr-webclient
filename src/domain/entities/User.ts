@@ -1,11 +1,21 @@
-import { UserSettings } from '@/domain/entities/UserSettings'
+import { UserProfileType } from './UserProfile'
 
-export class User {
-  constructor(
-    public readonly npub: string,
-    public readonly pubkey: string,
-    public readonly username: string,
-    public readonly image: string,
-    public readonly settings: UserSettings
-  ) {}
+export interface UserType {
+  npub: string
+  pubkey: string
+  profile?: UserProfileType
+}
+
+export class User implements UserType {
+  npub: string = ''
+  pubkey: string = ''
+  profile?: UserProfileType
+
+  constructor(data: UserType) {
+    Object.assign(this, data)
+  }
+
+  static verified(user: User) {
+    return !!user.profile?.nostrAddress
+  }
 }

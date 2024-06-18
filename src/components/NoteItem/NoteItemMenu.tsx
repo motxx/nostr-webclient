@@ -3,14 +3,14 @@ import { FiUserPlus, FiUserX, FiVolumeX } from 'react-icons/fi'
 import { useClickAway } from 'react-use'
 
 interface NoteItemMenuProps {
-  userId: string
+  userName: string
   following: boolean
   onToggleFollow: (userId: string) => boolean
   onClose: () => void
 }
 
 const NoteItemMenu: React.FC<NoteItemMenuProps> = ({
-  userId,
+  userName,
   following,
   onToggleFollow,
   onClose,
@@ -20,7 +20,7 @@ const NoteItemMenu: React.FC<NoteItemMenuProps> = ({
   useClickAway(ref, onClose)
 
   const handleClickToggleFollow = () => {
-    onToggleFollow(userId)
+    onToggleFollow(userName)
     onClose()
   }
 
@@ -39,11 +39,12 @@ const NoteItemMenu: React.FC<NoteItemMenuProps> = ({
           <FiUserPlus className="w-5 h-5 mt-1 mr-2" />
         )}
         {following
-          ? `@${userId}さんのフォローを解除`
-          : `@${userId}さんをフォロー`}
+          ? `${userName}さんのフォローを解除`
+          : `${userName}さんをフォロー`}
       </div>
       <div className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-800 dark:text-gray-300">
-        <FiVolumeX className="w-5 h-5 mt-1 mr-2" />@{userId}さんをミュート
+        <FiVolumeX className="w-5 h-5 mt-1 mr-2" />
+        {userName}さんをミュート
       </div>
     </div>
   )
