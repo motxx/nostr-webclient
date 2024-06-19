@@ -30,8 +30,15 @@ const Timeline: React.FC<TimelineProps> = ({
   useEffect(() => {
     subscribe(
       (note) => {
-        setNotes((prevNotes: Note[]) => [...prevNotes, note])
-        setIsLoading(false)
+        if (
+          note.media?.some(
+            (m) =>
+              m.type === 'image' || m.type === 'video' || m.type === 'youtube'
+          )
+        ) {
+          setNotes((prevNotes: Note[]) => [...prevNotes, note])
+          setIsLoading(false)
+        }
       }
       // { image: true }
     )
