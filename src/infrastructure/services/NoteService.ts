@@ -41,7 +41,7 @@ export class NoteService implements NoteRepository {
       kinds: [NDKKind.Text],
       authors,
       since: options?.since ? unixtimeOf(options.since) : undefined,
-      limit: options?.limit ?? 100,
+      limit: options?.limit ?? 500,
       // NIP-50: Search Capability - https://scrapbox.io/nostr/NIP-50
       // search文字列の仕様はRelayer依存
       search: options?.image

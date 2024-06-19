@@ -40,7 +40,8 @@ export class NostrClient {
 
   static readonly LoginTimeoutMSec = 60000
   static readonly Relays = [
-    ...CommonRelays.NIP50SearchCapabilityCompatibles,
+    'wss://relay.nostr.band',
+    // ...CommonRelays.NIP50SearchCapabilityCompatibles,
     //'wss://relay.hakua.xyz',
     //'wss://relay.damus.io',
     //...CommonRelays.JapaneseRelays,

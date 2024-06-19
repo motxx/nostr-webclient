@@ -2,10 +2,10 @@
 
 export const CommonRelays = {
   NIP50SearchCapabilityCompatibles: [
-    `wss://relay.nostr.band`,
-    `wss://search.nos.today`,
-    `wss://nostrja-kari-nip50.heguro.com`,
-    `wss://universe.nostrich.land`,
+    'wss://relay.nostr.band',
+    'wss://search.nos.today',
+    'wss://nostrja-kari-nip50.heguro.com',
+    'wss://universe.nostrich.land',
     //`wss://filter.nostr.wine/REPLACE_WITH_YOUR_NPUB?broadcast=true`,
   ],
   MutinyWallet: ['wss://relay.mutinywallet.com'],
