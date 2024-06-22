@@ -24,15 +24,14 @@ const Timeline: React.FC<TimelineProps> = ({
   const timelineRef = useRef<HTMLDivElement>(null)
   const [activeTabId, setActiveTabId] = useState<TimelineTabId>('following')
   const [lastScrollTop, setLastScrollTop] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
   const [notes, setNotes] = useAtom(followingTimelineAtom)
+  const isLoading = notes.length === 0
 
   const handleNewNote = useCallback(
     (note: Note) => {
       setNotes((prevNotes) => {
         // XXX: 重複排除はNostrClient内にも存在するが、制御が上手く行っていないのでここにも存在する
         if (prevNotes.some((n) => n.id === note.id)) return prevNotes
-        setIsLoading(false)
         console.log(note)
         const newNotes = [...prevNotes, note].sort((a, b) => {
           return b.created_at.getTime() - a.created_at.getTime()
