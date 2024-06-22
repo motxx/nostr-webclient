@@ -1,7 +1,7 @@
 {
   "name": "cobra",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.1",
+  "license": "AGPL-3.0",
   "dependencies": {
     "@getalby/sdk": "^3.5.1",
     "@nostr-dev-kit/ndk": "^2.8.2",
