@@ -39,10 +39,11 @@ export class NostrClient {
 
   static readonly LoginTimeoutMSec = 60000
   static readonly Relays = [
+    // TODO: クライアントの安定性が確認でき次第リレーを徐々に増やし、ユーザ側でも指定可能にする
+    'wss://relay.hakua.xyz',
+    'wss://relay.damus.io',
     'wss://relay.nostr.band',
     // ...CommonRelays.NIP50SearchCapabilityCompatibles,
-    //'wss://relay.hakua.xyz',
-    //'wss://relay.damus.io',
     //...CommonRelays.JapaneseRelays,
     //...CommonRelays.Iris,
   ]
