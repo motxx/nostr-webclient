@@ -76,17 +76,19 @@ export class NostrClient {
    * Subscribe events specified by filters
    * @param onEvent listener of NDKEvent
    * @param filters NDKFilter
+   * @param isForever true: subscribe forever, false: subscribe once
    */
   async subscribeEvents(
     filters: NDKFilter,
-    onEvent: (event: NDKEvent) => void
+    onEvent: (event: NDKEvent) => void,
+    isForever: boolean = true
   ) {
     const relaySet = NDKRelaySet.fromRelayUrls(NostrClient.Relays, this.#ndk)
     const subscription = this.#ndk
       .subscribe(
         filters,
         {
-          closeOnEose: false, // subscribe forever
+          closeOnEose: !isForever, // subscribe forever
         },
         relaySet,
         true
@@ -102,6 +104,7 @@ export class NostrClient {
 
     return {
       unsubscribe: () => {
+        console.log('unsubscribe', subscription)
         subscription.stop()
       },
     }

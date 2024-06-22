@@ -2,6 +2,7 @@ import { Note } from '@/domain/entities/Note'
 
 export type SubscribeNotesOptions = {
   since?: Date
+  until?: Date
   limit?: number
   text?: boolean
   image?: boolean
@@ -9,6 +10,7 @@ export type SubscribeNotesOptions = {
   video?: boolean
   youtube?: boolean
   authorPubkeys?: string[]
+  isForever?: boolean
 }
 
 export interface NoteRepository {

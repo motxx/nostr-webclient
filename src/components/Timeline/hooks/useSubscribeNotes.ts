@@ -8,7 +8,7 @@ import { useNostrClient } from '@/hooks/useNostrClient'
 
 export const useSubscribeNotes = () => {
   const nostrClient = useNostrClient()
-  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null)
+  const subscriptionsRef = useRef<Array<{ unsubscribe: () => void }>>([])
 
   const subscribe = useCallback(
     async (onNote: (note: Note) => void, options?: SubscribeNotesOptions) => {
@@ -18,20 +18,37 @@ export const useSubscribeNotes = () => {
       const userProfileService = new UserProfileService(nostrClient)
       const noteService = new NoteService(nostrClient, userProfileService)
       const subscribeTimeline = new SubscribeNotes(noteService)
+
       const subscription = await subscribeTimeline.execute(onNote, options)
-      subscriptionRef.current = subscription
+      subscriptionsRef.current.push(subscription)
       return subscription
     },
     [nostrClient]
   )
 
-  useEffect(() => {
-    return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe()
+  const unsubscribe = useCallback(
+    (subscription: { unsubscribe: () => void }) => {
+      const index = subscriptionsRef.current.indexOf(subscription)
+      if (index > -1) {
+        subscription.unsubscribe()
+        subscriptionsRef.current.splice(index, 1)
       }
-    }
+    },
+    []
+  )
+
+  const unsubscribeAll = useCallback(() => {
+    subscriptionsRef.current.forEach((subscription) =>
+      subscription.unsubscribe()
+    )
+    subscriptionsRef.current = []
   }, [])
 
-  return { subscribe }
+  useEffect(() => {
+    return () => {
+      unsubscribeAll()
+    }
+  }, [unsubscribeAll])
+
+  return { subscribe, unsubscribe, unsubscribeAll }
 }

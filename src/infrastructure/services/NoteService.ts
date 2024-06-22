@@ -41,6 +41,7 @@ export class NoteService implements NoteRepository {
       kinds: [NDKKind.Text],
       authors,
       since: options?.since ? unixtimeOf(options.since) : undefined,
+      until: options?.until ? unixtimeOf(options.until) : undefined,
       limit: options?.limit ?? 20,
       // NIP-50: Search Capability - https://scrapbox.io/nostr/NIP-50
       // search文字列の仕様はRelayer依存
@@ -63,7 +64,8 @@ export class NoteService implements NoteRepository {
 
         const note = await this.createNoteFromEvent(event, author)
         onNote(note)
-      }
+      },
+      options?.isForever
     )
   }
 
