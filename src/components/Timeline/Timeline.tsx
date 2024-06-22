@@ -30,6 +30,7 @@ const Timeline: React.FC<TimelineProps> = ({
   const handleNewNote = useCallback(
     (note: Note) => {
       setNotes((prevNotes) => {
+        // XXX: 重複排除はNostrClient内にも存在するが、制御が上手く行っていないのでここにも存在する
         if (prevNotes.some((n) => n.id === note.id)) return prevNotes
         setIsLoading(false)
         console.log(note)
