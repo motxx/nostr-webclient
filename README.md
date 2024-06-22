@@ -18,4 +18,4 @@ bun start
 
 ## Note
 
-This project is currently under development. Features and name are subject to change.
+This project was originally licensed under the MIT License. As of 2024-06-22, the license has been changed to the AGPL.
