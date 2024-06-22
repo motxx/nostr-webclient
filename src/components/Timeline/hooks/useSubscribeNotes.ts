@@ -8,7 +8,9 @@ import { useNostrClient } from '@/hooks/useNostrClient'
 
 export const useSubscribeNotes = () => {
   const nostrClient = useNostrClient()
-  const subscriptionsRef = useRef<Array<{ unsubscribe: () => void }>>([])
+  const subscriptionsRef = useRef<
+    Array<{ isForever?: boolean; unsubscribe: () => void }>
+  >([])
 
   const subscribe = useCallback(
     async (onNote: (note: Note) => void, options?: SubscribeNotesOptions) => {
@@ -20,7 +22,10 @@ export const useSubscribeNotes = () => {
       const subscribeTimeline = new SubscribeNotes(noteService)
 
       const subscription = await subscribeTimeline.execute(onNote, options)
-      subscriptionsRef.current.push(subscription)
+      subscriptionsRef.current.push({
+        isForever: options?.isForever,
+        unsubscribe: subscription.unsubscribe,
+      })
       return subscription
     },
     [nostrClient]
@@ -38,9 +43,11 @@ export const useSubscribeNotes = () => {
   )
 
   const unsubscribeAll = useCallback(() => {
-    subscriptionsRef.current.forEach((subscription) =>
-      subscription.unsubscribe()
-    )
+    subscriptionsRef.current.forEach((subscription) => {
+      if (!subscription.isForever) {
+        subscription.unsubscribe()
+      }
+    })
     subscriptionsRef.current = []
   }, [])
 
