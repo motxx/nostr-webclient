@@ -7,7 +7,10 @@ import {
 export class SubscribeNotes {
   constructor(private noteRepository: NoteRepository) {}
 
-  async execute(onNote: (note: Note) => void, options?: SubscribeNotesOptions) {
-    this.noteRepository.subscribeNotes(onNote, options)
+  async execute(
+    onNote: (note: Note) => void,
+    options?: SubscribeNotesOptions
+  ): Promise<{ unsubscribe: () => void }> {
+    return this.noteRepository.subscribeNotes(onNote, options)
   }
 }

@@ -30,7 +30,7 @@ export class NoteService implements NoteRepository {
   async subscribeNotes(
     onNote: (note: Note) => void,
     options?: SubscribeNotesOptions
-  ): Promise<void> {
+  ): Promise<{ unsubscribe: () => void }> {
     const user = await this.#nostrClient.getLoggedInUser()
     const follows = await user.follows()
     const authors =
@@ -41,7 +41,7 @@ export class NoteService implements NoteRepository {
       kinds: [NDKKind.Text],
       authors,
       since: options?.since ? unixtimeOf(options.since) : undefined,
-      limit: options?.limit ?? 500,
+      limit: options?.limit ?? 20,
       // NIP-50: Search Capability - https://scrapbox.io/nostr/NIP-50
       // search文字列の仕様はRelayer依存
       search: options?.image
@@ -49,7 +49,7 @@ export class NoteService implements NoteRepository {
         : undefined,
     }
 
-    await this.#nostrClient.subscribeEvents(
+    return await this.#nostrClient.subscribeEvents(
       filterOptions,
       async (event: NDKEvent) => {
         const profile = await this.#userProfileRepository.fetchProfile(
