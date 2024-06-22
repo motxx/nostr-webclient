@@ -21,6 +21,7 @@ const Timeline: React.FC<TimelineProps> = ({
 }) => {
   const { subscribe } = useSubscribeNotes()
   const tabRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
   const [activeTabId, setActiveTabId] = useState<TimelineTabId>('following')
   const [lastScrollTop, setLastScrollTop] = useState(0)
@@ -53,12 +54,6 @@ const Timeline: React.FC<TimelineProps> = ({
     [handleNote]
   )
 
-  useEffect(() => {
-    if (isLoading) {
-      subscribe(handleNewNote, { limit: 20, isForever: true })
-    }
-  }, [isLoading, subscribe, handleNewNote])
-
   const loadMoreNotes = useCallback(() => {
     if (isLoadingMore || isLoading) return
 
@@ -74,12 +69,31 @@ const Timeline: React.FC<TimelineProps> = ({
     })
   }, [isLoadingMore, isLoading, notes, subscribe, handleOldNote])
 
+  useEffect(() => {
+    if (isLoading) {
+      subscribe(handleNewNote, { limit: 20, isForever: true })
+    }
+    if (!isLoadingMore) {
+      const wrapperElement = wrapperRef.current
+      const scrollElement = timelineRef.current
+      if (wrapperElement && scrollElement) {
+        const currentScrollTop = scrollElement.scrollTop
+        const scrollHeight = scrollElement.scrollHeight
+        const clientHeight = wrapperElement.clientHeight
+        if (scrollHeight - currentScrollTop <= clientHeight) {
+          loadMoreNotes()
+        }
+      }
+    }
+  }, [isLoading, subscribe, handleNewNote, isLoadingMore, loadMoreNotes])
+
   const handleScroll = () => {
+    const wrapperElement = wrapperRef.current
     const scrollElement = timelineRef.current
-    if (scrollElement) {
+    if (wrapperElement && scrollElement) {
       const currentScrollTop = scrollElement.scrollTop
       const scrollHeight = scrollElement.scrollHeight
-      const clientHeight = scrollElement.clientHeight
+      const clientHeight = wrapperElement.clientHeight
 
       if (tabRef.current && currentScrollTop <= tabRef.current.clientHeight) {
         onScrollUp()
@@ -89,8 +103,7 @@ const Timeline: React.FC<TimelineProps> = ({
         onScrollUp()
       }
 
-      // 画面の2倍の高さが残っている時点で新しい投稿を読み込む
-      if (scrollHeight - currentScrollTop <= clientHeight * 3) {
+      if (scrollHeight - currentScrollTop <= clientHeight) {
         loadMoreNotes()
       }
 
@@ -106,14 +119,6 @@ const Timeline: React.FC<TimelineProps> = ({
   }
 
   const renderFeed = () => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
-        </div>
-      )
-    }
-
     const activeTab = HomeTimelineTabs.find((tab) => tab.id === activeTabId)
     switch (activeTab?.feedType) {
       case 'standard':
@@ -132,24 +137,26 @@ const Timeline: React.FC<TimelineProps> = ({
   }
 
   return (
-    <div
-      ref={timelineRef}
-      onScroll={handleScroll}
-      className="w-full max-w-2xl mx-auto overflow-auto"
-      style={{ maxHeight: '100vh' }}
-    >
-      <TimelineTab
-        ref={tabRef}
-        onTabItemClick={handleTabClick}
-        tabs={HomeTimelineTabs}
-        activeTabId={activeTabId}
-      />
-      <div className="flex justify-center w-full">{renderFeed()}</div>
-      {isLoadingMore && (
-        <div className="flex justify-center items-center h-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
-        </div>
-      )}
+    <div ref={wrapperRef} className="h-full">
+      <div
+        ref={timelineRef}
+        onScroll={handleScroll}
+        className="w-full max-w-2xl mx-auto overflow-auto"
+        style={{ maxHeight: '100vh' }}
+      >
+        <TimelineTab
+          ref={tabRef}
+          onTabItemClick={handleTabClick}
+          tabs={HomeTimelineTabs}
+          activeTabId={activeTabId}
+        />
+        <div className="flex justify-center w-full">{renderFeed()}</div>
+        {(isLoading || isLoadingMore) && (
+          <div className="flex justify-center items-center h-16">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
