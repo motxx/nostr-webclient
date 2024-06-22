@@ -26,37 +26,61 @@ const Timeline: React.FC<TimelineProps> = ({
   const [lastScrollTop, setLastScrollTop] = useState(0)
   const [notes, setNotes] = useAtom(followingTimelineAtom)
   const isLoading = notes.length === 0
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
 
-  const handleNewNote = useCallback(
-    (note: Note) => {
+  const handleNote = useCallback(
+    (note: Note, isNewNote: boolean = true) => {
       setNotes((prevNotes) => {
         // XXX: 重複制御はNostrClient内にも存在するが、制御が十分ではないのでここにも存在する
         if (prevNotes.some((n) => n.id === note.id)) return prevNotes
-        console.log(note)
-        const newNotes = [...prevNotes, note].sort((a, b) => {
-          return b.created_at.getTime() - a.created_at.getTime()
-        })
-        return newNotes
+        console.log(isNewNote ? 'New note:' : 'Old note:', note)
+        const newNotes = isNewNote ? [note, ...prevNotes] : [...prevNotes, note]
+        return newNotes.sort(
+          (a, b) => b.created_at.getTime() - a.created_at.getTime()
+        )
       })
     },
     [setNotes]
   )
 
-  useEffect(() => {
-    subscribe(handleNewNote)
-  }, [subscribe, handleNewNote])
+  const handleNewNote = useCallback(
+    (note: Note) => handleNote(note, true),
+    [handleNote]
+  )
 
-  const handleTabClick = (tabId: TimelineTabId) => {
-    setActiveTabId(tabId)
-    if (timelineRef.current) {
-      timelineRef.current.scrollTop = 0
+  const handleOldNote = useCallback(
+    (note: Note) => handleNote(note, false),
+    [handleNote]
+  )
+
+  useEffect(() => {
+    if (isLoading) {
+      subscribe(handleNewNote, { limit: 20, isForever: true })
     }
-  }
+  }, [isLoading, subscribe, handleNewNote])
+
+  const loadMoreNotes = useCallback(() => {
+    if (isLoadingMore || isLoading) return
+
+    console.log('Loading more notes...')
+    setIsLoadingMore(true)
+    const oldestNote = notes[notes.length - 1]
+    subscribe(handleOldNote, {
+      until: oldestNote.created_at,
+      limit: 20,
+      isForever: false,
+    }).then((subscription) => {
+      setIsLoadingMore(false)
+    })
+  }, [isLoadingMore, isLoading, notes, subscribe, handleOldNote])
 
   const handleScroll = () => {
     const scrollElement = timelineRef.current
     if (scrollElement) {
       const currentScrollTop = scrollElement.scrollTop
+      const scrollHeight = scrollElement.scrollHeight
+      const clientHeight = scrollElement.clientHeight
+
       if (tabRef.current && currentScrollTop <= tabRef.current.clientHeight) {
         onScrollUp()
       } else if (currentScrollTop > lastScrollTop) {
@@ -64,7 +88,20 @@ const Timeline: React.FC<TimelineProps> = ({
       } else if (currentScrollTop < lastScrollTop) {
         onScrollUp()
       }
+
+      // 画面の2倍の高さが残っている時点で新しい投稿を読み込む
+      if (scrollHeight - currentScrollTop <= clientHeight * 3) {
+        loadMoreNotes()
+      }
+
       setLastScrollTop(currentScrollTop)
+    }
+  }
+
+  const handleTabClick = (tabId: TimelineTabId) => {
+    setActiveTabId(tabId)
+    if (timelineRef.current) {
+      timelineRef.current.scrollTop = 0
     }
   }
 
@@ -108,6 +145,11 @@ const Timeline: React.FC<TimelineProps> = ({
         activeTabId={activeTabId}
       />
       <div className="flex justify-center w-full">{renderFeed()}</div>
+      {isLoadingMore && (
+        <div className="flex justify-center items-center h-16">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
+        </div>
+      )}
     </div>
   )
 }
