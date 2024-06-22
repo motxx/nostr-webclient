@@ -6,8 +6,8 @@ const newlineToBr = (text: string): string => text.split('\n').join('<br />')
 
 const hashtagToLink = (text: string): string =>
   text.replace(
-    /#([^\s#@<>${}/\\]+)/g,
-    (match, p1) => `<RouterLink to='/hashtag/${p1}'>#${p1}</RouterLink>`
+    /(^|\s)#([^\s#@<>${}/\\]+)/g,
+    (match, p1, p2) => `<RouterLink to='/hashtag/${p2}'>#${p2}</RouterLink>`
   )
 
 const nostrNpubToLink = (text: string): string =>
