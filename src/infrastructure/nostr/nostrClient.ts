@@ -123,51 +123,20 @@ export class NostrClient {
   }
 
   /**
+   * Get user from nip05Id
+   * @param nip05Id
+   * @returns NDKUser
+   */
+  async getUserFromNip05(nip05Id: string) {
+    return this.#ndk.getUserFromNip05(nip05Id)
+  }
+
+  /**
    * Get logged-in user
    * @returns NDKUser
    */
   async getLoggedInUser() {
     return this.#user
-  }
-
-  /**
-   * Get logged-in user's hex pubkey
-   * @returns pubkey
-   */
-  async getLoggedInUserPubkey() {
-    return this.#user.pubkey
-  }
-
-  /**
-   * Get logged-in user's npub
-   * @returns npub
-   */
-  async getLoggedInUserNpub() {
-    return this.#user.npub
-  }
-
-  /**
-   * Get logged-in user's name
-   * @returns name or undefined
-   */
-  async getLoggedInUserName() {
-    return this.#user.profile?.name
-  }
-
-  /**
-   * Get logged-in user's image
-   * @returns image or undefined
-   */
-  async getLoggedInUserImage() {
-    return this.#user.profile?.image
-  }
-
-  /**
-   * Get logged-in user's lud16
-   * @returns lud16 or undefined
-   */
-  async getLoggedInUserLud16() {
-    return this.#user.profile?.lud16
   }
 
   async decryptEvent(event: NDKEvent) {

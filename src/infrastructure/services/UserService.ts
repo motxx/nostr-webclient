@@ -22,37 +22,58 @@ export class UserService implements UserRepository {
   }
 
   async login(): Promise<User> {
-    const npub = await this.#nostrClient.getLoggedInUserNpub()
-    const pubkey = await this.#nostrClient.getLoggedInUserPubkey()
-    this.#userStore = new UserStore(npub)
-    const userName = (await this.#nostrClient.getLoggedInUserName()) || ''
-    const userImage = (await this.#nostrClient.getLoggedInUserImage()) || ''
+    const user = await this.#nostrClient.getLoggedInUser()
+    this.#userStore = new UserStore(user.npub)
+    const userName = user.profile?.displayName || user.profile?.name
+    const userImage = user.profile?.image
     return new User({
-      npub,
-      pubkey,
+      npub: user.npub,
+      pubkey: user.pubkey,
       profile: { name: userName, image: userImage },
     })
   }
 
-  async fetch(): Promise<User> {
+  async #ensureLoggedIn() {
+    this.login()
+  }
+
+  async fetchLoggedInUser(): Promise<User> {
+    await this.#ensureLoggedIn()
     if (!this.#isLoggedIn()) {
       throw new UserNotLoggedInError()
     }
-    const npub = await this.nostrClient.getLoggedInUserNpub()
-    const pubkey = await this.nostrClient.getLoggedInUserPubkey()
-    const userName = (await this.nostrClient.getLoggedInUserName()) || ''
-    const userImage = (await this.nostrClient.getLoggedInUserImage()) || ''
+    const user = await this.#nostrClient.getLoggedInUser()
+    const userName = user.profile?.displayName || user.profile?.name
+    const userImage = user.profile?.image
     return new User({
-      npub,
-      pubkey,
+      npub: user.npub,
+      pubkey: user.pubkey,
       profile: { name: userName, image: userImage },
     })
   }
+  /*
+  async fetchUser(npub: string): Promise<User> {
+    await this.#ensureLoggedIn()
+    if (!this.#isLoggedIn()) {
+      throw new UserNotLoggedInError()
+    }
+    const user = await this.#nostrClient.getUser(npub)
+    const pubkey = user.pubkey
+    const name = user.profile?.displayName || user.profile?.name
+    const image = user.profile?.image
+    return new User({
+      npub,
+      pubkey,
+      profile: { name, image },
+    })
+  }
+*/
 
   async sendZapRequest(
     nip05Id: string,
     sats: number
   ): Promise<SendZapRequestResponse> {
+    await this.#ensureLoggedIn()
     if (!this.#isLoggedIn()) {
       throw new UserNotLoggedInError()
     }
@@ -60,7 +81,10 @@ export class UserService implements UserRepository {
     return this.#nostrClient.sendZapRequest(nip05Id, sats)
   }
 
-  #isLoggedIn(): this is { nostrClient: NostrClient; userStore: UserStore } {
+  #isLoggedIn(): this is {
+    '#nostrClient': NostrClient
+    '#userStore': UserStore
+  } {
     return this.#nostrClient !== undefined && this.#userStore !== undefined
   }
 }

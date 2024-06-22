@@ -77,8 +77,9 @@ export class NostrWalletAuth {
     const decrypted = await this.#nostrClient.decryptEvent(event)
     const content = JSON.parse(decrypted.content)
     console.log('decrypted NWARequest content', content)
-    const pubkey = await this.#nostrClient.getLoggedInUserPubkey()
-    const lud16 = await this.#nostrClient.getLoggedInUserLud16()
+    const user = await this.#nostrClient.getLoggedInUser()
+    const pubkey = user.pubkey
+    const lud16 = user.profile?.lud16
     const uri = new URL(`nostr+walletconnect://${pubkey}`)
     uri.searchParams.append('relay', content.relay)
     uri.searchParams.append('secret', content.secret)

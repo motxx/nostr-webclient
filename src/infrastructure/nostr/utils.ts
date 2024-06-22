@@ -1,7 +1,4 @@
-import { User } from '@/domain/entities/User'
-import { UserExternalLinks } from '@/domain/entities/UserExternalLinks'
-import { UserProfile } from '@/domain/entities/UserProfile'
-import { NDKUser, NostrEvent } from '@nostr-dev-kit/ndk'
+import { NostrEvent } from '@nostr-dev-kit/ndk'
 import { createHash } from 'sha256-uint8array'
 
 export const unixtime = () => {

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import UserHeader from './components/UserHeader'
 import UserDescription from './components/UserDescription'
 import UserContents from './components/UserContents'
 import { User } from '@/domain/entities/User'
-import { UserProfile } from '@/domain/entities/UserProfile'
+import { useNostrClient } from '@/hooks/useNostrClient'
+import { FetchNpubFromNostrAddress } from '@/domain/use_cases/FetchNpubFromNostrAddress'
+import { FetchUser } from '@/domain/use_cases/FetchUser'
+import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 
 interface UserPageProps {
   isFollowing: boolean
@@ -12,42 +15,44 @@ interface UserPageProps {
 }
 
 const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
-  const { userId } = useParams<{ userId: string }>()
+  const nostrClient = useNostrClient()
   const [user, setUser] = useState<User | null>(null)
+  const location = useLocation()
 
   useEffect(() => {
+    if (!nostrClient) return
+
     const fetchUserData = async () => {
-      const mockUser = new User({
-        npub: 'npub1v20e8yj9y7n58q5kfp0fahea9g4p3pmv2ufjgc6c9mcnugyeemyqu6s59g',
-        pubkey:
-          '629f93924527a7438296485e9edf3d2a2a18876c57132463582ef13e2099cec8',
-        profile: new UserProfile({
-          name: 'moti',
-          nostrAddress: '_@motxx.pages.dev',
-          image: 'https://randomuser.me/api/portraits/men/5.jpg',
-          bio: 'This is a mock user bio.\nnostr:npub14wr8qwpe82k072mjhdg8qjv0hkrkuvguwcjr7hmw5vn3336tg3dqgm752r\nhttps://www.example.com',
-          followersCount: 150,
-          followingCount: 100,
-          banner:
-            'https://fastly.picsum.photos/id/227/600/200.jpg?hmac=iWKqkrS9xX7cgGWbiBCnAUzNtyCn8vpUBupjxwF3Lo8',
-          links: {
-            github: 'https://github.com/example',
-            twitter: 'https://twitter.com/example',
-            mastodon: 'https://mastodon.social/@example',
-            telegram: 'https://t.me/example',
-            bluesky: 'https://bsky.app/profile/example',
-            pixiv: 'https://pixiv.net/users/example',
-            skeb: 'https://skeb.jp/@example',
-            instagram: 'https://instagram.com/example',
-            website: 'https://example.com',
-          },
-        }),
-      })
-      setUser(mockUser)
+      const userProfileService = new UserProfileService(nostrClient)
+      const npubPattern = new RegExp('/user/(npub[^/]+)/?')
+      const npubMatch = location.pathname.match(npubPattern)
+      const userId = npubMatch ? npubMatch[1] : null
+      if (!userId) return
+
+      let npub: string
+      if (npubMatch) {
+        npub = npubMatch[1]
+      } else {
+        const nostrAddressPattern = new RegExp('/user/([^/]*@[^/]+)/?')
+        const nostrAddressMatch = location.pathname.match(nostrAddressPattern)
+        if (!nostrAddressMatch) return
+
+        const nostrAddress = nostrAddressMatch[1]
+        try {
+          npub = await new FetchNpubFromNostrAddress(
+            userProfileService
+          ).execute(nostrAddress)
+        } catch {
+          console.log('npub not found')
+          return
+        }
+      }
+      const user = await new FetchUser(userProfileService).execute(npub)
+      setUser(user)
     }
 
     fetchUserData()
-  }, [userId])
+  }, [nostrClient, location.pathname])
 
   if (!user) return <div>Loading...</div>
 

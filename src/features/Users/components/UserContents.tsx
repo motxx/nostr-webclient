@@ -4,7 +4,7 @@ import { mockImages, mockMerchants, mockPaidContents } from '../types'
 import { User } from '@/domain/entities/User'
 import { useSubscribeNotes } from '@/components/Timeline/hooks/useSubscribeNotes'
 import { NoteType } from '@/domain/entities/Note'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface UserContentsProps {
   user: User
@@ -14,14 +14,16 @@ interface UserContentsProps {
 const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
   const { subscribe } = useSubscribeNotes()
   const [notes, setNotes] = useState<NoteType[]>([])
-  subscribe(
-    (note) => {
-      setNotes((prev) => [...prev, note])
-    },
-    {
-      authorPubkeys: [user.pubkey],
-    }
-  )
+  useEffect(() => {
+    subscribe(
+      (note) => {
+        setNotes((prev) => [...prev, note])
+      },
+      {
+        authorPubkeys: [user.pubkey],
+      }
+    )
+  }, [subscribe, user.pubkey])
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-12 sm:px-8">
