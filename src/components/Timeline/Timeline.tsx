@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
 import TimelineImageGrid from './TimelineImageGrid'
@@ -27,25 +27,24 @@ const Timeline: React.FC<TimelineProps> = ({
   const [isLoading, setIsLoading] = useState(true)
   const [notes, setNotes] = useAtom(followingTimelineAtom)
 
-  useEffect(() => {
-    subscribe(
-      (note) => {
-        if (
-          note.media?.some(
-            (m) =>
-              m.type === 'image' || m.type === 'video' || m.type === 'youtube'
-          )
-        ) {
-          setNotes((prevNotes: Note[]) => [...prevNotes, note])
-          setIsLoading(false)
-        }
-      }
-      // { image: true }
-    )
+  const handleNewNote = useCallback(
+    (note: Note) => {
+      setNotes((prevNotes) => {
+        if (prevNotes.some((n) => n.id === note.id)) return prevNotes
+        setIsLoading(false)
+        console.log(note)
+        const newNotes = [...prevNotes, note].sort((a, b) => {
+          return b.created_at.getTime() - a.created_at.getTime()
+        })
+        return newNotes
+      })
+    },
+    [setNotes]
+  )
 
-    // Cleanup subscription on unmount
-    //return () => unsubscribe()
-  }, [subscribe, setNotes])
+  useEffect(() => {
+    subscribe(handleNewNote)
+  }, [subscribe, handleNewNote])
 
   const handleTabClick = (tabId: TimelineTabId) => {
     setActiveTabId(tabId)

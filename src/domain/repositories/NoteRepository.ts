@@ -17,5 +17,5 @@ export interface NoteRepository {
   subscribeNotes(
     onNote: (note: Note) => void,
     options?: SubscribeNotesOptions
-  ): Promise<void>
+  ): Promise<{ unsubscribe: () => void }>
 }

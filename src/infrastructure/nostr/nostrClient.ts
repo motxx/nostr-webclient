@@ -30,7 +30,6 @@ export class NostrClient {
   #ndk: NDK
   #user: NDKUser
   #eventIdSet: Set<string>
-  #events: NDKEvent[] = []
 
   private constructor(ndk: NDK, user: NDKUser) {
     this.#ndk = ndk
@@ -83,7 +82,7 @@ export class NostrClient {
     onEvent: (event: NDKEvent) => void
   ) {
     const relaySet = NDKRelaySet.fromRelayUrls(NostrClient.Relays, this.#ndk)
-    this.#ndk
+    const subscription = this.#ndk
       .subscribe(
         filters,
         {
@@ -94,13 +93,18 @@ export class NostrClient {
       )
       .on('event', (event: NDKEvent) => {
         if (this.#eventIdSet.has(event.id)) {
+          console.log('event already exists', event)
           return
         }
         this.#eventIdSet.add(event.id)
-        this.#events.push(event)
-        this.#events.sort((a, b) => (b.created_at || 0) - (a.created_at || 0))
         onEvent(event)
       })
+
+    return {
+      unsubscribe: () => {
+        subscription.stop()
+      },
+    }
   }
 
   /**
