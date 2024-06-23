@@ -3,7 +3,6 @@ import { atomFamily } from 'jotai/utils'
 import { User } from '@/domain/entities/User'
 import { UserProfile } from '@/domain/entities/UserProfile'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
-import { Note } from '@/domain/entities/Note'
 
 export const isLoggedInAtom = atom<boolean>(false)
 export const userAtom = atom(
@@ -23,6 +22,10 @@ export const publicChannelScrollPositionAtom = atom<{
 
 export const userProfileFamily = atomFamily((npub: string) =>
   atom<UserProfile | null>(null)
+)
+
+export const npubFromNostrAddressFamily = atomFamily((nostrAddress: string) =>
+  atom<string | null>(null)
 )
 
 export const nostrClientAtom = atom<NostrClient | null>(null)

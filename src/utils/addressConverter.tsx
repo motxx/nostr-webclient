@@ -1,7 +1,7 @@
 import { User } from '@/domain/entities/User'
 import { bech32 } from 'bech32'
 
-export const nostrAddressForDisplay = (nostrAddress: string) => {
+export const nostrAddressSimplified = (nostrAddress: string) => {
   return nostrAddress.startsWith('_@')
     ? nostrAddress.substring(1)
     : nostrAddress
@@ -14,7 +14,7 @@ const shortenNpub = (npub: string) => {
 export const userIdForDisplay = (user: User) => {
   const profile = user.profile
   return profile?.nostrAddress
-    ? nostrAddressForDisplay(profile.nostrAddress)
+    ? nostrAddressSimplified(profile.nostrAddress)
     : shortenNpub(user.npub)
 }
 

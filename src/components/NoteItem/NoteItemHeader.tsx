@@ -5,7 +5,11 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NoteType } from '@/domain/entities/Note'
 import { User } from '@/domain/entities/User'
-import { userIdForDisplay, userNameForDisplay } from '@/utils/addressConverter'
+import {
+  nostrAddressSimplified,
+  userIdForDisplay,
+  userNameForDisplay,
+} from '@/utils/addressConverter'
 import { formatDateAsString } from '@/utils/timeConverter'
 import Avatar from 'boring-avatars'
 
@@ -26,6 +30,8 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
   const author = {
     image: note.author.profile?.image,
     name: userNameForDisplay(note.author),
+    nostrAddress: note.author.profile?.nostrAddress,
+    npub: note.author.npub,
     id: userIdForDisplay(note.author),
     verified: User.verified(note.author),
   }
@@ -35,7 +41,11 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
       <div className="flex justify-between items-center font-noto-sans">
         <div
           className="flex items-center space-x-3 cursor-pointer"
-          onClick={() => navigate(`/user/${note.author.npub}`)}
+          onClick={() =>
+            navigate(
+              `/user/${author.nostrAddress ? nostrAddressSimplified(author.nostrAddress) : author.npub}`
+            )
+          }
         >
           {author.image ? (
             <img
@@ -46,7 +56,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
           ) : (
             <Avatar
               size={32}
-              name={note.author.profile?.name || note.author.npub}
+              name={author.name}
               variant="beam"
               colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
             />

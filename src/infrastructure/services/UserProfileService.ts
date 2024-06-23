@@ -2,7 +2,12 @@ import { UserProfileRepository } from '@/domain/repositories/UserProfileReposito
 import { UserProfile } from '@/domain/entities/UserProfile'
 import { UserExternalLinks } from '@/domain/entities/UserExternalLinks'
 import { NostrClient } from '../nostr/nostrClient'
-import { getUserProfileCache, setUserProfileCache } from '@/state/actions'
+import {
+  getNpubFromNostrAddressCache,
+  getUserProfileCache,
+  setNpubFromNostrAddressCache,
+  setUserProfileCache,
+} from '@/state/actions'
 
 export class UserProfileService implements UserProfileRepository {
   nostrClient: NostrClient
@@ -33,6 +38,9 @@ export class UserProfileService implements UserProfileRepository {
         }),
       })
 
+      if (userProfile.nostrAddress) {
+        setNpubFromNostrAddressCache(userProfile.nostrAddress, npub)
+      }
       setUserProfileCache(npub, userProfile)
 
       return userProfile
@@ -52,10 +60,18 @@ export class UserProfileService implements UserProfileRepository {
   }
 
   async fetchNpubFromNostrAddress(nostrAddress: string): Promise<string> {
+    const cachedNpub = getNpubFromNostrAddressCache(nostrAddress)
+    if (cachedNpub) {
+      return cachedNpub
+    }
+
     const user = await this.nostrClient.getUserFromNip05(nostrAddress)
     if (!user) {
       throw new Error('User not found')
     }
+
+    setNpubFromNostrAddressCache(nostrAddress, user.npub)
+
     return user.npub
   }
 }

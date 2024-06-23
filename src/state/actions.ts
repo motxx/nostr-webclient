@@ -1,5 +1,10 @@
 import { atom, getDefaultStore } from 'jotai'
-import { isLoggedInAtom, userAtom, userProfileFamily } from './atoms'
+import {
+  isLoggedInAtom,
+  npubFromNostrAddressFamily,
+  userAtom,
+  userProfileFamily,
+} from './atoms'
 import { User } from '@/domain/entities/User'
 import { UserProfile } from '@/domain/entities/UserProfile'
 
@@ -37,4 +42,19 @@ export const setUserProfileCache = (
 ): void => {
   const atom = userProfileFamily(npub)
   store.set(atom, profile)
+}
+
+export const getNpubFromNostrAddressCache = (
+  nostrAddress: string
+): string | null => {
+  const atom = npubFromNostrAddressFamily(nostrAddress)
+  return store.get(atom)
+}
+
+export const setNpubFromNostrAddressCache = (
+  nostrAddress: string,
+  npub: string
+): void => {
+  const atom = npubFromNostrAddressFamily(nostrAddress)
+  store.set(atom, npub)
 }

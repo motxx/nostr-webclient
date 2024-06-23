@@ -4,8 +4,8 @@ import UserExternalLinks from './UserExternalLinks'
 import { TextConverter } from '@/components/functional/TextConverter'
 import TertiaryButton from '@/components/ui-parts/TertiaryButton'
 import FollowButton from '@/components/ui-parts/FollowButton'
-import { nostrAddressForDisplay } from '@/utils/addressConverter'
 import { User } from '@/domain/entities/User'
+import { nostrAddressSimplified } from '@/utils/addressConverter'
 
 interface UserDescriptionProps {
   user: User
@@ -52,7 +52,7 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
       <div>
         <p className="text-gray-500 whitespace-pre-wrap break-words">
           {user.profile?.nostrAddress
-            ? nostrAddressForDisplay(user.profile?.nostrAddress)
+            ? nostrAddressSimplified(user.profile?.nostrAddress)
             : user.npub}
         </p>
         <div className="flex space-x-4">
