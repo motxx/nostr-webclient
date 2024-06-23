@@ -8,7 +8,6 @@ export class FetchUser {
   async execute(npub: string): Promise<User> {
     const profile = await this.userProfileRepository.fetchProfile(npub)
     const pubkey = npubToPubkey(npub)
-    console.log('pubkey', pubkey)
     return new User({
       npub,
       pubkey,
