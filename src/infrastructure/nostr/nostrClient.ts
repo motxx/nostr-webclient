@@ -26,6 +26,10 @@ import {
 } from '@/infrastructure/nostr/lnurlPay'
 import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 
+const FetchTimeout = 1000 // 1 second
+const MaxRetries = 3
+const RetryDelay = 100 // 0.1 seconds
+
 export class NostrClient {
   #ndk: NDK
   #user: NDKUser
@@ -122,6 +126,53 @@ export class NostrClient {
    */
   async getUserFromNip05(nip05Id: string) {
     return this.#ndk.getUserFromNip05(nip05Id)
+  }
+
+  private delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+
+  async #fetchWithRetry(
+    operation: () => Promise<any>,
+    retries = 0
+  ): Promise<any> {
+    try {
+      const fetchWithTimeout = async () => {
+        return Promise.race([
+          operation(),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error('Operation timeout')),
+              FetchTimeout
+            )
+          ),
+        ])
+      }
+
+      return await fetchWithTimeout()
+    } catch (error) {
+      console.error(`Error in operation (attempt ${retries + 1}):`, error)
+      if (retries < MaxRetries - 1) {
+        console.log(`Retrying in ${RetryDelay / 1000} seconds...`)
+        await this.delay(RetryDelay)
+        return this.#fetchWithRetry(operation, retries + 1)
+      } else {
+        throw error
+      }
+    }
+  }
+
+  /**
+   * Get user from npub and fetch their profile
+   * @returns NDKUser with fetched profile
+   */
+  async getUserWithProfile(npub: string): Promise<NDKUser> {
+    if (npub.length !== 63 || !npub.startsWith('npub')) {
+      throw new Error(`Invalid npub: ${npub}`)
+    }
+    const user = this.#ndk.getUser({ npub })
+    await this.#fetchWithRetry(() => user.fetchProfile())
+    return user
   }
 
   /**
