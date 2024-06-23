@@ -9,7 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, onClick, children, disabled }) => (
+  ({ className, onClick, children, disabled }, ref) => (
     <button
       className={classNames('p-2', className)}
       onClick={onClick}
