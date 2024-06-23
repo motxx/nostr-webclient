@@ -26,8 +26,6 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
       const userProfileService = new UserProfileService(nostrClient)
       const npubPattern = new RegExp('/user/(npub[^/]+)/?')
       const npubMatch = location.pathname.match(npubPattern)
-      const userId = npubMatch ? npubMatch[1] : null
-      if (!userId) return
 
       let npub: string
       if (npubMatch) {
@@ -37,8 +35,10 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
         const nostrAddressMatch = location.pathname.match(nostrAddressPattern)
         if (!nostrAddressMatch) return
 
-        const nostrAddress = nostrAddressMatch[1]
-        console.log('nostrAddress', nostrAddress)
+        let nostrAddress = nostrAddressMatch[1]
+        if (nostrAddress.startsWith('@')) {
+          nostrAddress = `_${nostrAddress}`
+        }
         try {
           npub = await new FetchNpubFromNostrAddress(
             userProfileService
