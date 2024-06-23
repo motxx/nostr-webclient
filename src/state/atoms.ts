@@ -25,6 +25,4 @@ export const userProfileFamily = atomFamily((npub: string) =>
   atom<UserProfile | null>(null)
 )
 
-export const followingTimelineAtom = atom<Note[]>([])
-
 export const nostrClientAtom = atom<NostrClient | null>(null)

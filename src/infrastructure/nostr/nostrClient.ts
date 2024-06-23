@@ -26,15 +26,17 @@ import {
 } from '@/infrastructure/nostr/lnurlPay'
 import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 
+const FetchTimeout = 1000 // 1 second
+const MaxRetries = 3
+const RetryDelay = 100 // 0.1 seconds
+
 export class NostrClient {
   #ndk: NDK
   #user: NDKUser
-  #eventIdSet: Set<string>
 
   private constructor(ndk: NDK, user: NDKUser) {
     this.#ndk = ndk
     this.#user = user
-    this.#eventIdSet = new Set()
   }
 
   static readonly LoginTimeoutMSec = 60000
@@ -95,11 +97,6 @@ export class NostrClient {
         true
       )
       .on('event', (event: NDKEvent) => {
-        if (this.#eventIdSet.has(event.id)) {
-          console.log('event already exists', event)
-          return
-        }
-        this.#eventIdSet.add(event.id)
         onEvent(event)
       })
 
@@ -123,51 +120,67 @@ export class NostrClient {
   }
 
   /**
+   * Get user from nip05Id
+   * @param nip05Id
+   * @returns NDKUser
+   */
+  async getUserFromNip05(nip05Id: string) {
+    return this.#ndk.getUserFromNip05(nip05Id)
+  }
+
+  private delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+
+  async #fetchWithRetry(
+    operation: () => Promise<any>,
+    retries = 0
+  ): Promise<any> {
+    try {
+      const fetchWithTimeout = async () => {
+        return Promise.race([
+          operation(),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error('Operation timeout')),
+              FetchTimeout
+            )
+          ),
+        ])
+      }
+
+      return await fetchWithTimeout()
+    } catch (error) {
+      console.error(`Error in operation (attempt ${retries + 1}):`, error)
+      if (retries < MaxRetries - 1) {
+        console.log(`Retrying in ${RetryDelay / 1000} seconds...`)
+        await this.delay(RetryDelay)
+        return this.#fetchWithRetry(operation, retries + 1)
+      } else {
+        throw error
+      }
+    }
+  }
+
+  /**
+   * Get user from npub and fetch their profile
+   * @returns NDKUser with fetched profile
+   */
+  async getUserWithProfile(npub: string): Promise<NDKUser> {
+    if (npub.length !== 63 || !npub.startsWith('npub')) {
+      throw new Error(`Invalid npub: ${npub}`)
+    }
+    const user = this.#ndk.getUser({ npub })
+    await this.#fetchWithRetry(() => user.fetchProfile())
+    return user
+  }
+
+  /**
    * Get logged-in user
    * @returns NDKUser
    */
   async getLoggedInUser() {
     return this.#user
-  }
-
-  /**
-   * Get logged-in user's hex pubkey
-   * @returns pubkey
-   */
-  async getLoggedInUserPubkey() {
-    return this.#user.pubkey
-  }
-
-  /**
-   * Get logged-in user's npub
-   * @returns npub
-   */
-  async getLoggedInUserNpub() {
-    return this.#user.npub
-  }
-
-  /**
-   * Get logged-in user's name
-   * @returns name or undefined
-   */
-  async getLoggedInUserName() {
-    return this.#user.profile?.name
-  }
-
-  /**
-   * Get logged-in user's image
-   * @returns image or undefined
-   */
-  async getLoggedInUserImage() {
-    return this.#user.profile?.image
-  }
-
-  /**
-   * Get logged-in user's lud16
-   * @returns lud16 or undefined
-   */
-  async getLoggedInUserLud16() {
-    return this.#user.profile?.lud16
   }
 
   async decryptEvent(event: NDKEvent) {

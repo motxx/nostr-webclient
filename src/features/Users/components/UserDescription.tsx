@@ -25,7 +25,7 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
   return (
     <>
       <div className="flex items-center justify-between pt-4 w-full">
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-bold whitespace-pre-wrap break-words">
           {user.profile?.name || user.npub}
         </h1>
         <div className="flex items-center space-x-2 ml-auto">
@@ -50,7 +50,7 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
         </div>
       </div>
       <div>
-        <p className="text-gray-500">
+        <p className="text-gray-500 whitespace-pre-wrap break-words">
           {user.profile?.nostrAddress
             ? nostrAddressForDisplay(user.profile?.nostrAddress)
             : user.npub}

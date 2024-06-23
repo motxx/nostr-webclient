@@ -2,7 +2,7 @@ import { UserProfileRepository } from '@/domain/repositories/UserProfileReposito
 import { UserProfile } from '@/domain/entities/UserProfile'
 import { UserExternalLinks } from '@/domain/entities/UserExternalLinks'
 import { NostrClient } from '../nostr/nostrClient'
-import { getUserProfile, setUserProfile } from '@/state/actions'
+import { getUserProfileCache, setUserProfileCache } from '@/state/actions'
 
 export class UserProfileService implements UserProfileRepository {
   nostrClient: NostrClient
@@ -12,28 +12,50 @@ export class UserProfileService implements UserProfileRepository {
   }
 
   async fetchProfile(npub: string): Promise<UserProfile> {
-    const cachedProfile = getUserProfile(npub)
+    const cachedProfile = getUserProfileCache(npub)
     if (cachedProfile) {
       return cachedProfile
     }
 
-    const user = await this.nostrClient.getUser(npub)
-    const profile = await user.fetchProfile().catch(() => null)
+    try {
+      const user = await this.nostrClient.getUserWithProfile(npub)
+      const profile = user.profile
 
-    const userProfile = new UserProfile({
-      name: profile?.displayName || profile?.name,
-      nostrAddress: profile?.nip05,
-      lightningAddress: profile?.lud16,
-      image: profile?.image,
-      bio: profile?.bio || profile?.about,
-      banner: profile?.banner,
-      links: new UserExternalLinks({
-        website: profile?.website,
-      }),
-    })
+      const userProfile = new UserProfile({
+        name: profile?.displayName || profile?.name,
+        nostrAddress: profile?.nip05,
+        lightningAddress: profile?.lud16,
+        image: profile?.image,
+        bio: profile?.bio || profile?.about,
+        banner: profile?.banner,
+        links: new UserExternalLinks({
+          website: profile?.website,
+        }),
+      })
 
-    setUserProfile(npub, userProfile)
+      setUserProfileCache(npub, userProfile)
 
-    return userProfile
+      return userProfile
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error)
+      // If all retries fail, return a minimal UserProfile
+      return new UserProfile({
+        name: 'Unknown User',
+        nostrAddress: '',
+        lightningAddress: '',
+        image: '',
+        bio: '',
+        banner: '',
+        links: new UserExternalLinks({ website: '' }),
+      })
+    }
+  }
+
+  async fetchNpubFromNostrAddress(nostrAddress: string): Promise<string> {
+    const user = await this.nostrClient.getUserFromNip05(nostrAddress)
+    if (!user) {
+      throw new Error('User not found')
+    }
+    return user.npub
   }
 }

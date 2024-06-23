@@ -40,7 +40,9 @@ const UnsafeReactComponent: React.FC<UnsafeReactComponentProps> = ({
         (domNode as Element).attribs?.tweetid
       ) {
         const { tweetid } = (domNode as Element).attribs
-        return <TwitterTweetEmbed tweetId={tweetid} />
+        return (
+          <TwitterTweetEmbed tweetId={tweetid} options={{ height: '400' }} />
+        )
       }
     },
   }

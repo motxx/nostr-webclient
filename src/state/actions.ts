@@ -26,12 +26,15 @@ export const logoutAction = atom(null, (get, set) => {
 
 const store = getDefaultStore()
 
-export const getUserProfile = (npub: string): UserProfile | null => {
+export const getUserProfileCache = (npub: string): UserProfile | null => {
   const atom = userProfileFamily(npub)
   return store.get(atom)
 }
 
-export const setUserProfile = (npub: string, profile: UserProfile): void => {
+export const setUserProfileCache = (
+  npub: string,
+  profile: UserProfile
+): void => {
   const atom = userProfileFamily(npub)
   store.set(atom, profile)
 }
