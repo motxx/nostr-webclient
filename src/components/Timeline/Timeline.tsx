@@ -1,12 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
 import TimelineImageGrid from './TimelineImageGrid'
-import { useSubscribeNotes } from './hooks/useSubscribeNotes'
+import { useInfiniteNotes } from './hooks/useInfiniteNotes'
 import { HomeTimelineTabs, TimelineTabId } from './types'
-import { Note } from '@/domain/entities/Note'
-import { useAtom } from 'jotai'
-import { followingTimelineAtom } from '@/state/atoms'
 
 interface TimelineProps {
   onScrollUp: () => void
@@ -19,75 +16,17 @@ const Timeline: React.FC<TimelineProps> = ({
   onScrollDown,
   onToggleFollow,
 }) => {
-  const { subscribe } = useSubscribeNotes()
   const tabRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
   const [activeTabId, setActiveTabId] = useState<TimelineTabId>('following')
   const [lastScrollTop, setLastScrollTop] = useState(0)
-  const [notes, setNotes] = useAtom(followingTimelineAtom)
-  const isLoading = notes.length === 0
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
 
-  const handleNote = useCallback(
-    (note: Note, isNewNote: boolean = true) => {
-      setNotes((prevNotes) => {
-        // XXX: 重複制御はNostrClient内にも存在するが、制御が十分ではないのでここにも存在する
-        if (prevNotes.some((n) => n.id === note.id)) return prevNotes
-        console.log(isNewNote ? 'New note:' : 'Old note:', note)
-        const newNotes = isNewNote ? [note, ...prevNotes] : [...prevNotes, note]
-        return newNotes.sort(
-          (a, b) => b.created_at.getTime() - a.created_at.getTime()
-        )
-      })
-    },
-    [setNotes]
-  )
+  const { notes, isLoading, isLoadingMore, loadMoreNotes } = useInfiniteNotes({
+    limit: 20,
+  })
 
-  const handleNewNote = useCallback(
-    (note: Note) => handleNote(note, true),
-    [handleNote]
-  )
-
-  const handleOldNote = useCallback(
-    (note: Note) => handleNote(note, false),
-    [handleNote]
-  )
-
-  const loadMoreNotes = useCallback(() => {
-    if (isLoadingMore || isLoading) return
-
-    console.log('Loading more notes...')
-    setIsLoadingMore(true)
-    const oldestNote = notes[notes.length - 1]
-    subscribe(handleOldNote, {
-      until: oldestNote.created_at,
-      limit: 20,
-      isForever: false,
-    }).then((subscription) => {
-      setIsLoadingMore(false)
-    })
-  }, [isLoadingMore, isLoading, notes, subscribe, handleOldNote])
-
-  useEffect(() => {
-    if (isLoading) {
-      subscribe(handleNewNote, { limit: 20, isForever: true })
-    }
-    if (!isLoadingMore) {
-      const wrapperElement = wrapperRef.current
-      const scrollElement = timelineRef.current
-      if (wrapperElement && scrollElement) {
-        const currentScrollTop = scrollElement.scrollTop
-        const scrollHeight = scrollElement.scrollHeight
-        const clientHeight = wrapperElement.clientHeight
-        if (scrollHeight - currentScrollTop <= clientHeight) {
-          loadMoreNotes()
-        }
-      }
-    }
-  }, [isLoading, subscribe, handleNewNote, isLoadingMore, loadMoreNotes])
-
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     const wrapperElement = wrapperRef.current
     const scrollElement = timelineRef.current
     if (wrapperElement && scrollElement) {
@@ -103,13 +42,24 @@ const Timeline: React.FC<TimelineProps> = ({
         onScrollUp()
       }
 
-      if (scrollHeight - currentScrollTop <= clientHeight) {
+      if (
+        !isLoading &&
+        !isLoadingMore &&
+        scrollHeight - currentScrollTop <= clientHeight * 1.5
+      ) {
         loadMoreNotes()
       }
 
       setLastScrollTop(currentScrollTop)
     }
-  }
+  }, [
+    isLoading,
+    isLoadingMore,
+    lastScrollTop,
+    onScrollDown,
+    onScrollUp,
+    loadMoreNotes,
+  ])
 
   const handleTabClick = (tabId: TimelineTabId) => {
     setActiveTabId(tabId)
@@ -141,8 +91,7 @@ const Timeline: React.FC<TimelineProps> = ({
       <div
         ref={timelineRef}
         onScroll={handleScroll}
-        className="w-full max-w-2xl mx-auto overflow-auto"
-        style={{ maxHeight: '100vh' }}
+        className="w-full max-w-2xl max-h-[100vh] mx-auto overflow-auto"
       >
         <TimelineTab
           ref={tabRef}

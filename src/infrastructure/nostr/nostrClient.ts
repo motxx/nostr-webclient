@@ -29,12 +29,10 @@ import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 export class NostrClient {
   #ndk: NDK
   #user: NDKUser
-  #eventIdSet: Set<string>
 
   private constructor(ndk: NDK, user: NDKUser) {
     this.#ndk = ndk
     this.#user = user
-    this.#eventIdSet = new Set()
   }
 
   static readonly LoginTimeoutMSec = 60000
@@ -95,11 +93,6 @@ export class NostrClient {
         true
       )
       .on('event', (event: NDKEvent) => {
-        if (this.#eventIdSet.has(event.id)) {
-          console.log('event already exists', event)
-          return
-        }
-        this.#eventIdSet.add(event.id)
         onEvent(event)
       })
 
