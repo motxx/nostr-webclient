@@ -45,7 +45,7 @@ const App: React.FC = () => {
           shouldFocusBottomTab={shouldFocusBottomTab}
           focusBottomTab={focusBottomTab}
         />
-        <div className="flex flex-col w-full ml-0 sm:ml-20 lg:ml-60">
+        <main className="w-full pl-0 sm:pl-20 lg:pl-60">
           <Routes>
             <Route
               path="/"
@@ -95,7 +95,7 @@ const App: React.FC = () => {
             />
           </Routes>
           <Toaster />
-        </div>
+        </main>
       </div>
     </Router>
   )

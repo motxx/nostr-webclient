@@ -57,17 +57,17 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
   if (!user) return <div>Loading...</div>
 
   return (
-    <div className="flex flex-col items-center w-full">
+    <div className="w-full flex flex-col items-center justify-center">
       <UserHeader user={user} />
       <div className="w-full">
-        <div className="px-2 sm:px-6 pt-2 sm:pt-6">
+        <div className="px-2 sm:px-6 pt-2 pb-10 sm:pt-6">
           <UserDescription
             user={user}
             isFollowing={isFollowing}
             toggleFollow={toggleFollow}
           />
         </div>
-        <div className="flex flex-col items-start pt-10">
+        <div className="w-full flex flex-col items-start">
           <UserContents user={user} toggleFollow={toggleFollow} />
         </div>
       </div>
