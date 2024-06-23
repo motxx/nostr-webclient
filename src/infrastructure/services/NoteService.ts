@@ -10,6 +10,7 @@ import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { unixtimeOf } from '../nostr/utils'
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
+const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
 
 export class NoteService implements NoteRepository {
   #nostrClient: NostrClient
@@ -73,34 +74,45 @@ export class NoteService implements NoteRepository {
     throw new Error('Method not implemented.')
   }
 
-  private async isImageUrl(url: string): Promise<boolean> {
-    const cleanUrl = url.split('?')[0]
-    const urlExtension = cleanUrl.split('.').pop()?.toLowerCase()
-    const isExtensionImage =
-      urlExtension && imageExtensions.includes(urlExtension)
-    if (isExtensionImage) {
-      return true
-    }
-
-    try {
-      const response = await fetch(url, { method: 'HEAD' })
-      const contentType = response.headers.get('Content-Type')
-      return contentType ? contentType.startsWith('image') : false
-    } catch (error) {
-      console.error('Error fetching the URL:', error)
-      return false
-    }
+  private getUrlExtension(url: string): string | undefined {
+    const pathname = new URL(url).pathname
+    const parts = pathname.split('.')
+    return parts.length > 1 ? parts.pop()?.toLowerCase() : undefined
   }
 
-  private async extractMedia(event: NDKEvent) {
-    const content = event.content
-    const extensionsPattern = imageExtensions.join('|')
-    const urlPattern = new RegExp(
-      `http.*\\.(${extensionsPattern})(\\?[^\\s]*)?`,
-      'gi'
+  private isImageUrl(url: string): boolean {
+    const extension = this.getUrlExtension(url)
+    return extension ? imageExtensions.includes(extension) : false
+  }
+
+  private isVideoUrl(url: string): boolean {
+    const extension = this.getUrlExtension(url)
+    return extension ? videoExtensions.includes(extension) : false
+  }
+
+  private isYouTubeUrl(url: string): boolean {
+    return /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?[\w-]+/.test(
+      url
     )
+  }
+
+  private async extractMedia(event: NDKEvent): Promise<Media[]> {
+    const content = event.content
+    const urlPattern = /(https?:\/\/[^\s]+)/g
     const matches = content.match(urlPattern) || []
-    const media = matches.map((url) => ({ type: 'image', url }) as Media)
+
+    const media: Media[] = []
+
+    for (const url of matches) {
+      if (await this.isImageUrl(url)) {
+        media.push({ type: 'image', url })
+      } else if (await this.isVideoUrl(url)) {
+        media.push({ type: 'video', url })
+      } else if (this.isYouTubeUrl(url)) {
+        media.push({ type: 'youtube', url })
+      }
+    }
+
     return media
   }
 
