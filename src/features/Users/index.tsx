@@ -38,6 +38,7 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
         if (!nostrAddressMatch) return
 
         const nostrAddress = nostrAddressMatch[1]
+        console.log('nostrAddress', nostrAddress)
         try {
           npub = await new FetchNpubFromNostrAddress(
             userProfileService
