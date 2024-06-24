@@ -31,7 +31,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
       <div
         ref={modalRef}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-2xl"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-2xl whitespace-pre-wrap break-words"
       >
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold">{title}</h2>

@@ -128,7 +128,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
       <AlertModal
         show={showJSONModal}
         title="ノートのJSON"
-        message={note.id}
+        message={`イベントID: ${note.id}`}
         textarea={true}
         textareaContent={JSON.stringify(JSON.parse(note.json), null, 2)}
         onClose={() => setShowJSONModal(false)}
