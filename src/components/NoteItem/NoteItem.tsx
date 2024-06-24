@@ -130,7 +130,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
         title="ノートのJSON"
         message={`イベントID: ${note.id}`}
         textarea={true}
-        textareaContent={JSON.stringify(JSON.parse(note.json), null, 2)}
+        textareaContent={JSON.stringify(JSON.parse(note.json || '{}'), null, 2)}
         onClose={() => setShowJSONModal(false)}
       />
     </div>
