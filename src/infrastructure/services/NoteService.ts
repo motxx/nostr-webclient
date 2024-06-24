@@ -54,16 +54,7 @@ export class NoteService implements NoteRepository {
     return await this.#nostrClient.subscribeEvents(
       filterOptions,
       async (event: NDKEvent) => {
-        const profile = await this.#userProfileRepository.fetchProfile(
-          event.author.npub
-        )
-        const author = new User({
-          npub: event.author.npub,
-          pubkey: event.author.pubkey,
-          profile,
-        })
-
-        const note = await this.createNoteFromEvent(event, author)
+        const note = await this.createNoteFromEvent(event)
         onNote(note)
       },
       options?.isForever
@@ -118,16 +109,34 @@ export class NoteService implements NoteRepository {
 
   private async createNoteFromEvent(
     event: NDKEvent,
-    author: User
+    depth: number = 0
   ): Promise<Note> {
+    const profile = await this.#userProfileRepository.fetchProfile(
+      event.author.npub
+    )
+    const author = new User({
+      npub: event.author.npub,
+      pubkey: event.author.pubkey,
+      profile,
+    })
     const media = await this.extractMedia(event)
     const json = JSON.stringify(event.rawEvent())
+
+    const replyEventId = event.tags.find((tag) => tag[0] === 'e')?.[1]
+    const replyEvent =
+      replyEventId && depth === 0
+        ? await this.#nostrClient.fetchEvent(replyEventId)
+        : undefined
+
     return new Note({
       id: event.id,
       author,
       text: event.content,
       media,
       json,
+      replyNote: replyEvent
+        ? await this.createNoteFromEvent(replyEvent, 1)
+        : undefined,
       replies: 0,
       likes: 0,
       reposts: 0,

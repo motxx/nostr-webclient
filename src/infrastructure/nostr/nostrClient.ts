@@ -109,6 +109,15 @@ export class NostrClient {
   }
 
   /**
+   * Fetch event by eventId
+   * @param eventId
+   * @returns NDKEvent
+   */
+  async fetchEvent(eventId: string) {
+    return this.#ndk.fetchEvent(eventId)
+  }
+
+  /**
    * Get user from npub
    * @returns NDKUser
    */
