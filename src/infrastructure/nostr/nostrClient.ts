@@ -86,25 +86,32 @@ export class NostrClient {
     onEvent: (event: NDKEvent) => void,
     isForever: boolean = true
   ) {
-    const relaySet = NDKRelaySet.fromRelayUrls(NostrClient.Relays, this.#ndk)
-    const subscription = this.#ndk
-      .subscribe(
-        filters,
-        {
-          closeOnEose: !isForever, // subscribe forever
-        },
-        relaySet,
-        true
-      )
-      .on('event', (event: NDKEvent) => {
-        onEvent(event)
-      })
+    try {
+      const relaySet = NDKRelaySet.fromRelayUrls(NostrClient.Relays, this.#ndk)
+      const subscription = this.#ndk
+        .subscribe(
+          filters,
+          {
+            closeOnEose: !isForever, // subscribe forever
+          },
+          relaySet,
+          true
+        )
+        .on('event', (event: NDKEvent) => {
+          onEvent(event)
+        })
 
-    return {
-      unsubscribe: () => {
-        console.log('unsubscribe', subscription)
-        subscription.stop()
-      },
+      return {
+        unsubscribe: () => {
+          console.log('unsubscribe', subscription)
+          subscription.stop()
+        },
+      }
+    } catch (e) {
+      console.error(e)
+      return {
+        unsubscribe: () => {},
+      }
     }
   }
 
