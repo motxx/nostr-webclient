@@ -30,9 +30,9 @@ const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="w-full space-y-12 overflow-y-auto max-h-[calc(100vh-100px)]"
+      className="w-full overflow-y-auto max-h-[calc(100vh-100px)]"
     >
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto space-y-12">
         {notes.length > 0 && (
           <div>
             <h2 className="text-lg font-bold mb-4 ml-2">ピクチャー</h2>
