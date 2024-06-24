@@ -16,8 +16,8 @@ const TimelineStandard: React.FC<TimelineStandardProps> = ({
 }) => {
   return (
     <div className={classNames('sm:px-6 mb-20 max-w-xl', className)}>
-      {notes.map(({ ...note }, index) => (
-        <div key={index} className="mb-8 sm:mb-10">
+      {notes.map(({ ...note }, _) => (
+        <div key={note.id} className="mb-8 sm:mb-10">
           <NoteItem note={note} onToggleFollow={onToggleFollow} />
         </div>
       ))}
