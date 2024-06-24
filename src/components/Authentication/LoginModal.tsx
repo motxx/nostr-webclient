@@ -92,7 +92,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   )
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
       <div
         ref={modalRef}
         className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 md:p-16 flex flex-col items-center justify-center w-full max-w-md mx-0 md:mx-auto min-h-52"
