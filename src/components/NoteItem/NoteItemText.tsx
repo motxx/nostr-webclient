@@ -10,7 +10,7 @@ const NoteItemText: React.FC<NoteItemTextProps> = ({ text }) => {
   const toggleShowMore = () => setShowMore(!showMore)
 
   return (
-    <div className="text-sm text-gray-700 dark:text-gray-300 font-noto-sans">
+    <div className="pt-2 text-sm text-gray-700 dark:text-gray-300 font-noto-sans whitespace-pre-wrap break-words">
       <TextConverter text={showMore ? text : text.substring(0, 300)} />
       {text.length > 300 && (
         <span>

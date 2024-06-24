@@ -85,35 +85,33 @@ const NoteItem: React.FC<NoteItemProps> = ({
   }, [observer])
 
   return (
-    <div className="relative">
-      <div className="px-2 pb-2 sm:px-0">
-        <NoteItemHeader
-          note={note}
-          onToggleFollow={onToggleFollow}
-          onShowJSON={() => setShowJSONModal(true)}
-        />
-      </div>
+    <div className="relative space-y-0">
+      <NoteItemHeader
+        className="ml-2 sm:ml-0 pb-2"
+        note={note}
+        onToggleFollow={onToggleFollow}
+        onShowJSON={() => setShowJSONModal(true)}
+      />
       {note.media && (
-        <div className="mb-4">
-          <NoteItemMedia
-            media={note.media}
-            text={note.text}
-            openDetails={openDetails}
-            youtubeIFrameRef={youtubeIFrameRef}
+        <NoteItemMedia
+          className="mb-4"
+          media={note.media}
+          text={note.text}
+          openDetails={openDetails}
+          youtubeIFrameRef={youtubeIFrameRef}
+        />
+      )}
+      {note.replyNote && noteDepth === 0 && (
+        <div className="ml-4 sm:ml-2 mr-2 sm:mr-0 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
+          <NoteItem
+            note={note.replyNote}
+            noteDepth={noteDepth + 1}
+            onToggleFollow={onToggleFollow}
+            onReply={onReply}
           />
         </div>
       )}
-      <div className="px-2 sm:px-0 space-y-2 sm:space-y-4">
-        {note.replyNote && noteDepth === 0 && (
-          <div className="ml-4 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
-            <NoteItem
-              note={note.replyNote}
-              noteDepth={noteDepth + 1}
-              onToggleFollow={onToggleFollow}
-              onReply={onReply}
-            />
-          </div>
-        )}
+      <div className="ml-2 sm:ml-0 space-y-2 sm:space-y-4">
         <NoteItemText text={note.text} />
         {noteDepth === 0 && (
           <NoteItemActions

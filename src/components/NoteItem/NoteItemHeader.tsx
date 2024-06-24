@@ -17,12 +17,14 @@ interface NoteItemHeaderProps {
   note: NoteType
   onToggleFollow: (userId: string) => boolean
   onShowJSON: () => void
+  className?: string
 }
 
 const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
   note,
   onToggleFollow,
   onShowJSON,
+  className,
 }) => {
   const navigate = useNavigate()
   const [showMenu, setShowMenu] = useState(false)
@@ -39,7 +41,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
   }
 
   return (
-    <div>
+    <div className={className}>
       <div className="flex justify-between items-center font-noto-sans">
         <div
           className="flex items-center space-x-3 cursor-pointer"
@@ -53,7 +55,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
             <img
               src={author.image}
               alt={`${author.name}'s profile`}
-              className="w-8 h-8 ml-1 rounded-full"
+              className="w-8 h-8 rounded-full"
             />
           ) : (
             <Avatar

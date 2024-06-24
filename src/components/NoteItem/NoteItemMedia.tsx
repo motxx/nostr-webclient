@@ -7,6 +7,7 @@ interface NoteItemMediaProps {
   text: string
   openDetails: () => void
   youtubeIFrameRef?: React.RefObject<HTMLIFrameElement>
+  className?: string
 }
 
 const NoteItemMedia: React.FC<NoteItemMediaProps> = ({
@@ -14,6 +15,7 @@ const NoteItemMedia: React.FC<NoteItemMediaProps> = ({
   text,
   openDetails,
   youtubeIFrameRef,
+  className,
 }) => {
   const isMobile = () => window.matchMedia('(max-width: 640px)').matches
 
@@ -24,7 +26,7 @@ const NoteItemMedia: React.FC<NoteItemMediaProps> = ({
   }
 
   return (
-    <div>
+    <div className={className}>
       {media.map((item, index) => {
         const embedUrl =
           item.type === 'youtube' ? convertToEmbedUrl(item.url) : undefined
