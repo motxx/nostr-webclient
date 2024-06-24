@@ -5,6 +5,7 @@ import NoteItemActions from './NoteItemActions'
 import RepliesThreadModal from '@/components/Reply/RepliesThreadModal'
 import NoteItemHeader from './NoteItemHeader'
 import NoteItemText from './NoteItemText'
+import AlertModal from '../Alert/AlertModal'
 import { NoteType } from '@/domain/entities/Note'
 
 type NoteItemProps = {
@@ -23,6 +24,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isRepliesThreadModalOpen, setIsRepliesThreadModalOpen] =
     useState(false)
+  const [showJSONModal, setShowJSONModal] = useState(false)
   const youtubeIFrameRef = useRef<HTMLIFrameElement>(null)
 
   const openDetails = () => setIsDetailsOpen(true)
@@ -83,7 +85,11 @@ const NoteItem: React.FC<NoteItemProps> = ({
   return (
     <div className="relative">
       <div className="px-2 pb-2 sm:px-0">
-        <NoteItemHeader note={note} onToggleFollow={onToggleFollow} />
+        <NoteItemHeader
+          note={note}
+          onToggleFollow={onToggleFollow}
+          onShowJSON={() => setShowJSONModal(true)}
+        />
       </div>
       {note.media && (
         <div className="mb-4">
@@ -118,6 +124,14 @@ const NoteItem: React.FC<NoteItemProps> = ({
         onClose={closeRepliesThreadModal}
         showModal={isRepliesThreadModalOpen}
         onToggleFollow={onToggleFollow}
+      />
+      <AlertModal
+        show={showJSONModal}
+        title="ノートのJSON"
+        message={note.id}
+        textarea={true}
+        textareaContent={JSON.stringify(JSON.parse(note.json), null, 2)}
+        onClose={() => setShowJSONModal(false)}
       />
     </div>
   )

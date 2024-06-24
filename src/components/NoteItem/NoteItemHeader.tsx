@@ -16,11 +16,13 @@ import Avatar from 'boring-avatars'
 interface NoteItemHeaderProps {
   note: NoteType
   onToggleFollow: (userId: string) => boolean
+  onShowJSON: () => void
 }
 
 const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
   note,
   onToggleFollow,
+  onShowJSON,
 }) => {
   const navigate = useNavigate()
   const [showMenu, setShowMenu] = useState(false)
@@ -89,6 +91,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
           following={note.following ?? false /* TODO: author.following */}
           onToggleFollow={onToggleFollow}
           onClose={closeMenu}
+          onShowJSON={onShowJSON}
         />
       )}
     </div>
