@@ -10,7 +10,7 @@ import { NoteType } from '@/domain/entities/Note'
 
 type NoteItemProps = {
   note: NoteType
-  showActions?: boolean
+  noteDepth?: number
   onToggleFollow: (userId: string) => boolean
   onReply?: (userId: string) => void
 }
@@ -19,7 +19,7 @@ export type PostActionType = 'reply' | 'repost' | 'like' | 'zap'
 
 const NoteItem: React.FC<NoteItemProps> = ({
   note,
-  showActions = true,
+  noteDepth = 0,
   onToggleFollow,
   onReply,
 }) => {
@@ -104,8 +104,18 @@ const NoteItem: React.FC<NoteItemProps> = ({
         </div>
       )}
       <div className="px-2 sm:px-0 space-y-2 sm:space-y-4">
+        {note.replyNote && noteDepth === 0 && (
+          <div className="ml-4 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
+            <NoteItem
+              note={note.replyNote}
+              noteDepth={noteDepth + 1}
+              onToggleFollow={onToggleFollow}
+              onReply={onReply}
+            />
+          </div>
+        )}
         <NoteItemText text={note.text} />
-        {showActions && (
+        {noteDepth === 0 && (
           <NoteItemActions
             replies={0}
             reposts={note.reposts}
