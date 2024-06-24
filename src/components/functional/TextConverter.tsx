@@ -13,7 +13,7 @@ const hashtagToLink = (text: string): string =>
 const nostrNpubToLink = (text: string): string =>
   // TODO: Convert npub to nostr address
   text.replace(
-    /nostr:(npub1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{58})/g,
+    /(?:nostr:)?(npub1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{58})/g,
     (match, p1) => `<RouterLink to='/user/${p1}'>${p1}</RouterLink>`
   )
 

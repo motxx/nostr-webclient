@@ -15,6 +15,8 @@ export interface NoteType {
   json: string
   created_at: Date
 
+  replyNote?: NoteType
+
   // TODO: NoteReactions
   replies: number
   likes: number
@@ -35,6 +37,8 @@ export class Note implements NoteType {
   media?: Media[]
   json: string = ''
   created_at: Date = new Date('1970-01-01T00:00:00Z')
+
+  replyNote?: NoteType
 
   // TODO: NoteReactions
   replies: number = 0
