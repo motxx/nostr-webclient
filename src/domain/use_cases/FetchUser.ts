@@ -1,4 +1,4 @@
-import { npubToPubkey } from '@/utils/addressConverter'
+import { bech32ToHex } from '@/utils/addressConverter'
 import { User } from '../entities/User'
 import { UserProfileRepository } from '../repositories/UserProfileRepository'
 import { UserProfile } from '../entities/UserProfile'
@@ -14,7 +14,7 @@ export class FetchUser {
       throw profileResult.error
     }
     const profile = profileResult.value
-    const pubkey = npubToPubkey(npub)
+    const pubkey = bech32ToHex(npub)
     return new User({
       npub,
       pubkey,
