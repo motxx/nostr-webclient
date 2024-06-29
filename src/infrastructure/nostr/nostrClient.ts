@@ -24,6 +24,7 @@ import {
   toLnurlPayUrl,
 } from '@/infrastructure/nostr/lnurlPay'
 import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
+import { decode } from 'light-bolt11-decoder'
 
 const FetchTimeout = 5000 // 5 seconds
 const MaxRetries = 3
@@ -266,46 +267,51 @@ export class NostrClient {
       let totalZapAmount = 0
       for (const zapEvent of zapEvents) {
         const zapAmount = this.extractZapAmount(zapEvent)
-        if (zapAmount !== null) {
-          totalZapAmount += zapAmount
+        if (zapAmount.isOk()) {
+          totalZapAmount += zapAmount.value
         }
       }
       return ok(totalZapAmount)
     })
   }
 
-  private extractZapAmount(zapEvent: NDKEvent): number | null {
-    const amountTag = zapEvent.tags.find((tag) => tag[0] === 'amount')
-    if (amountTag && amountTag[1]) {
-      const amount = parseInt(amountTag[1], 10)
-      if (!isNaN(amount)) {
-        return amount
-      }
+  private extractZapAmount(zapEvent: NDKEvent): Result<number, Error> {
+    const bolt11Tag = zapEvent.tags.find((tag) => tag[0] === 'bolt11')
+    if (!bolt11Tag || !bolt11Tag[1]) {
+      return err(new Error('Missing bolt11 tag in zap receipt'))
     }
 
-    const descriptionTag = zapEvent.tags.find((tag) => tag[0] === 'description')
-    if (descriptionTag && descriptionTag[1]) {
-      try {
-        const zapRequest = JSON.parse(descriptionTag[1])
-        if (zapRequest.tags) {
-          const zapRequestAmountTag = zapRequest.tags.find(
-            (tag: string[]) => tag[0] === 'amount'
-          )
-          if (zapRequestAmountTag && zapRequestAmountTag[1]) {
-            const amount = parseInt(zapRequestAmountTag[1], 10)
-            if (!isNaN(amount)) {
-              return amount
-            }
-          }
-        }
-      } catch (error) {
-        // Ignore parsing errors
+    try {
+      const decodedInvoice = decode(bolt11Tag[1])
+      const amountSection = decodedInvoice.sections.find(
+        (section) => section.name === 'amount'
+      )
+      if (amountSection && 'value' in amountSection) {
+        // Convert millisatoshis to satoshis
+        return ok(
+          Math.floor(parseInt(amountSection.value as string, 10) / 1000)
+        )
       }
+    } catch (error) {
+      return err(new Error(`Failed to decode bolt11 invoice: ${error}`))
     }
 
-    return null
+    return err(new Error('Failed to extract amount from bolt11 invoice'))
   }
 
+  private validateZapReceipt(
+    zapEvent: NDKEvent,
+    lnurlProviderPubkey: string
+  ): boolean {
+    // Implement zap receipt validation as per Appendix F
+    if (zapEvent.pubkey !== lnurlProviderPubkey) {
+      return false
+    }
+
+    // Add more validation steps here...
+
+    return true
+  }
   sendZapRequest(nip05Id: string, sat: number) {
     return ResultAsync.fromPromise(
       (async () => {
