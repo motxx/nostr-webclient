@@ -16,8 +16,8 @@ const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
 
 const noteIdPattern = '(?:nostr:)?(note1[a-zA-Z0-9]{58})'
-const youtubeRegexp =
-  /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?[\w-]+/
+const youtubePattern =
+  '(?:https?://)?(?:www.)?(?:youtube.com|youtu.be)/(?:watch?v=)?[w-]+'
 
 export class NoteService implements NoteRepository {
   #nostrClient: NostrClient
@@ -91,7 +91,8 @@ export class NoteService implements NoteRepository {
   private isVideoUrl = (url: string): boolean =>
     this.isUrlOfType(url, videoExtensions)
 
-  private isYouTubeUrl = (url: string): boolean => youtubeRegexp.test(url)
+  private isYouTubeUrl = (url: string): boolean =>
+    new RegExp(youtubePattern).test(url)
 
   private extractMedia(event: NDKEvent): ResultAsync<Media[], Error> {
     return ResultAsync.fromSafePromise(
@@ -183,24 +184,24 @@ export class NoteService implements NoteRepository {
   }
 
   private cleanupText(text: string): string {
-    // 先頭末尾空白なしのURLのみであれば、展開されるものは消す
+    // 展開されるURLのみの行は消す
     return text
       .replaceAll(new RegExp(`^${noteIdPattern}$`, 'gm'), '')
       .replaceAll(
         new RegExp(
-          `^https?://.+(${imageExtensions.join('|')})(?:\\?[^#]*)?(?:#.*)?$`,
+          `^\\s*https?://.+(${imageExtensions.join('|')})(?:\\?[^#]*)?(?:#.*)?\\s*$`,
           'gm'
         ),
         ''
       )
       .replaceAll(
         new RegExp(
-          `^https?://.+(${videoExtensions.join('|')})(?:\\?[^#]*)?(?:#.*)?$`,
+          `^\\s*https?://.+(${videoExtensions.join('|')})(?:\\?[^#]*)?(?:#.*)?\\s*$`,
           'gm'
         ),
         ''
       )
-      .replaceAll(new RegExp('^' + youtubeRegexp + '$', 'gm'), '')
+      .replaceAll(new RegExp(`^\\s*${youtubePattern}\\s*$`, 'gm'), '')
   }
 
   private createNoteReactionsFromEvent(
