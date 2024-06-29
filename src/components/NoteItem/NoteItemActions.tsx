@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useRef } from 'react'
 import { AiOutlineThunderbolt } from 'react-icons/ai'
 import { FiHeart, FiMessageCircle, FiRepeat } from 'react-icons/fi'
-import { useNostrClient } from '@/hooks/useNostrClient'
 import { PostActionType } from '@/domain/entities/Note'
 import { emojify } from 'node-emoji'
 
@@ -22,26 +21,7 @@ const NoteItemActions: React.FC<PostActionsProps> = ({
   customReactions,
   onClickAction,
 }) => {
-  const nostrClient = useNostrClient()
   const actionsRef = useRef<HTMLDivElement>(null)
-  const observer = useMemo(
-    () =>
-      new IntersectionObserver(async ([entry]) => {
-        if (entry.isIntersecting && actionsRef.current && nostrClient) {
-          // TODO: fetch reactions count
-        }
-      }),
-    [nostrClient]
-  )
-
-  useEffect(() => {
-    const ref = actionsRef.current
-    if (ref) observer.observe(ref)
-
-    return () => {
-      if (ref) observer.unobserve(ref)
-    }
-  }, [observer])
 
   const renderCustomReactions = () => {
     if (!customReactions) return null
