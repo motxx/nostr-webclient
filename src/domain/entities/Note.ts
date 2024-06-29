@@ -1,5 +1,13 @@
+import emojiRegex from 'emoji-regex'
 import { NoteReactions, NoteReactionsType } from './NoteReactions'
 import { User } from './User'
+
+export type EmojiString = string
+export type PostActionType = 'reply' | 'repost' | 'like' | 'zap' | EmojiString
+
+export const isEmoji = (str: string): boolean => {
+  return emojiRegex().test(str)
+}
 
 export type MediaType = 'image' | 'audio' | 'video' | 'youtube'
 

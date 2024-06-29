@@ -1,6 +1,6 @@
 import { ResultAsync, ok, err } from 'neverthrow'
 import { NDKEvent, NDKFilter, NDKKind } from '@nostr-dev-kit/ndk'
-import { Media, Note } from '@/domain/entities/Note'
+import { isEmoji, Media, Note } from '@/domain/entities/Note'
 import {
   NoteRepository,
   SubscribeNotesOptions,
@@ -231,10 +231,7 @@ export class NoteService implements NoteRepository {
 
         if (content === '+' || content === '') {
           likesCount++
-        } else if (
-          (content.startsWith(':') && content.endsWith(':')) ||
-          (content.length === 1 && content.match(/\p{Emoji}/u))
-        ) {
+        } else if (isEmoji(content)) {
           customReactions[content] = (customReactions[content] || 0) + 1
         }
       }
