@@ -1,7 +1,7 @@
 import { User } from '@/domain/entities/User'
+import { Result } from 'neverthrow'
 
 export interface UserRepository {
-  login(): Promise<User>
-  fetchLoggedInUser(): Promise<User>
-  fetchNpubFromNostrAddress(nostrAddress: string): Promise<string | null>
+  login(): Result<User, Error>
+  fetchLoggedInUser(): Result<User, Error>
 }

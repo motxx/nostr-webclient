@@ -9,8 +9,12 @@ export const useNostrClient = () => {
   useEffect(() => {
     const initializeClient = async () => {
       if (!nostrClient) {
-        const client = await NostrClient.connect()
-        setNostrClient(client)
+        const result = await NostrClient.connect()
+        if (result.isOk()) {
+          setNostrClient(result.value)
+        } else {
+          console.error(result.error)
+        }
       }
     }
 

@@ -24,6 +24,7 @@
     "html-react-parser": "^5.1.10",
     "immutability-helper": "^3.1.1",
     "jotai": "^2.8.1",
+    "neverthrow": "^6.2.2",
     "qrcode.react": "^3.1.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
