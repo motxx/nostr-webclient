@@ -108,10 +108,8 @@ export class NostrClient {
         },
       }
     } catch (e) {
-      console.error(e)
-      return {
-        unsubscribe: () => {},
-      }
+      console.error('Error: subscribeEvents: ', e)
+      throw e
     }
   }
 
@@ -121,7 +119,11 @@ export class NostrClient {
    * @returns NDKEvent
    */
   async fetchEvent(eventId: string) {
-    return this.#ndk.fetchEvent(eventId)
+    const event = await this.#ndk.fetchEvent(eventId).catch((e) => {
+      console.error('Error: fetchEvent:', e)
+      throw e
+    })
+    return event
   }
 
   /**
@@ -132,7 +134,12 @@ export class NostrClient {
     if (npub.length !== 63 || !npub.startsWith('npub')) {
       throw new Error(`Invalid npub: ${npub}`)
     }
-    return this.#ndk.getUser({ npub })
+    try {
+      return this.#ndk.getUser({ npub })
+    } catch (e) {
+      console.error('Error: getUser:', e)
+      throw e
+    }
   }
 
   /**
@@ -141,7 +148,11 @@ export class NostrClient {
    * @returns NDKUser
    */
   async getUserFromNip05(nip05Id: string) {
-    return this.#ndk.getUserFromNip05(nip05Id)
+    const user = await this.#ndk.getUserFromNip05(nip05Id).catch((e) => {
+      console.error('Error: getUserFromNip05:', e)
+      throw e
+    })
+    return user
   }
 
   private delay(ms: number) {
@@ -186,9 +197,17 @@ export class NostrClient {
     if (npub.length !== 63 || !npub.startsWith('npub')) {
       throw new Error(`Invalid npub: ${npub}`)
     }
-    const user = this.#ndk.getUser({ npub })
-    await this.#fetchWithRetry(() => user.fetchProfile())
-    return user
+    try {
+      const user = this.#ndk.getUser({ npub })
+      await this.#fetchWithRetry(() => user.fetchProfile()).catch((e) => {
+        console.error('Error: getUserWithProfile: fetchProfile:', e)
+        throw e
+      })
+      return user
+    } catch (e) {
+      console.error('Error: getUserWithProfile:', e)
+      throw e
+    }
   }
 
   /**
