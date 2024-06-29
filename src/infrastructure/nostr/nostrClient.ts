@@ -26,9 +26,9 @@ import {
 } from '@/infrastructure/nostr/lnurlPay'
 import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 
-const FetchTimeout = 1000 // 1 second
+const FetchTimeout = 5000 // 5 seconds
 const MaxRetries = 3
-const RetryDelay = 100 // 0.1 seconds
+const RetryDelay = 1000 // 1 second
 
 export class NostrClient {
   #ndk: NDK
@@ -127,6 +127,62 @@ export class NostrClient {
   }
 
   /**
+   * Fetch events based on the provided filter
+   * @param filter NDKFilter to specify which events to fetch
+   * @param limit Maximum number of events to fetch (optional, default is 20)
+   * @returns Promise<NDKEvent[]>
+   */
+  async fetchEvents(
+    filter: NDKFilter,
+    limit: number = 20
+  ): Promise<NDKEvent[]> {
+    const events: NDKEvent[] = []
+    let currentLimit = limit
+
+    const fetchBatch = async (batchSize: number): Promise<NDKEvent[]> => {
+      const batchFilter = { ...filter, limit: batchSize }
+      return new Promise((resolve) => {
+        const batchEvents: NDKEvent[] = []
+        const subscription = this.#ndk.subscribe(
+          batchFilter,
+          { closeOnEose: true },
+          undefined,
+          true
+        )
+
+        subscription.on('event', (event: NDKEvent) => {
+          batchEvents.push(event)
+        })
+
+        subscription.on('eose', () => {
+          subscription.stop()
+          resolve(batchEvents)
+        })
+      })
+    }
+
+    while (events.length < limit) {
+      const batchSize = Math.min(currentLimit, 100) // Fetch up to 100 events at a time
+      const batchEvents = await this.#fetchWithRetry(() =>
+        fetchBatch(batchSize)
+      ).catch((e) => {
+        console.error('Error: fetchEvents:', e)
+        throw e
+      })
+      events.push(...batchEvents)
+
+      if (batchEvents.length < batchSize) {
+        // No more events to fetch
+        break
+      }
+
+      currentLimit -= batchEvents.length
+    }
+
+    return events.slice(0, limit)
+  }
+
+  /**
    * Get user from npub
    * @returns NDKUser
    */
@@ -184,6 +240,7 @@ export class NostrClient {
         await this.delay(RetryDelay)
         return this.#fetchWithRetry(operation, retries + 1)
       } else {
+        console.error('Error: fetchWithRetry:', error)
         throw error
       }
     }
@@ -201,7 +258,6 @@ export class NostrClient {
       const user = this.#ndk.getUser({ npub })
       await this.#fetchWithRetry(() => user.fetchProfile()).catch((e) => {
         console.error('Error: getUserWithProfile: fetchProfile:', e)
-        throw e
       })
       return user
     } catch (e) {
@@ -221,6 +277,76 @@ export class NostrClient {
   async decryptEvent(event: NDKEvent) {
     await event.decrypt()
     return event
+  }
+
+  /**
+   * Calculate the total amount of zaps for a specific event
+   * @param eventId The ID of the event to calculate zaps for
+   * @returns Promise<number> The total amount of zaps in millisatoshis
+   */
+  async calculateZapsAmount(eventId: string): Promise<number> {
+    const zapFilter: NDKFilter = {
+      kinds: [NDKKind.Zap],
+      '#e': [eventId],
+    }
+
+    let totalZapAmount = 0
+
+    try {
+      const zapEvents = await this.fetchEvents(zapFilter)
+
+      for (const zapEvent of zapEvents) {
+        const zapAmount = this.extractZapAmount(zapEvent)
+        if (zapAmount !== null) {
+          totalZapAmount += zapAmount
+        }
+      }
+    } catch (error) {
+      console.error('Error calculating zaps amount:', error)
+      return 0
+    }
+
+    return totalZapAmount
+  }
+
+  /**
+   * Extract the zap amount from a zap event
+   * @param zapEvent The zap event to extract the amount from
+   * @returns number | null The zap amount in millisatoshis, or null if unable to extract
+   */
+  private extractZapAmount(zapEvent: NDKEvent): number | null {
+    // Look for the amount tag
+    const amountTag = zapEvent.tags.find((tag) => tag[0] === 'amount')
+    if (amountTag && amountTag[1]) {
+      const amount = parseInt(amountTag[1], 10)
+      if (!isNaN(amount)) {
+        return amount
+      }
+    }
+
+    // If amount tag is not found or invalid, try to extract from the description tag
+    const descriptionTag = zapEvent.tags.find((tag) => tag[0] === 'description')
+    if (descriptionTag && descriptionTag[1]) {
+      try {
+        const zapRequest = JSON.parse(descriptionTag[1])
+        if (zapRequest.tags) {
+          const zapRequestAmountTag = zapRequest.tags.find(
+            (tag: string[]) => tag[0] === 'amount'
+          )
+          if (zapRequestAmountTag && zapRequestAmountTag[1]) {
+            const amount = parseInt(zapRequestAmountTag[1], 10)
+            if (!isNaN(amount)) {
+              return amount
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing zap request:', error)
+      }
+    }
+
+    // If unable to extract the amount, return null
+    return null
   }
 
   /**

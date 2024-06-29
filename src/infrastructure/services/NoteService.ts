@@ -8,6 +8,7 @@ import { UserProfileRepository } from '@/domain/repositories/UserProfileReposito
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { unixtimeOf } from '../nostr/utils'
+import { NoteReactions } from '@/domain/entities/NoteReactions'
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
@@ -138,14 +139,55 @@ export class NoteService implements NoteRepository {
         ? await this.createNoteFromEvent(replyEvent, 1)
         : undefined,
       replyChildNotes: [],
-      reactions: {
-        likesCount: 0,
-        repostsCount: 0,
-        zapsAmount: 0,
-      },
+      reactions: await this.createNoteReactionsFromEvent(event),
       created_at: event.created_at
         ? new Date(event.created_at * 1000)
         : new Date('1970-01-01T00:00:00Z'),
+    })
+  }
+
+  private async createNoteReactionsFromEvent(
+    event: NDKEvent
+  ): Promise<NoteReactions> {
+    const likeFilter: NDKFilter = {
+      kinds: [NDKKind.Reaction],
+      '#e': [event.id],
+    }
+
+    let likesCount = 0
+    let repostsCount = 0
+    let zapsAmount = 0
+    const customReactions: { [key: string]: number } = {}
+
+    const reactionEvents = await this.#nostrClient.fetchEvents(likeFilter)
+
+    for (const reactionEvent of reactionEvents) {
+      const content = reactionEvent.content.trim()
+
+      if (content === '+' || content === '') {
+        likesCount++
+      } else if (
+        (content.startsWith(':') && content.endsWith(':')) ||
+        (content.length === 1 && content.match(/\p{Emoji}/u))
+      ) {
+        customReactions[content] = (customReactions[content] || 0) + 1
+      }
+    }
+
+    const repostFilter: NDKFilter = {
+      kinds: [NDKKind.Repost],
+      '#e': [event.id],
+    }
+    const repostEvents = await this.#nostrClient.fetchEvents(repostFilter)
+    repostsCount = repostEvents.length
+
+    zapsAmount = await this.#nostrClient.calculateZapsAmount(event.id)
+
+    return new NoteReactions({
+      likesCount,
+      repostsCount,
+      zapsAmount,
+      customReactions,
     })
   }
 }

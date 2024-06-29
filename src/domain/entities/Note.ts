@@ -29,21 +29,22 @@ export type NotificationNoteType = NoteType & {
 }
 
 export class Note implements NoteType {
-  id: string = ''
-  author: User = { npub: '', pubkey: '' }
-  text: string = ''
-  media?: Media[]
-  json: string = ''
-  created_at: Date = new Date('1970-01-01T00:00:00Z')
+  public readonly id: string = ''
+  public readonly author: User = { npub: '', pubkey: '' }
+  public readonly text: string = ''
+  public readonly media?: Media[]
+  public readonly json: string = ''
+  public readonly created_at: Date = new Date('1970-01-01T00:00:00Z')
 
-  replyParentNote?: NoteType
-  reactions: NoteReactionsType = {
+  public replyParentNote?: NoteType
+  public readonly reactions: NoteReactionsType = {
     likesCount: 0,
     repostsCount: 0,
     zapsAmount: 0,
+    customReactions: {},
   }
 
-  following: boolean = false // TODO: ユーザデータなので消す
+  public following: boolean = false // TODO: ユーザデータなので消す
 
   constructor(data: NoteType) {
     Object.assign(this, data)
