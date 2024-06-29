@@ -15,6 +15,10 @@ import { bech32ToHex } from '@/utils/addressConverter'
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
 
+const noteIdPattern = '(?:nostr:)?(note1[a-zA-Z0-9]{58})'
+const youtubeRegexp =
+  /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?[\w-]+/
+
 export class NoteService implements NoteRepository {
   #nostrClient: NostrClient
   #userProfileRepository: UserProfileRepository
@@ -87,10 +91,7 @@ export class NoteService implements NoteRepository {
   private isVideoUrl = (url: string): boolean =>
     this.isUrlOfType(url, videoExtensions)
 
-  private isYouTubeUrl = (url: string): boolean =>
-    /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?[\w-]+/.test(
-      url
-    )
+  private isYouTubeUrl = (url: string): boolean => youtubeRegexp.test(url)
 
   private extractMedia(event: NDKEvent): ResultAsync<Media[], Error> {
     return ResultAsync.fromSafePromise(
@@ -139,10 +140,9 @@ export class NoteService implements NoteRepository {
                 () => new Error('Failed to resolve undefined')
               )
 
-        const noteRegexp = /(?:nostr:)?(note1[a-zA-Z0-9]{58})/g
         const mentionedEventIds =
           depth === 0
-            ? Array.from(event.content.matchAll(noteRegexp))
+            ? Array.from(event.content.matchAll(new RegExp(noteIdPattern, 'g')))
                 .map((match) => match[1])
                 ?.map((noteId) => bech32ToHex(noteId))
                 ?.filter((eventId) => eventId !== replyEventId) ?? []
@@ -162,7 +162,7 @@ export class NoteService implements NoteRepository {
           fetchMentionedNotes,
           this.createNoteReactionsFromEvent(event),
         ]).map(([replyParentNote, mentionedNotes, reactions]) => {
-          const text = event.content.replace(noteRegexp, '')
+          const text = this.cleanupText(event.content)
           return new Note({
             id: event.id,
             author,
@@ -180,6 +180,27 @@ export class NoteService implements NoteRepository {
           })
         })
       })
+  }
+
+  private cleanupText(text: string): string {
+    // 先頭末尾空白なしのURLのみであれば、展開されるものは消す
+    return text
+      .replaceAll(new RegExp(`^${noteIdPattern}$`, 'gm'), '')
+      .replaceAll(
+        new RegExp(
+          `^https?://.+(${imageExtensions.join('|')})(?:\\?[^#]*)?(?:#.*)?$`,
+          'gm'
+        ),
+        ''
+      )
+      .replaceAll(
+        new RegExp(
+          `^https?://.+(${videoExtensions.join('|')})(?:\\?[^#]*)?(?:#.*)?$`,
+          'gm'
+        ),
+        ''
+      )
+      .replaceAll(new RegExp('^' + youtubeRegexp + '$', 'gm'), '')
   }
 
   private createNoteReactionsFromEvent(
