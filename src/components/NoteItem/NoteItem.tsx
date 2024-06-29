@@ -105,8 +105,11 @@ const NoteItem: React.FC<NoteItemProps> = ({
       )}
       {note.replyTargetNotes &&
         noteDepth === 0 &&
-        note.replyTargetNotes.map((note) => (
-          <div className="ml-4 sm:ml-2 mr-2 mt-2 sm:mr-0 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
+        note.replyTargetNotes.map((note, index) => (
+          <div
+            key={index}
+            className="ml-4 sm:ml-2 mr-2 mt-2 sm:mr-0 p-2 bg-gray-100 dark:bg-gray-800 rounded-md"
+          >
             <NoteItem
               note={note}
               noteDepth={noteDepth + 1}
