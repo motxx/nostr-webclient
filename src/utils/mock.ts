@@ -20,6 +20,7 @@ export const createDummyNewReply = (text: string): NoteType => {
       likesCount: 0,
       repostsCount: 0,
       zapsAmount: 0,
+      customReactions: {},
     },
     following: true,
   }

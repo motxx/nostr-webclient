@@ -16,12 +16,16 @@ const replyData: NoteType[] = [
       },
     },
     text: 'うおおおおおお！！！',
-    replies: 0,
-    likes: 3,
-    reposts: 0,
-    zaps: 15,
+    reactions: {
+      likesCount: 3,
+      repostsCount: 0,
+      zapsAmount: 15,
+      customReactions: {},
+    },
+
     created_at: new Date('2024-06-01T00:00:00Z'),
     following: true,
+    json: '{}',
   },
   {
     id: '102',
@@ -36,12 +40,15 @@ const replyData: NoteType[] = [
       },
     },
     text: 'nice!!!',
-    replies: 0,
-    likes: 0,
-    reposts: 0,
-    zaps: 0,
+    reactions: {
+      likesCount: 0,
+      repostsCount: 0,
+      zapsAmount: 0,
+      customReactions: {},
+    },
     created_at: new Date('2024-06-02T00:00:00Z'),
     following: false,
+    json: '{}',
   },
 ]
 

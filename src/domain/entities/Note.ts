@@ -1,4 +1,4 @@
-import { NoteReactionsType } from './NoteReactions'
+import { NoteReactions, NoteReactionsType } from './NoteReactions'
 import { User } from './User'
 
 export type MediaType = 'image' | 'audio' | 'video' | 'youtube'
@@ -37,7 +37,7 @@ export class Note implements NoteType {
   public readonly created_at: Date = new Date('1970-01-01T00:00:00Z')
 
   public replyParentNote?: NoteType
-  public readonly reactions: NoteReactionsType = {
+  public readonly reactions: NoteReactions = {
     likesCount: 0,
     repostsCount: 0,
     zapsAmount: 0,
