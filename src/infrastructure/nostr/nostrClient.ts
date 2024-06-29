@@ -134,48 +134,44 @@ export class NostrClient {
     filter: NDKFilter,
     limit: number = 20
   ): ResultAsync<NDKEvent[], Error> {
+    const fetchBatch = (batchSize: number): Promise<NDKEvent[]> =>
+      new Promise((resolve) => {
+        const batchEvents: NDKEvent[] = []
+        const subscription = this.#ndk.subscribe(
+          { ...filter, limit: batchSize },
+          { closeOnEose: true },
+          undefined,
+          true
+        )
+
+        subscription.on('event', (event: NDKEvent) => {
+          batchEvents.push(event)
+        })
+        subscription.on('eose', () => {
+          subscription.stop()
+          resolve(batchEvents)
+        })
+      })
+
     return ResultAsync.fromPromise(
       (async () => {
         const events: NDKEvent[] = []
         let currentLimit = limit
-
-        const fetchBatch = async (batchSize: number): Promise<NDKEvent[]> => {
-          const batchFilter = { ...filter, limit: batchSize }
-          return new Promise((resolve) => {
-            const batchEvents: NDKEvent[] = []
-            const subscription = this.#ndk.subscribe(
-              batchFilter,
-              { closeOnEose: true },
-              undefined,
-              true
-            )
-
-            subscription.on('event', (event: NDKEvent) => {
-              batchEvents.push(event)
-            })
-
-            subscription.on('eose', () => {
-              subscription.stop()
-              resolve(batchEvents)
-            })
-          })
-        }
 
         while (events.length < limit) {
           const batchSize = Math.min(currentLimit, 100)
           const batchEventsResult = await this.#fetchWithRetry(() =>
             fetchBatch(batchSize)
           )
+
           if (batchEventsResult.isErr()) {
             throw batchEventsResult.error
           }
+
           const batchEvents = batchEventsResult.value
           events.push(...batchEvents)
 
-          if (batchEvents.length < batchSize) {
-            break
-          }
-
+          if (batchEvents.length < batchSize) break
           currentLimit -= batchEvents.length
         }
 
@@ -199,41 +195,37 @@ export class NostrClient {
     )
   }
 
-  private delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+  private async delay(ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   #fetchWithRetry(
     operation: () => Promise<any>,
     retries = 0
   ): ResultAsync<any, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        const fetchWithTimeout = async () => {
-          return Promise.race([
-            operation(),
-            new Promise((_, reject) =>
-              setTimeout(
-                () => reject(new Error('Operation timeout')),
-                FetchTimeout
-              )
-            ),
-          ])
-        }
+    const fetchWithTimeout = (): ResultAsync<any, Error> =>
+      ResultAsync.fromPromise(
+        Promise.race([
+          operation(),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error('Operation timeout')),
+              FetchTimeout
+            )
+          ),
+        ]),
+        (error) => new Error(`Fetch operation failed: ${error}`)
+      )
 
-        try {
-          return await fetchWithTimeout()
-        } catch (error) {
-          if (retries < MaxRetries - 1) {
-            await this.delay(RetryDelay)
-            return this.#fetchWithRetry(operation, retries + 1)
-          } else {
-            throw error
-          }
-        }
-      })(),
-      (error) => new Error(`Fetch operation failed: ${error}`)
-    )
+    return fetchWithTimeout().orElse((error) => {
+      if (retries < MaxRetries - 1) {
+        const delay = RetryDelay * Math.pow(2, retries)
+        return ResultAsync.fromSafePromise(this.delay(delay)).andThen(() =>
+          this.#fetchWithRetry(operation, retries + 1)
+        )
+      }
+      return err(error)
+    })
   }
 
   getUserWithProfile(npub: string): ResultAsync<NDKUser, Error> {
