@@ -134,10 +134,10 @@ export class NoteService implements NoteRepository {
       text: event.content,
       media,
       json,
-      replyNote: replyEvent
+      replyParentNote: replyEvent
         ? await this.createNoteFromEvent(replyEvent, 1)
         : undefined,
-      replies: 0,
+      replyChildNotes: [],
       likes: 0,
       reposts: 0,
       zaps: 0,

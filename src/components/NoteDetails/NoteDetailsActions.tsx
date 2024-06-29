@@ -58,11 +58,12 @@ const NoteDetails: React.FC<NoteDetailsActionsProps> = ({
           onClick={(e) => handleActionClick(e, 'reply')}
         >
           <FiMessageCircle className="text-2xl group-hover:text-blue-500 transition" />
-          {originalNote.replies > 0 && (
-            <span className="text-sm group-hover:text-blue-500 transition">
-              {originalNote.replies}
-            </span>
-          )}
+          {originalNote.replyChildNotes &&
+            originalNote.replyChildNotes.length > 0 && (
+              <span className="text-sm group-hover:text-blue-500 transition">
+                {originalNote.replyChildNotes.length}
+              </span>
+            )}
         </div>
         <div
           className="flex items-center space-x-1 cursor-pointer group h-full min-w-10 sm:min-w-20"

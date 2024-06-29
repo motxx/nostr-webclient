@@ -15,10 +15,10 @@ export interface NoteType {
   json: string
   created_at: Date
 
-  replyNote?: NoteType
+  replyParentNote?: NoteType
+  replyChildNotes?: NoteType[]
 
   // TODO: NoteReactions
-  replies: number
   likes: number
   reposts: number
   zaps: number
@@ -38,10 +38,9 @@ export class Note implements NoteType {
   json: string = ''
   created_at: Date = new Date('1970-01-01T00:00:00Z')
 
-  replyNote?: NoteType
+  replyParentNote?: NoteType
 
   // TODO: NoteReactions
-  replies: number = 0
   likes: number = 0
   reposts: number = 0
   zaps: number = 0
