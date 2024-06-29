@@ -286,7 +286,7 @@ export class NostrClient {
       const amountSection = decodedInvoice.sections.find(
         (section) => section.name === 'amount'
       )
-      if (amountSection && 'value' in amountSection) {
+      if (amountSection && amountSection.value) {
         // Convert millisatoshis to satoshis
         return ok(
           Math.floor(parseInt(amountSection.value as string, 10) / 1000)
