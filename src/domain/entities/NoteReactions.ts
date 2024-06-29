@@ -1,8 +1,13 @@
-export class NoteReactions {
+export interface NoteReactionsType {
+  likesCount: number
+  repostsCount: number
+  zapsAmount: number
+}
+
+export class NoteReactions implements NoteReactionsType {
   constructor(
-    public readonly id: string,
-    public readonly noteId: string,
-    public readonly userId: string,
-    public readonly reaction: string
+    public readonly likesCount: number,
+    public readonly repostsCount: number,
+    public readonly zapsAmount: number
   ) {}
 }

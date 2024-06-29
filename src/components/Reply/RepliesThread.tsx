@@ -40,9 +40,11 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
         text: newReply,
         created_at: new Date(),
         replyChildNotes: [],
-        likes: 0,
-        reposts: 0,
-        zaps: 0,
+        reactions: {
+          likesCount: 0,
+          repostsCount: 0,
+          zapsAmount: 0,
+        },
         following: true,
         json: '{"example":"json"}',
       })

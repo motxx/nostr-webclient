@@ -116,9 +116,9 @@ const NoteItem: React.FC<NoteItemProps> = ({
         {noteDepth === 0 && (
           <NoteItemActions
             repliesCount={note.replyChildNotes?.length || 0}
-            repostsCount={note.reposts}
-            likesCount={note.likes}
-            zapsAmount={note.zaps}
+            repostsCount={note.reactions.repostsCount}
+            likesCount={note.reactions.likesCount}
+            zapsAmount={note.reactions.zapsAmount}
             onClickAction={onClickAction}
           />
         )}

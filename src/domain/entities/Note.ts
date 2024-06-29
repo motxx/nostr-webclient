@@ -1,3 +1,4 @@
+import { NoteReactionsType } from './NoteReactions'
 import { User } from './User'
 
 export type MediaType = 'image' | 'audio' | 'video' | 'youtube'
@@ -18,10 +19,7 @@ export interface NoteType {
   replyParentNote?: NoteType
   replyChildNotes?: NoteType[]
 
-  // TODO: NoteReactions
-  likes: number
-  reposts: number
-  zaps: number
+  reactions: NoteReactionsType
 
   following?: boolean // TODO: ユーザデータなので消す
 }
@@ -39,11 +37,11 @@ export class Note implements NoteType {
   created_at: Date = new Date('1970-01-01T00:00:00Z')
 
   replyParentNote?: NoteType
-
-  // TODO: NoteReactions
-  likes: number = 0
-  reposts: number = 0
-  zaps: number = 0
+  reactions: NoteReactionsType = {
+    likesCount: 0,
+    repostsCount: 0,
+    zapsAmount: 0,
+  }
 
   following: boolean = false // TODO: ユーザデータなので消す
 

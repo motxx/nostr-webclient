@@ -138,9 +138,11 @@ export class NoteService implements NoteRepository {
         ? await this.createNoteFromEvent(replyEvent, 1)
         : undefined,
       replyChildNotes: [],
-      likes: 0,
-      reposts: 0,
-      zaps: 0,
+      reactions: {
+        likesCount: 0,
+        repostsCount: 0,
+        zapsAmount: 0,
+      },
       created_at: event.created_at
         ? new Date(event.created_at * 1000)
         : new Date('1970-01-01T00:00:00Z'),
