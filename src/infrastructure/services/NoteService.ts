@@ -10,6 +10,7 @@ import { User } from '@/domain/entities/User'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { unixtimeOf } from '../nostr/utils'
 import { NoteReactions } from '@/domain/entities/NoteReactions'
+import { bech32ToHex } from '@/utils/addressConverter'
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
@@ -186,27 +187,51 @@ export class NoteService implements NoteRepository {
                 () => new Error('Failed to resolve undefined')
               )
 
+        const noteRegexp = /(?:nostr:)?(note1[a-zA-Z0-9]{58})/g
+        const mentionedEventIds =
+          depth === 0
+            ? Array.from(event.content.matchAll(noteRegexp))
+                .map((match) => match[1])
+                ?.map((noteId) => bech32ToHex(noteId))
+                ?.filter((eventId) => eventId !== replyEventId) ?? []
+            : []
+
+        const fetchMentionedNotes = ResultAsync.combine(
+          mentionedEventIds
+            .map((eventId) => this.#nostrClient.fetchEvent(eventId))
+            .map((eventResult) =>
+              eventResult.andThen((event) =>
+                this.createNoteFromEvent(event, depth + 1)
+              )
+            )
+            .filter(async (noteResult) => (await noteResult).isOk())
+        )
+
         return ResultAsync.combine([
           fetchReplyParentNote,
+          fetchMentionedNotes,
           this.createNoteReactionsFromEvent(event),
-        ]).map(
-          ([replyParentNote, reactions]) =>
-            new Note({
-              id: event.id,
-              author,
-              text: event.content,
-              media,
-              json: JSON.stringify(event.rawEvent()),
-              replyParentNote,
-              replyChildNotes: [],
-              reactions,
-              created_at: event.created_at
-                ? new Date(event.created_at * 1000)
-                : new Date('1970-01-01T00:00:00Z'),
-            })
-        )
+        ]).map(([replyParentNote, mentionedNotes, reactions]) => {
+          const text = event.content.replace(noteRegexp, '')
+          return new Note({
+            id: event.id,
+            author,
+            text,
+            media,
+            json: JSON.stringify(event.rawEvent()),
+            replyTargetNotes: [
+              ...(replyParentNote ? [replyParentNote] : []),
+              ...mentionedNotes,
+            ],
+            reactions,
+            created_at: event.created_at
+              ? new Date(event.created_at * 1000)
+              : new Date('1970-01-01T00:00:00Z'),
+          })
+        })
       })
   }
+
   private createNoteReactionsFromEvent(
     event: NDKEvent
   ): ResultAsync<NoteReactions, Error> {

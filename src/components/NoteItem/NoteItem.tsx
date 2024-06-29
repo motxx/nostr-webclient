@@ -103,21 +103,23 @@ const NoteItem: React.FC<NoteItemProps> = ({
           youtubeIFrameRef={youtubeIFrameRef}
         />
       )}
-      {note.replyParentNote && noteDepth === 0 && (
-        <div className="ml-4 sm:ml-2 mr-2 sm:mr-0 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
-          <NoteItem
-            note={note.replyParentNote}
-            noteDepth={noteDepth + 1}
-            onToggleFollow={onToggleFollow}
-            onReply={onReply}
-          />
-        </div>
-      )}
+      {note.replyTargetNotes &&
+        noteDepth === 0 &&
+        note.replyTargetNotes.map((note) => (
+          <div className="ml-4 sm:ml-2 mr-2 mt-2 sm:mr-0 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
+            <NoteItem
+              note={note}
+              noteDepth={noteDepth + 1}
+              onToggleFollow={onToggleFollow}
+              onReply={onReply}
+            />
+          </div>
+        ))}
       <div className="ml-2 sm:ml-0 space-y-2 sm:space-y-4">
         <NoteItemText text={note.text} />
         {noteDepth === 0 && (
           <NoteItemActions
-            repliesCount={note.replyChildNotes?.length || 0}
+            repliesCount={note.receivedReplyNotes?.length || 0}
             repostsCount={note.reactions.repostsCount}
             likesCount={note.reactions.likesCount}
             zapsAmount={note.reactions.zapsAmount}

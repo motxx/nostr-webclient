@@ -23,13 +23,25 @@ export const userNameForDisplay = (user: User) => {
   return profile?.name ? profile.name : shortenNpub(user.npub)
 }
 
-export const npubToPubkey = (npub: string) => {
-  if (!npub.startsWith('npub1')) {
-    throw new Error('Invalid npub format')
+export const bech32ToHex = (encoded: string): string => {
+  const { prefix, words } = bech32.decode(encoded)
+
+  switch (prefix) {
+    case 'npub':
+    case 'note':
+      const bytes = bech32.fromWords(words)
+      return uint8ArrayToHex(new Uint8Array(bytes))
+    case 'nsec':
+      throw new Error(
+        'nsec1 (secret key) should not be converted to hex publicly'
+      )
+    default:
+      throw new Error(`Unsupported prefix: ${prefix}`)
   }
-  const pubkeyArray = bech32.fromWords(bech32.decode(npub).words)
-  const pubkeyHex = Array.from(pubkeyArray)
+}
+
+const uint8ArrayToHex = (bytes: Uint8Array): string => {
+  return Array.from(bytes)
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('')
-  return pubkeyHex
 }

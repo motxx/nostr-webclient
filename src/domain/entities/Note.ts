@@ -24,9 +24,8 @@ export interface NoteType {
   json: string
   created_at: Date
 
-  replyParentNote?: NoteType // リプライ先の元ポスト
-  replyChildNotes?: NoteType[] // 自分のノートにリプライしたノート
-
+  replyTargetNotes?: NoteType[] // リプライ先のポスト
+  receivedReplyNotes?: NoteType[] // 自分のノートにリプライしたノート
   reactions: NoteReactionsType
 
   following?: boolean // TODO: ユーザデータなので消す
@@ -44,7 +43,8 @@ export class Note implements NoteType {
   public readonly json: string = ''
   public readonly created_at: Date = new Date('1970-01-01T00:00:00Z')
 
-  public replyParentNote?: NoteType
+  public replyTargetNotes?: NoteType[]
+  public receivedReplyNotes?: NoteType[]
   public readonly reactions: NoteReactions = {
     likesCount: 0,
     repostsCount: 0,
