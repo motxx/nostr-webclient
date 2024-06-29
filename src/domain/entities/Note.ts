@@ -16,8 +16,8 @@ export interface NoteType {
   json: string
   created_at: Date
 
-  replyParentNote?: NoteType
-  replyChildNotes?: NoteType[]
+  replyParentNote?: NoteType // リプライ先の元ポスト
+  replyChildNotes?: NoteType[] // 自分のノートにリプライしたノート
 
   reactions: NoteReactionsType
 
