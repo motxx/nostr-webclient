@@ -30,6 +30,15 @@ const FetchTimeout = 5000 // 5 seconds
 const MaxRetries = 3
 const RetryDelay = 1000 // 1 second
 
+type ZapResponse = {
+  pr: string
+  verify: string
+  successAction?: {
+    tag: string
+    message?: string
+  }
+}
+
 export class NostrClient {
   #ndk: NDK
   #user: NDKUser
@@ -312,7 +321,11 @@ export class NostrClient {
 
     return true
   }
-  sendZapRequest(nip05Id: string, sat: number) {
+
+  sendZapRequest(
+    nip05Id: string,
+    sat: number
+  ): ResultAsync<ZapResponse, Error> {
     return ResultAsync.fromPromise(
       (async () => {
         const millisats = sat * 1000
@@ -321,7 +334,7 @@ export class NostrClient {
           millisats
         )
         if (unsignedEventResult.isErr()) {
-          return err(unsignedEventResult.error)
+          throw unsignedEventResult.error
         }
         const unsignedEvent = unsignedEventResult.value
 
@@ -333,23 +346,23 @@ export class NostrClient {
           nip05Id
         )
         if (zapEndpointResult.isErr()) {
-          return err(zapEndpointResult.error)
+          throw zapEndpointResult.error
         }
         const zapEndpoint = zapEndpointResult.value
 
         const response = await axios.get(zapEndpoint)
         if (!response.data || response.data.status !== 'OK') {
-          return err(new NostrCallZapEndpointError(response))
+          throw new NostrCallZapEndpointError(response)
         }
 
         const { pr, verify, successAction } = response.data
         if (!pr) {
-          return err(new NostrInvoiceNotFoundError(response))
+          throw new NostrInvoiceNotFoundError(response)
         }
 
-        return ok({ pr, verify, successAction })
+        return { pr, verify, successAction } as ZapResponse
       })(),
-      (error) =>
+      (error): Error =>
         error instanceof Error
           ? error
           : new Error(`Failed to send zap request: ${error}`)
