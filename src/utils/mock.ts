@@ -14,6 +14,7 @@ export const createDummyNewReply = (text: string): NoteType => {
       },
     },
     created_at: new Date(),
+    json: '{}',
     replyChildNotes: [],
     likes: 0,
     reposts: 0,
