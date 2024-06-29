@@ -101,10 +101,10 @@ const NoteItem: React.FC<NoteItemProps> = ({
           youtubeIFrameRef={youtubeIFrameRef}
         />
       )}
-      {note.replyNote && noteDepth === 0 && (
+      {note.replyParentNote && noteDepth === 0 && (
         <div className="ml-4 sm:ml-2 mr-2 sm:mr-0 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
           <NoteItem
-            note={note.replyNote}
+            note={note.replyParentNote}
             noteDepth={noteDepth + 1}
             onToggleFollow={onToggleFollow}
             onReply={onReply}
@@ -115,10 +115,10 @@ const NoteItem: React.FC<NoteItemProps> = ({
         <NoteItemText text={note.text} />
         {noteDepth === 0 && (
           <NoteItemActions
-            replies={0}
-            reposts={note.reposts}
-            likes={note.likes}
-            zaps={note.zaps}
+            repliesCount={note.replyChildNotes?.length || 0}
+            repostsCount={note.reactions.repostsCount}
+            likesCount={note.reactions.likesCount}
+            zapsAmount={note.reactions.zapsAmount}
             onClickAction={onClickAction}
           />
         )}

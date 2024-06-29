@@ -58,20 +58,21 @@ const NoteDetails: React.FC<NoteDetailsActionsProps> = ({
           onClick={(e) => handleActionClick(e, 'reply')}
         >
           <FiMessageCircle className="text-2xl group-hover:text-blue-500 transition" />
-          {originalNote.replies > 0 && (
-            <span className="text-sm group-hover:text-blue-500 transition">
-              {originalNote.replies}
-            </span>
-          )}
+          {originalNote.replyChildNotes &&
+            originalNote.replyChildNotes.length > 0 && (
+              <span className="text-sm group-hover:text-blue-500 transition">
+                {originalNote.replyChildNotes.length}
+              </span>
+            )}
         </div>
         <div
           className="flex items-center space-x-1 cursor-pointer group h-full min-w-10 sm:min-w-20"
           onClick={(e) => handleActionClick(e, 'repost')}
         >
           <FiRepeat className="text-2xl group-hover:text-green-500 transition" />
-          {originalNote.reposts > 0 && (
+          {originalNote.reactions.repostsCount > 0 && (
             <span className="text-sm group-hover:text-green-500 transition">
-              {originalNote.reposts}
+              {originalNote.reactions.repostsCount}
             </span>
           )}
         </div>
@@ -80,9 +81,9 @@ const NoteDetails: React.FC<NoteDetailsActionsProps> = ({
           onClick={(e) => handleActionClick(e, 'like')}
         >
           <FiHeart className="text-2xl group-hover:text-red-500 transition" />
-          {originalNote.likes > 0 && (
+          {originalNote.reactions.likesCount > 0 && (
             <span className="text-sm group-hover:text-red-500 transition">
-              {originalNote.likes}
+              {originalNote.reactions.likesCount}
             </span>
           )}
         </div>
@@ -91,9 +92,9 @@ const NoteDetails: React.FC<NoteDetailsActionsProps> = ({
           onClick={(e) => handleActionClick(e, 'zap')}
         >
           <AiOutlineThunderbolt className="text-2xl group-hover:text-yellow-500 transition" />
-          {originalNote.zaps > 0 && (
+          {originalNote.reactions.zapsAmount > 0 && (
             <span className="text-sm group-hover:text-yellow-500 transition">
-              {originalNote.zaps}
+              {originalNote.reactions.zapsAmount}
             </span>
           )}
         </div>

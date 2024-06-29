@@ -14,10 +14,14 @@ export const createDummyNewReply = (text: string): NoteType => {
       },
     },
     created_at: new Date(),
-    replies: 0,
-    likes: 0,
-    reposts: 0,
-    zaps: 0,
+    json: '{}',
+    replyChildNotes: [],
+    reactions: {
+      likesCount: 0,
+      repostsCount: 0,
+      zapsAmount: 0,
+      customReactions: {},
+    },
     following: true,
   }
 }

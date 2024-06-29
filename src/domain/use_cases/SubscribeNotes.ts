@@ -11,6 +11,11 @@ export class SubscribeNotes {
     onNote: (note: Note) => void,
     options?: SubscribeNotesOptions
   ): Promise<{ unsubscribe: () => void }> {
-    return this.noteRepository.subscribeNotes(onNote, options)
+    const result = await this.noteRepository.subscribeNotes(onNote, options)
+    if (result.isOk()) {
+      return result.value
+    } else {
+      throw result.error
+    }
   }
 }

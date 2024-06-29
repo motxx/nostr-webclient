@@ -5,18 +5,18 @@ import { PostActionType } from './NoteItem'
 import { useNostrClient } from '@/hooks/useNostrClient'
 
 interface PostActionsProps {
-  replies: number
-  reposts: number
-  likes: number
-  zaps: number
+  repliesCount: number
+  repostsCount: number
+  likesCount: number
+  zapsAmount: number
   onClickAction: (id: PostActionType) => void
 }
 
 const NoteItemActions: React.FC<PostActionsProps> = ({
-  replies,
-  reposts,
-  likes,
-  zaps,
+  repliesCount,
+  repostsCount,
+  likesCount,
+  zapsAmount,
   onClickAction,
 }) => {
   const nostrClient = useNostrClient()
@@ -50,9 +50,9 @@ const NoteItemActions: React.FC<PostActionsProps> = ({
         onClick={() => onClickAction('reply')}
       >
         <FiMessageCircle className="text-xl group-hover:text-blue-500 transition" />
-        {replies > 0 && (
+        {repliesCount > 0 && (
           <span className="text-xs group-hover:text-blue-500 transition">
-            {replies}
+            {repliesCount}
           </span>
         )}
       </div>
@@ -61,9 +61,9 @@ const NoteItemActions: React.FC<PostActionsProps> = ({
         onClick={() => onClickAction('repost')}
       >
         <FiRepeat className="text-xl group-hover:text-green-500 transition" />
-        {reposts > 0 && (
+        {repostsCount > 0 && (
           <span className="text-xs group-hover:text-green-500 transition">
-            {reposts}
+            {repostsCount}
           </span>
         )}
       </div>
@@ -72,9 +72,9 @@ const NoteItemActions: React.FC<PostActionsProps> = ({
         onClick={() => onClickAction('like')}
       >
         <FiHeart className="text-xl group-hover:text-red-500 transition" />
-        {likes > 0 && (
+        {likesCount > 0 && (
           <span className="text-xs group-hover:text-red-500 transition">
-            {likes}
+            {likesCount}
           </span>
         )}
       </div>
@@ -83,9 +83,9 @@ const NoteItemActions: React.FC<PostActionsProps> = ({
         onClick={() => onClickAction('zap')}
       >
         <AiOutlineThunderbolt className="text-xl group-hover:text-yellow-500 transition" />
-        {zaps > 0 && (
+        {zapsAmount > 0 && (
           <span className="text-xs group-hover:text-yellow-500 transition">
-            {zaps}
+            {zapsAmount}
           </span>
         )}
       </div>

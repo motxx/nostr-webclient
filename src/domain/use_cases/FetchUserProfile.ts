@@ -5,7 +5,11 @@ export class FetchUserProfile {
   constructor(private userProfileRepository: UserProfileRepository) {}
 
   async execute(npub: string): Promise<UserProfile> {
-    const profile = await this.userProfileRepository.fetchProfile(npub)
-    return profile
+    const result = await this.userProfileRepository.fetchProfile(npub)
+    if (result.isOk()) {
+      return result.value
+    } else {
+      throw result.error
+    }
   }
 }

@@ -1,3 +1,4 @@
+import { ResultAsync, err, Result } from 'neverthrow'
 import { User } from '@/domain/entities/User'
 import { UserRepository } from '@/domain/repositories/UserRepository'
 import { UserStore } from '@/infrastructure/storage/UserStore'
@@ -21,64 +22,52 @@ export class UserService implements UserRepository {
     this.#nostrClient = nostrClient
   }
 
-  async login(): Promise<User> {
-    const user = await this.#nostrClient.getLoggedInUser()
-    this.#userStore = new UserStore(user.npub)
-    const userName = user.profile?.displayName || user.profile?.name
-    const userImage = user.profile?.image
-    return new User({
-      npub: user.npub,
-      pubkey: user.pubkey,
-      profile: { name: userName, image: userImage },
+  login(): Result<User, Error> {
+    return this.#nostrClient.getLoggedInUser().map((user) => {
+      this.#userStore = new UserStore(user.npub)
+      const userName = user.profile?.displayName || user.profile?.name
+      const userImage = user.profile?.image
+      return new User({
+        npub: user.npub,
+        pubkey: user.pubkey,
+        profile: { name: userName, image: userImage },
+      })
     })
   }
 
-  async #ensureLoggedIn() {
-    this.login()
+  #ensureLoggedIn(): Result<void, Error> {
+    return this.login().map(() => void 0)
   }
 
-  async fetchLoggedInUser(): Promise<User> {
-    await this.#ensureLoggedIn()
-    if (!this.#isLoggedIn()) {
-      throw new UserNotLoggedInError()
-    }
-    const user = await this.#nostrClient.getLoggedInUser()
-    const userName = user.profile?.displayName || user.profile?.name
-    const userImage = user.profile?.image
-    return new User({
-      npub: user.npub,
-      pubkey: user.pubkey,
-      profile: { name: userName, image: userImage },
+  fetchLoggedInUser(): Result<User, Error> {
+    return this.#ensureLoggedIn()
+      .andThen(() => {
+        if (!this.#isLoggedIn()) {
+          return err(new UserNotLoggedInError())
+        }
+        return this.#nostrClient.getLoggedInUser()
+      })
+      .map((user) => {
+        const userName = user.profile?.displayName || user.profile?.name
+        const userImage = user.profile?.image
+        return new User({
+          npub: user.npub,
+          pubkey: user.pubkey,
+          profile: { name: userName, image: userImage },
+        })
+      })
+  }
+
+  sendZapRequest(nip05Id: string, sats: number) {
+    return this.#ensureLoggedIn().asyncAndThen(() => {
+      if (!this.#isLoggedIn()) {
+        return ResultAsync.fromPromise(
+          Promise.resolve(err(new UserNotLoggedInError())),
+          () => new Error()
+        )
+      }
+      return this.#nostrClient.sendZapRequest(nip05Id, sats)
     })
-  }
-  /*
-  async fetchUser(npub: string): Promise<User> {
-    await this.#ensureLoggedIn()
-    if (!this.#isLoggedIn()) {
-      throw new UserNotLoggedInError()
-    }
-    const user = await this.#nostrClient.getUser(npub)
-    const pubkey = user.pubkey
-    const name = user.profile?.displayName || user.profile?.name
-    const image = user.profile?.image
-    return new User({
-      npub,
-      pubkey,
-      profile: { name, image },
-    })
-  }
-*/
-
-  async sendZapRequest(
-    nip05Id: string,
-    sats: number
-  ): Promise<SendZapRequestResponse> {
-    await this.#ensureLoggedIn()
-    if (!this.#isLoggedIn()) {
-      throw new UserNotLoggedInError()
-    }
-
-    return this.#nostrClient.sendZapRequest(nip05Id, sats)
   }
 
   #isLoggedIn(): this is {

@@ -20,8 +20,14 @@ export class SendZap {
    * @returns
    */
   async execute(to: string, sats: number): Promise<SendZapResponse> {
-    const { pr: invoice, successAction } =
-      await this.userService.sendZapRequest(to, sats)
+    const zapRequestResult = await this.userService.sendZapRequest(to, sats)
+    if (zapRequestResult.isErr()) {
+      throw new Error(String(zapRequestResult.error))
+    }
+    if (zapRequestResult.value.isErr()) {
+      throw new Error(String(zapRequestResult.value.error))
+    }
+    const { pr: invoice, successAction } = zapRequestResult.value.value
     const { preimage } = await this.walletService.sendPayment(invoice)
     // TODO: MAY fetch zap receipt
     if (

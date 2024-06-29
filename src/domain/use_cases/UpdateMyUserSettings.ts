@@ -9,7 +9,10 @@ export class UpdateMyUserSettings {
   ) {}
 
   async execute(settings: UserSettings): Promise<UserSettings> {
-    const user = await this.userRepository.fetch()
-    return this.userSettingsRepository.updateSettings(user.npub, settings)
+    const user = this.userRepository.fetchLoggedInUser()
+    if (user.isErr()) {
+      throw new Error(String(user.error))
+    }
+    return this.userSettingsRepository.updateSettings(user.value.npub, settings)
   }
 }

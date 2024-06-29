@@ -1,3 +1,4 @@
+import { ResultAsync } from 'neverthrow'
 import { Note } from '@/domain/entities/Note'
 
 export type SubscribeNotesOptions = {
@@ -14,10 +15,10 @@ export type SubscribeNotesOptions = {
 }
 
 export interface NoteRepository {
-  postNote(note: Note): Promise<void>
+  postNote(note: Note): ResultAsync<void, Error>
 
   subscribeNotes(
     onNote: (note: Note) => void,
     options?: SubscribeNotesOptions
-  ): Promise<{ unsubscribe: () => void }>
+  ): ResultAsync<{ unsubscribe: () => void }, Error>
 }

@@ -1,6 +1,7 @@
+import { ResultAsync } from 'neverthrow'
 import { UserProfile } from '../entities/UserProfile'
 
 export interface UserProfileRepository {
-  fetchProfile(npub: string): Promise<UserProfile>
-  fetchNpubFromNostrAddress(nostrAddress: string): Promise<string>
+  fetchProfile(npub: string): ResultAsync<UserProfile, Error>
+  fetchNpubFromNostrAddress(nostrAddress: string): ResultAsync<string, Error>
 }

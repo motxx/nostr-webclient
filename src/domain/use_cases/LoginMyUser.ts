@@ -9,7 +9,11 @@ export class LoginMyUser {
   ) {}
 
   async execute(): Promise<User> {
-    const user = await this.userRepository.login()
+    const result = this.userRepository.login()
+    if (result.isErr()) {
+      throw result.error
+    }
+    const user = result.value
     const settings = await this.userSettingsRepository.fetchUserSettings(
       user.npub
     )
