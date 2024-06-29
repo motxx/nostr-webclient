@@ -6,7 +6,7 @@ import RepliesThreadModal from '@/components/Reply/RepliesThreadModal'
 import NoteItemHeader from './NoteItemHeader'
 import NoteItemText from './NoteItemText'
 import AlertModal from '../Alert/AlertModal'
-import { NoteType } from '@/domain/entities/Note'
+import { isEmoji, NoteType, PostActionType } from '@/domain/entities/Note'
 
 type NoteItemProps = {
   note: NoteType
@@ -14,8 +14,6 @@ type NoteItemProps = {
   onToggleFollow: (userId: string) => boolean
   onReply?: (userId: string) => void
 }
-
-export type PostActionType = 'reply' | 'repost' | 'like' | 'zap'
 
 const NoteItem: React.FC<NoteItemProps> = ({
   note,
@@ -52,7 +50,11 @@ const NoteItem: React.FC<NoteItemProps> = ({
     } else if (type === 'zap') {
       // handle zap action
     } else {
-      throw new Error(`Unsupported type: ${type}`)
+      if (isEmoji(type)) {
+        // handle custom reaction
+      } else {
+        throw new Error(`Unsupported type: ${type}`)
+      }
     }
   }
 
@@ -119,6 +121,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
             repostsCount={note.reactions.repostsCount}
             likesCount={note.reactions.likesCount}
             zapsAmount={note.reactions.zapsAmount}
+            customReactions={note.reactions.customReactions}
             onClickAction={onClickAction}
           />
         )}

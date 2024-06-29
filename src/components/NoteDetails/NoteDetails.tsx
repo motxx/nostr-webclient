@@ -2,9 +2,8 @@ import React from 'react'
 import NoteDetailsMediaContent from './NoteDetailsMediaContent'
 import NoteDetailsActions from './NoteDetailsActions'
 import RepliesThread from '@/components/Reply/RepliesThread'
-import { PostActionType } from '@/components/NoteItem/NoteItem'
 import { PiCaretLeftBold, PiCaretRightBold } from 'react-icons/pi'
-import { NoteType } from '@/domain/entities/Note'
+import { NoteType, PostActionType } from '@/domain/entities/Note'
 
 interface NoteDetailsProps {
   isOpen: boolean
