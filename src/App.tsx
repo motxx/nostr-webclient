@@ -1,5 +1,10 @@
 import React, { useState } from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from 'react-router-dom'
 import Navigation from './components/Navigation/Navigation'
 import HomePage from '@/features/Home'
 import ExplorePage from '@/features/Explore'
@@ -47,16 +52,7 @@ const App: React.FC = () => {
         />
         <main className="w-full pl-0 sm:pl-20 lg:pl-60">
           <Routes>
-            <Route
-              path="/"
-              element={
-                <HomePage
-                  focusBottomTab={focusBottomTab}
-                  unfocusBottomTab={unfocusBottomTab}
-                  toggleFollow={toggleFollow}
-                />
-              }
-            />
+            <Route path="/" element={<Navigate to="/home" />} />
             <Route
               path="/home"
               element={
