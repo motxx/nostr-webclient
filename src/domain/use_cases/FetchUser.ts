@@ -14,7 +14,13 @@ export class FetchUser {
       throw profileResult.error
     }
     const profile = profileResult.value
-    const pubkey = bech32ToHex(npub)
+
+    const pubkeyResult = bech32ToHex(npub)
+    if (pubkeyResult.isErr()) {
+      throw pubkeyResult.error
+    }
+    const pubkey = pubkeyResult.value
+
     return new User({
       npub,
       pubkey,
