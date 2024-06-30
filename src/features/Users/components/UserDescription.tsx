@@ -5,7 +5,10 @@ import { TextConverter } from '@/components/functional/TextConverter'
 import TertiaryButton from '@/components/ui-parts/TertiaryButton'
 import FollowButton from '@/components/ui-parts/FollowButton'
 import { User } from '@/domain/entities/User'
-import { nostrAddressSimplified } from '@/utils/addressConverter'
+import {
+  nostrAddressSimplified,
+  userIdForDisplay,
+} from '@/utils/addressConverter'
 
 interface UserDescriptionProps {
   user: User
@@ -26,7 +29,7 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
     <>
       <div className="flex items-center justify-between pt-4 w-full">
         <h1 className="text-2xl font-bold whitespace-pre-wrap break-words">
-          {user.profile?.name || user.npub}
+          {user.profile?.name || userIdForDisplay(user)}
         </h1>
         <div className="flex items-center space-x-2 ml-auto">
           {user.profile?.links && (
