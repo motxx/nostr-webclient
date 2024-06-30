@@ -220,12 +220,17 @@ export class NostrClient {
           operation(),
           new Promise((_, reject) =>
             setTimeout(
-              () => reject(new Error('Operation timeout')),
+              () =>
+                reject(
+                  new Error(
+                    `Operation timeout. operation:${JSON.stringify(operation)}`
+                  )
+                ),
               FetchTimeout
             )
           ),
         ]),
-        (error) => new Error(`Fetch operation failed: ${error}`)
+        (error) => new Error(`fetchWithRetry: ${error}`)
       )
 
     return fetchWithTimeout().orElse((error) => {

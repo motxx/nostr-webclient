@@ -1,6 +1,7 @@
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk'
 import { ResultAsync } from 'neverthrow'
 import { CommonRelays } from './commonRelays'
+import shuffle from 'fisher-yates'
 
 const relayUrls = [
   ...new Set([
@@ -14,6 +15,9 @@ const relayUrls = [
 
 /**
  * Experimental
+ * FIXME: このクラスに限ったことではないが、eventIdをキャッシュしていないため、何度も問い合わせが発生している
+ *        取得成功したeventはeventIdでキャッシュ、失敗したeventはeventIdとrelayUrlの組み合わせてキャッシュし、全体で利用できるようにする
+ * TODO: リクエスト数に対して、SUCCESSの数が多くなってきたらExperimentalを外す
  */
 export class RobustEventFetcher {
   private ndk: NDK
@@ -44,19 +48,15 @@ export class RobustEventFetcher {
 
         console.log(`robust fetch ---- eventId: ${eventId}`)
         let times = 0
-        const selectedRelays = this.relayUrls
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 5)
-        for (const relayUrl of selectedRelays) {
+        const shuffledRelayUrls = shuffle(this.relayUrls)
+        for (const relayUrl of shuffledRelayUrls) {
           try {
             times++
             await new Promise((resolve) => setTimeout(resolve, 1000))
-            console.log(`fetchEvent: relayUrl: ${relayUrl} times: ${times}`)
+            console.log('fetchEvent', { times, relayUrl })
             event = await this.tryFetchEvent(eventId, relayUrl)
             if (event !== null) {
-              console.log(
-                `-------------------------\nfetchEvent: event: ${JSON.stringify(event)} times: ${times}\n-------------------------`
-              )
+              console.log(`SUCCESS fetchEvent`, { times, relayUrl, event })
               return event
             }
           } catch (error) {

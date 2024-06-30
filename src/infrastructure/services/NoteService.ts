@@ -67,7 +67,10 @@ export class NoteService implements NoteRepository {
           this.createNoteFromEvent(event)
             .map((note) => onNote(note))
             .orElse((e) => {
-              console.error('event is not NDKKind.Text', e)
+              console.error({
+                error: e,
+                event: event,
+              })
               return ok(undefined)
             })
 

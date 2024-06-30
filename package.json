@@ -22,6 +22,7 @@
     "classnames": "^2.5.1",
     "dompurify": "^3.1.5",
     "emoji-regex": "^10.3.0",
+    "fisher-yates": "^1.0.4",
     "html-react-parser": "^5.1.10",
     "immutability-helper": "^3.1.1",
     "jotai": "^2.8.1",
