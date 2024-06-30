@@ -87,9 +87,9 @@ export class NostrClient {
     filters: NDKFilter,
     onEvent: (event: NDKEvent) => ResultAsync<void, never>,
     isForever: boolean = true
-  ): ResultAsync<{ unsubscribe: () => void }, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
+  ): Result<{ unsubscribe: () => void }, Error> {
+    return Result.fromThrowable(
+      () => {
         const relaySet = NDKRelaySet.fromRelayUrls(
           NostrClient.Relays,
           this.#ndk
@@ -115,9 +115,9 @@ export class NostrClient {
             subscription.stop()
           },
         }
-      })(),
-      (error) => new Error(`Failed to subscribe events: ${error}`)
-    )
+      },
+      (error) => new Error(`subscribeEvents: ${error}`)
+    )()
   }
 
   fetchEvent(eventId: string): ResultAsync<NDKEvent, Error> {

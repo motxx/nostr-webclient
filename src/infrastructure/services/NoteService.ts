@@ -12,6 +12,7 @@ import { unixtimeOf } from '../nostr/utils'
 import { NoteReactions } from '@/domain/entities/NoteReactions'
 import { bech32ToHex } from '@/utils/addressConverter'
 import { NoteServiceNotTextEvent } from './serviceErrors'
+import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
@@ -70,11 +71,9 @@ export class NoteService implements NoteRepository {
               return ok(undefined)
             })
 
-        return this.#nostrClient.subscribeEvents(
-          filterOptions,
-          onEvent,
-          options?.isForever
-        )
+        return this.#nostrClient
+          .subscribeEvents(filterOptions, onEvent, options?.isForever)
+          .mapErr((e) => new ErrorWithDetails('subscribeNotes', e))
       })
   }
 
