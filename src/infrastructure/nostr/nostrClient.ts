@@ -28,7 +28,7 @@ import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
 
 const FetchTimeout = 5000 // 5 seconds
-const DefaultMaxRetries = 3
+const DefaultMaxRetries = 1
 const RetryDelay = 1000 // 1 second
 
 type ZapResponse = {
