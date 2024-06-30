@@ -75,7 +75,7 @@ export class NostrClient {
         ndk.assertSigner()
         await ndk.connect(1)
         const user = await ndk!.signer!.user()
-        await user.fetchProfile()
+        await NostrClient.#fetchWithRetry(() => user.fetchProfile())
         NostrClient.#nostrClient = new NostrClient(ndk, user)
         return NostrClient.#nostrClient
       })(),
@@ -160,7 +160,7 @@ export class NostrClient {
 
         while (events.length < limit) {
           const batchSize = Math.min(currentLimit, 100)
-          const batchEventsResult = await this.#fetchWithRetry(() =>
+          const batchEventsResult = await NostrClient.#fetchWithRetry(() =>
             fetchBatch(batchSize)
           )
 
@@ -195,11 +195,11 @@ export class NostrClient {
     )
   }
 
-  private async delay(ms: number) {
+  private static async delay(ms: number) {
     await new Promise((resolve) => setTimeout(resolve, ms))
   }
 
-  #fetchWithRetry(
+  static #fetchWithRetry(
     operation: () => Promise<any>,
     retries = 0
   ): ResultAsync<any, Error> {
@@ -220,8 +220,8 @@ export class NostrClient {
     return fetchWithTimeout().orElse((error) => {
       if (retries < MaxRetries - 1) {
         const delay = RetryDelay * Math.pow(2, retries)
-        return ResultAsync.fromSafePromise(this.delay(delay)).andThen(() =>
-          this.#fetchWithRetry(operation, retries + 1)
+        return ResultAsync.fromSafePromise(NostrClient.delay(delay)).andThen(
+          () => NostrClient.#fetchWithRetry(operation, retries + 1)
         )
       }
       return err(error)
@@ -237,7 +237,7 @@ export class NostrClient {
     return ResultAsync.fromPromise(
       (async () => {
         const user = this.#ndk.getUser({ npub })
-        await this.#fetchWithRetry(() => user.fetchProfile())
+        await NostrClient.#fetchWithRetry(() => user.fetchProfile())
         return user
       })(),
       (error) => new Error(`Failed to get user with profile: ${error}`)
