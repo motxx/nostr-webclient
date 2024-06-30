@@ -74,7 +74,7 @@ export class NostrClient {
           signer,
         })
         ndk.assertSigner()
-        await ndk.connect(1)
+        await ndk.connect(1000)
         const user = await ndk!.signer!.user()
         await NostrClient.#fetchWithRetry(() => user.fetchProfile())
         NostrClient.#nostrClient = new NostrClient(ndk, user)
