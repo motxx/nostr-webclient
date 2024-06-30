@@ -25,6 +25,7 @@ import {
 } from '@/infrastructure/nostr/lnurlPay'
 import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 import { decode } from 'light-bolt11-decoder'
+import { RobustEventFetcher } from './robustEventFetcher'
 
 const FetchTimeout = 5000 // 5 seconds
 const DefaultMaxRetries = 3
@@ -131,6 +132,12 @@ export class NostrClient {
       })(),
       (error) => new Error(`fetchEvent: ${error}`)
     )
+  }
+
+  robustFetchEvent(eventId: string): ResultAsync<NDKEvent, Error> {
+    // Experimental: リクエストが増えすぎないように注意する
+    const eventFetcher = new RobustEventFetcher(this.#ndk)
+    return eventFetcher.robustFetchEvent(eventId)
   }
 
   fetchEvents(
