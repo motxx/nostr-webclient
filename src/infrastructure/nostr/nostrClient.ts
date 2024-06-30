@@ -27,7 +27,7 @@ import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 import { decode } from 'light-bolt11-decoder'
 
 const FetchTimeout = 5000 // 5 seconds
-const MaxRetries = 3
+const DefaultMaxRetries = 3
 const RetryDelay = 1000 // 1 second
 
 type ZapResponse = {
@@ -125,11 +125,11 @@ export class NostrClient {
       (async () => {
         const event = await this.#ndk.fetchEvent(eventId)
         if (event === null) {
-          throw new Error(`Event not found: ${eventId}`)
+          throw new Error(`Event not found. eventId: ${eventId}`)
         }
         return event
       })(),
-      (error) => new Error(`Failed to fetch event: ${error}`)
+      (error) => new Error(`fetchEvent: ${error}`)
     )
   }
 
@@ -204,7 +204,8 @@ export class NostrClient {
 
   static #fetchWithRetry(
     operation: () => Promise<any>,
-    retries = 0
+    maxRetries = DefaultMaxRetries,
+    currentRetries = 0
   ): ResultAsync<any, Error> {
     const fetchWithTimeout = (): ResultAsync<any, Error> =>
       ResultAsync.fromPromise(
@@ -221,10 +222,16 @@ export class NostrClient {
       )
 
     return fetchWithTimeout().orElse((error) => {
-      if (retries < MaxRetries - 1) {
-        const delay = RetryDelay * Math.pow(2, retries)
+      if (currentRetries < maxRetries - 1) {
+        const delay =
+          RetryDelay * Math.pow(2, currentRetries * (1.0 + Math.random()))
         return ResultAsync.fromSafePromise(NostrClient.delay(delay)).andThen(
-          () => NostrClient.#fetchWithRetry(operation, retries + 1)
+          () =>
+            NostrClient.#fetchWithRetry(
+              operation,
+              maxRetries,
+              currentRetries + 1
+            )
         )
       }
       return err(error)
