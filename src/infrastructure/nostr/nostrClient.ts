@@ -85,7 +85,7 @@ export class NostrClient {
 
   subscribeEvents(
     filters: NDKFilter,
-    onEvent: (event: NDKEvent) => void,
+    onEvent: (event: NDKEvent) => ResultAsync<void, never>,
     isForever: boolean = true
   ): ResultAsync<{ unsubscribe: () => void }, Error> {
     return ResultAsync.fromPromise(
@@ -104,7 +104,10 @@ export class NostrClient {
             true
           )
           .on('event', (event: NDKEvent) => {
-            onEvent(event)
+            onEvent(event).match(
+              () => {},
+              (error) => console.error('never passed here', error)
+            )
           })
 
         return {
