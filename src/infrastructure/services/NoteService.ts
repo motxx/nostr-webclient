@@ -61,6 +61,7 @@ export class NoteService implements NoteRepository {
         search: options?.image
           ? `http.+(${imageExtensions.join('|')})`
           : undefined,
+        '#t': options?.hashtag ? [options.hashtag] : undefined,
       }))
       .andThen((filterOptions) => {
         const onEvent = (event: NDKEvent) =>

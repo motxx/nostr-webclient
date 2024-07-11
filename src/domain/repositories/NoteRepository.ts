@@ -10,6 +10,7 @@ export type SubscribeNotesOptions = {
   audio?: boolean
   video?: boolean
   youtube?: boolean
+  hashtag?: string
   authorPubkeys?: string[]
   isForever?: boolean
 }
