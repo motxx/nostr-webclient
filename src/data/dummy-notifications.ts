@@ -140,7 +140,13 @@ const notifications: NotificationNoteType[] = [
     json: '',
     created_at: new Date('2024-06-15T15:00:00Z'),
     type: 'reply',
-    replies: 0,
+    reactions: {
+      likesCount: 1,
+      zapsAmount: 0,
+      repostsCount: 0,
+      customReactions: {},
+    },
+    replyTargetNotes: [],
     following: false,
   },
   // Zaps - Single User
