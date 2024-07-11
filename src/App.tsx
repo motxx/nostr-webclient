@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom'
 import Navigation from './components/Navigation/Navigation'
 import HomePage from '@/features/Home'
+import HashtagPage from '@/features/Hashtag'
 import ExplorePage from '@/features/Explore'
 import NotificationPage from '@/features/Notification'
 import PublicChannelPage from '@/features/PublicChannel'
@@ -57,6 +58,16 @@ const App: React.FC = () => {
               path="/home"
               element={
                 <HomePage
+                  focusBottomTab={focusBottomTab}
+                  unfocusBottomTab={unfocusBottomTab}
+                  toggleFollow={toggleFollow}
+                />
+              }
+            />
+            <Route
+              path="/hashtag/:hashtag"
+              element={
+                <HashtagPage
                   focusBottomTab={focusBottomTab}
                   unfocusBottomTab={unfocusBottomTab}
                   toggleFollow={toggleFollow}

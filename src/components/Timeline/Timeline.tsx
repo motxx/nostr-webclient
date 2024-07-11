@@ -9,12 +9,16 @@ interface TimelineProps {
   onScrollUp: () => void
   onScrollDown: () => void
   onToggleFollow: (userId: string) => boolean
+  hashtag?: string
+  showTabs?: boolean
 }
 
 const Timeline: React.FC<TimelineProps> = ({
   onScrollUp,
   onScrollDown,
   onToggleFollow,
+  hashtag,
+  showTabs = true,
 }) => {
   const tabRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -24,6 +28,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
   const { notes, isLoading, isLoadingMore, loadMoreNotes } = useInfiniteNotes({
     limit: 20,
+    hashtag,
   })
 
   const handleScroll = useCallback(() => {
@@ -93,12 +98,15 @@ const Timeline: React.FC<TimelineProps> = ({
         onScroll={handleScroll}
         className="w-full max-w-2xl max-h-[100vh] mx-auto overflow-auto"
       >
-        <TimelineTab
-          ref={tabRef}
-          onTabItemClick={handleTabClick}
-          tabs={HomeTimelineTabs}
-          activeTabId={activeTabId}
-        />
+        {showTabs && (
+          <TimelineTab
+            ref={tabRef}
+            onTabItemClick={handleTabClick}
+            tabs={HomeTimelineTabs}
+            activeTabId={activeTabId}
+          />
+        )}
+        {hashtag && <h1 className="text-2xl font-bold p-4">#{hashtag}</h1>}
         <div className="flex justify-center w-full">{renderFeed()}</div>
         {(isLoading || isLoadingMore) && (
           <div className="flex justify-center items-center h-16">
