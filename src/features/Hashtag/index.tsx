@@ -1,28 +1,32 @@
 import React from 'react'
+import { useParams } from 'react-router-dom'
 import TimelineLayout from '@/components/Timeline/TimelineLayout'
 import Timeline from '@/components/Timeline/Timeline'
 
-interface HomePageProps {
+interface HashtagPageProps {
   focusBottomTab: () => void
   unfocusBottomTab: () => void
   toggleFollow: (userId: string) => boolean
 }
 
-const HomePage: React.FC<HomePageProps> = ({
+const HashtagPage: React.FC<HashtagPageProps> = ({
   focusBottomTab,
   unfocusBottomTab,
   toggleFollow,
 }) => {
+  const { hashtag } = useParams<{ hashtag: string }>()
+
   return (
     <TimelineLayout>
       <Timeline
         onScrollUp={focusBottomTab}
         onScrollDown={unfocusBottomTab}
         onToggleFollow={toggleFollow}
-        showTabs={true}
+        hashtag={hashtag}
+        showTabs={false}
       />
     </TimelineLayout>
   )
 }
 
-export default HomePage
+export default HashtagPage
