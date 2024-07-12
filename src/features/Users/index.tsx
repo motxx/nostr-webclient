@@ -15,7 +15,7 @@ interface UserPageProps {
 }
 
 const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
-  const nostrClient = useNostrClient()
+  const { nostrClient } = useNostrClient()
   const [user, setUser] = useState<User | null>(null)
   const location = useLocation()
 

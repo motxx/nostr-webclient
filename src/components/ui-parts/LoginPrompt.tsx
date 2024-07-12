@@ -5,7 +5,7 @@ import { isLoggedInAtom } from '@/state/atoms'
 import { useAtom } from 'jotai'
 
 const LoginPrompt: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom)
+  const [isLoggedIn] = useAtom(isLoggedInAtom)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false)
 
   const openLoginModal = () => setIsLoginModalOpen(true)
@@ -25,7 +25,6 @@ const LoginPrompt: React.FC = () => {
 
   const handleLogin = (method: () => void) => {
     method()
-    setIsLoggedIn(true)
     closeLoginModal()
   }
 
