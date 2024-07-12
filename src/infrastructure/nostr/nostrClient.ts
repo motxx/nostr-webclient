@@ -8,6 +8,8 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
+  NDKPrivateKeySigner,
+  NDKSigner,
 } from '@nostr-dev-kit/ndk'
 import {
   NostrCallZapEndpointError,
@@ -49,7 +51,9 @@ export class NostrClient {
     this.#user = user
   }
 
-  static readonly LoginTimeoutMSec = 60000
+  static readonly SharedDefaultPrivateKey =
+    'deba600201c506203810e29e9d6611814aa5c771555b58f5e4b35c0099072882'
+  static readonly LoginTimeoutMSec = 3000
   static readonly Relays = [
     'wss://relay.hakua.xyz',
     'wss://relay.damus.io',
@@ -66,8 +70,12 @@ export class NostrClient {
 
     return ResultAsync.fromPromise(
       (async () => {
-        const signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
-        await signer.blockUntilReady()
+        let signer: NDKSigner = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
+        await signer.blockUntilReady().catch((error) => {
+          signer = new NDKPrivateKeySigner(NostrClient.SharedDefaultPrivateKey)
+          signer.blockUntilReady()
+          // TODO: 未ログインであることをjotaiで記憶
+        })
 
         const ndk = new NDK({
           explicitRelayUrls: NostrClient.Relays,
