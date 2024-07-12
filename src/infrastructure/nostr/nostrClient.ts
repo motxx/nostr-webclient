@@ -19,7 +19,6 @@ import {
   NostrMinSendableConstraintError,
   NostrUnknownUserError,
 } from '@/infrastructure/nostr/nostrErrors'
-import { CommonRelays } from '@/infrastructure/nostr/commonRelays'
 import {
   LnurlPay,
   toBech32EncodedLnurl,
@@ -45,10 +44,12 @@ type ZapResponse = {
 export class NostrClient {
   #ndk: NDK
   #user: NDKUser
+  #isLoggedIn: boolean
 
-  private constructor(ndk: NDK, user: NDKUser) {
+  private constructor(ndk: NDK, user: NDKUser, isLoggedIn: boolean) {
     this.#ndk = ndk
     this.#user = user
+    this.#isLoggedIn = isLoggedIn
   }
 
   static readonly SharedDefaultPrivateKey =
@@ -70,12 +71,17 @@ export class NostrClient {
 
     return ResultAsync.fromPromise(
       (async () => {
-        let signer: NDKSigner = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
-        await signer.blockUntilReady().catch((error) => {
+        let signer: NDKSigner
+        let isLoggedIn = false
+
+        try {
+          signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
+          await signer.blockUntilReady()
+          isLoggedIn = true
+        } catch (error) {
           signer = new NDKPrivateKeySigner(NostrClient.SharedDefaultPrivateKey)
-          signer.blockUntilReady()
-          // TODO: 未ログインであることをjotaiで記憶
-        })
+          await signer.blockUntilReady()
+        }
 
         const ndk = new NDK({
           explicitRelayUrls: NostrClient.Relays,
@@ -85,11 +91,20 @@ export class NostrClient {
         await ndk.connect(1000)
         const user = await ndk!.signer!.user()
         await NostrClient.#fetchWithRetry(() => user.fetchProfile())
-        NostrClient.#nostrClient = new NostrClient(ndk, user)
+        NostrClient.#nostrClient = new NostrClient(ndk, user, isLoggedIn)
+
         return NostrClient.#nostrClient
       })(),
       (error) => new Error(`Failed to connect: ${error}`)
     )
+  }
+
+  isLoggedIn(): boolean {
+    return this.#isLoggedIn
+  }
+
+  setLoggedIn(isLoggedIn: boolean): void {
+    this.#isLoggedIn = isLoggedIn
   }
 
   subscribeEvents(
@@ -492,4 +507,8 @@ export class NostrClient {
           : new Error(`Failed to make zap request: ${error}`)
     )
   }
+}
+
+export const getNostrClient = (): ResultAsync<NostrClient, Error> => {
+  return NostrClient.connect()
 }

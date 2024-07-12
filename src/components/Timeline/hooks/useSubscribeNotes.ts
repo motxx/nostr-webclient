@@ -7,7 +7,7 @@ import { UserProfileService } from '@/infrastructure/services/UserProfileService
 import { useNostrClient } from '@/hooks/useNostrClient'
 
 export const useSubscribeNotes = () => {
-  const nostrClient = useNostrClient()
+  const { nostrClient } = useNostrClient()
   const subscriptionsRef = useRef<
     Array<{ isForever?: boolean; unsubscribe: () => void }>
   >([])
