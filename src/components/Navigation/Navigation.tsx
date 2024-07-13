@@ -9,6 +9,7 @@ import {
   FiUsers,
   FiSettings,
 } from 'react-icons/fi'
+import { PiNotePencil } from 'react-icons/pi'
 import { TbDeviceDesktopAnalytics } from 'react-icons/tb'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
@@ -61,6 +62,12 @@ const navigationItems: NavigationItem[] = [
   },
   { id: 'dashboard', icon: TbDeviceDesktopAnalytics, label: 'アナリティクス' },
   { id: 'settings', icon: FiSettings, label: '設定', hiddenOnMobile: true },
+  {
+    id: 'post',
+    icon: PiNotePencil,
+    label: 'ノートを書く',
+    hiddenOnMobile: true,
+  },
 ]
 const toItem = (id: NavigationItemId): NavigationItem | undefined =>
   navigationItems.find((item) => item.id === id)

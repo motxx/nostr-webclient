@@ -46,6 +46,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
             label={item.label}
             active={isActiveItem(item.id)}
             onClick={() => onNavigate(item.id)}
+            isPostNote={item.id === 'post'}
           />
         ))}
         {/* TODO: マイニング機能の実装
