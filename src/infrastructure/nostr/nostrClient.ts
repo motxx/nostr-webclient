@@ -102,17 +102,46 @@ export class NostrClient {
           signer,
         })
         ndk.assertSigner()
-        await ndk.connect(1000)
-        const user = await ndk!.signer!.user()
-        await NostrClient.#fetchWithRetry(() => user.fetchProfile())
-        NostrClient.#nostrClient = new NostrClient(ndk, user, isLoggedIn)
 
+        await NostrClient.connectWithRetry(ndk)
+
+        const user = await ndk!.signer!.user()
+        const profileResult = await NostrClient.#fetchWithRetry(() =>
+          user.fetchProfile()
+        )
+        if (profileResult.isErr()) {
+          throw profileResult.error
+        }
+
+        NostrClient.#nostrClient = new NostrClient(ndk, user, isLoggedIn)
         return NostrClient.#nostrClient
       }),
-      (error: unknown) => {
-        throw new Error(`Failed to connect: ${error}`)
-      }
+      (error: unknown) => new Error(`Failed to connect: ${error}`)
     )
+  }
+
+  private static async connectWithRetry(
+    ndk: NDK,
+    maxAttempts = 3,
+    initialDelay = 1000
+  ) {
+    let attempts = 0
+    while (attempts < maxAttempts) {
+      try {
+        await ndk.connect(NostrClient.LoginTimeoutMSec)
+        console.log('Successfully connected to relays')
+        return
+      } catch (error) {
+        attempts++
+        console.error(`Connection attempt ${attempts} failed: ${error}`)
+        if (attempts < maxAttempts) {
+          const delay = initialDelay * Math.pow(2, attempts - 1)
+          console.log(`Retrying in ${delay}ms...`)
+          await new Promise((resolve) => setTimeout(resolve, delay))
+        }
+      }
+    }
+    throw new Error('Failed to connect after multiple attempts')
   }
 
   disconnect() {
