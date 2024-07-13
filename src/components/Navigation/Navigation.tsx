@@ -47,7 +47,7 @@ const user = new User({
 
 const navigationItems: NavigationItem[] = [
   { id: 'home', icon: FiHome, label: 'ホーム', hasPostNoteButton: true },
-  { id: 'explore', icon: FiCompass, label: '探索' },
+  { id: 'explore', icon: FiCompass, label: '探索', hasPostNoteButton: true },
   { id: 'notification', icon: FiBell, label: '通知' },
   {
     id: 'public-channel',
@@ -125,6 +125,10 @@ const Navigation: React.FC<NavigationProps> = ({
     navigate(`/${to}`)
   }
 
+  const handlePostNote = () => {
+    console.log('post note')
+  }
+
   return isMobile ? (
     <NavigationBottomTab
       navigationItems={navigationItems}
@@ -132,6 +136,7 @@ const Navigation: React.FC<NavigationProps> = ({
       user={user}
       shouldFocusBottomTab={shouldFocusBottomTab}
       onNavigate={handleNavigate}
+      onPostNote={handlePostNote}
     />
   ) : (
     <NavigationSidebar
@@ -139,6 +144,7 @@ const Navigation: React.FC<NavigationProps> = ({
       user={user}
       activeItemId={getActiveItemId()}
       onNavigate={handleNavigate}
+      onPostNote={handlePostNote}
     />
   )
 }
