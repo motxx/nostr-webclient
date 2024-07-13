@@ -4,20 +4,19 @@ import NavigationSidebarItem from './NavigationSidebarItem'
 import NavigationSidebarUserSection from './NavigationSidebarUserSection'
 import { NavigationItem, NavigationItemId } from './Navigation'
 import { Link } from 'react-router-dom'
-import { User } from '@/domain/entities/User'
 
 interface NavigationSidebarProps {
   navigationItems: NavigationItem[]
   activeItemId: NavigationItemId
-  user: User
   onNavigate: (to: NavigationItemId) => void
+  onPostNote: () => void
 }
 
 const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   navigationItems,
   activeItemId,
-  user,
   onNavigate,
+  onPostNote,
 }) => {
   const [isMining, setIsMining] = useState(false)
 
@@ -45,7 +44,13 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
             id={item.id}
             label={item.label}
             active={isActiveItem(item.id)}
-            onClick={() => onNavigate(item.id)}
+            onClick={() => {
+              if (item.id === 'post') {
+                onPostNote()
+              } else {
+                onNavigate(item.id)
+              }
+            }}
             isPostNote={item.id === 'post'}
           />
         ))}
@@ -67,7 +72,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
         </div>
         */}
       </div>
-      <NavigationSidebarUserSection user={user} />
+      <NavigationSidebarUserSection />
     </div>
   )
 }

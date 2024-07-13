@@ -1,9 +1,9 @@
 import { atom } from 'jotai'
-import { isLoggedInAtom, userAtom } from './atoms'
+import { isLoggedInAtom, loggedInUserAtom } from './atoms'
 
-export const userProfileSelector = atom((get) => {
+export const loggedInUserSelector = atom((get) => {
   const isLoggedIn = get(isLoggedInAtom)
-  const user = get(userAtom)
+  const user = get(loggedInUserAtom)
 
   return isLoggedIn ? user : null
 })

@@ -2,6 +2,7 @@ import emojiRegex from 'emoji-regex'
 import { NoteReactions, NoteReactionsType } from './NoteReactions'
 import { User } from './User'
 import { NDKKind, NostrEvent } from '@nostr-dev-kit/ndk'
+import { generateEventId } from '@/infrastructure/nostr/utils'
 
 export type EmojiString = string
 export type PostActionType = 'reply' | 'repost' | 'like' | 'zap' | EmojiString
@@ -57,11 +58,39 @@ export class Note implements NoteType {
     Object.assign(this, data)
   }
 
+  static createNoteByUser(user: User, text: string): Note {
+    const createdAt = new Date()
+    const rawNostrEvent: NostrEvent = {
+      pubkey: user.pubkey,
+      created_at: createdAt.getTime(),
+      kind: NDKKind.Text,
+      content: text,
+      tags: [],
+    }
+    return new Note({
+      id: generateEventId(rawNostrEvent),
+      author: user,
+      text,
+      json: JSON.stringify(rawNostrEvent),
+      created_at: createdAt,
+      reactions: {
+        likesCount: 0,
+        repostsCount: 0,
+        zapsAmount: 0,
+        customReactions: {},
+      },
+      relays: [],
+    })
+  }
+
   toUnsignedNostrEvent(): NostrEvent {
     return {
       id: this.id,
       pubkey: this.author.pubkey,
-      created_at: this.created_at.getTime(),
+      created_at: parseInt(
+        Math.floor(this.created_at.getTime() / 1000).toString(),
+        10
+      ),
       kind: NDKKind.Text,
       tags:
         this.replyTargetNotes?.map((replyNote) => ['e', replyNote.id]) || [],

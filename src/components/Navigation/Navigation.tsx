@@ -13,8 +13,14 @@ import { PiNotePencil } from 'react-icons/pi'
 import { TbDeviceDesktopAnalytics } from 'react-icons/tb'
 import NavigationBottomTab from './NavigationBottomTab'
 import NavigationSidebar from './NavigationSidebar'
-import { User } from '@/domain/entities/User'
-import { UserProfile } from '@/domain/entities/UserProfile'
+import { PostNote } from '@/domain/use_cases/PostNote'
+import { UserProfileService } from '@/infrastructure/services/UserProfileService'
+import { NoteService } from '@/infrastructure/services/NoteService'
+import { useNostrClient } from '@/hooks/useNostrClient'
+import { Note } from '@/domain/entities/Note'
+import PostNoteModal from '../NoteItem/PostNoteModal'
+import { loggedInUserSelector } from '@/state/selectors'
+import { useAtom } from 'jotai'
 
 export type NavigationItemId =
   | 'home'
@@ -34,16 +40,6 @@ export type NavigationItem = {
   hiddenOnMobile?: boolean
   hasPostNoteButton?: boolean
 }
-
-const user = new User({
-  npub: 'npubexampleexampleexample',
-  pubkey: 'pubkeyexampleexampleexample',
-  profile: new UserProfile({
-    name: 'moti',
-    nostrAddress: '_@motxx.pages.dev',
-    image: 'https://randomuser.me/api/portraits/men/5.jpg',
-  }),
-})
 
 const navigationItems: NavigationItem[] = [
   { id: 'home', icon: FiHome, label: 'ホーム', hasPostNoteButton: true },
@@ -81,6 +77,9 @@ const Navigation: React.FC<NavigationProps> = ({
   shouldFocusBottomTab,
   focusBottomTab,
 }) => {
+  const [loggedInUser] = useAtom(loggedInUserSelector)
+  const { nostrClient } = useNostrClient()
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
@@ -125,27 +124,48 @@ const Navigation: React.FC<NavigationProps> = ({
     navigate(`/${to}`)
   }
 
-  const handlePostNote = () => {
-    console.log('post note')
+  const handleClickPostNote = () => {
+    setIsPostModalOpen(true)
   }
 
-  return isMobile ? (
-    <NavigationBottomTab
-      navigationItems={navigationItems}
-      shouldShowPostButton={hasPostNoteButton()}
-      user={user}
-      shouldFocusBottomTab={shouldFocusBottomTab}
-      onNavigate={handleNavigate}
-      onPostNote={handlePostNote}
-    />
-  ) : (
-    <NavigationSidebar
-      navigationItems={navigationItems}
-      user={user}
-      activeItemId={getActiveItemId()}
-      onNavigate={handleNavigate}
-      onPostNote={handlePostNote}
-    />
+  const handleClosePostModal = () => {
+    setIsPostModalOpen(false)
+  }
+
+  const handlePostSubmit = async (text: string, media?: File) => {
+    if (!nostrClient || !loggedInUser) return
+    const userProfileService = new UserProfileService(nostrClient)
+    const noteService = new NoteService(nostrClient, userProfileService)
+    await new PostNote(noteService).execute(
+      Note.createNoteByUser(loggedInUser, text)
+    )
+  }
+
+  return (
+    <>
+      <PostNoteModal
+        isOpen={isPostModalOpen}
+        onClose={handleClosePostModal}
+        onSubmit={handlePostSubmit}
+      />
+
+      {isMobile ? (
+        <NavigationBottomTab
+          navigationItems={navigationItems}
+          shouldShowPostButton={hasPostNoteButton()}
+          shouldFocusBottomTab={shouldFocusBottomTab}
+          onNavigate={handleNavigate}
+          onPostNote={handleClickPostNote}
+        />
+      ) : (
+        <NavigationSidebar
+          navigationItems={navigationItems}
+          activeItemId={getActiveItemId()}
+          onNavigate={handleNavigate}
+          onPostNote={handleClickPostNote}
+        />
+      )}
+    </>
   )
 }
 

@@ -32,6 +32,8 @@ import { Mutex } from 'async-mutex'
 const FetchTimeout = 5000 // 5 seconds
 const DefaultMaxRetries = 1
 const RetryDelay = 1000 // 1 second
+const LoginTimeoutMSec = 3000 // 3 seconds
+const PostEventTimeoutMSec = 10000 // 10 seconds
 
 type ZapResponse = {
   pr: string
@@ -53,13 +55,10 @@ export class NostrClient {
     this.#isLoggedIn = isLoggedIn
   }
 
-  static readonly LoginTimeoutMSec = 3000
   static readonly Relays = [
     'wss://relay.hakua.xyz',
-    /*
     'wss://relay.damus.io',
     'wss://relay.nostr.band',
-    */
   ]
   static readonly JapaneseUserBot =
     '087c51f1926f8d3cb4ff45f53a8ee2a8511cfe113527ab0e87f9c5821201a61e'
@@ -79,7 +78,7 @@ export class NostrClient {
         try {
           if (window.nostr) {
             console.log('use existing nostr')
-            signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
+            signer = new NDKNip07Signer(LoginTimeoutMSec)
             await signer.blockUntilReady()
             console.log('signer', signer)
             isLoggedIn = true
@@ -104,12 +103,13 @@ export class NostrClient {
             _requests: {},
             _pubkey: NostrClient.JapaneseUserBot,
           } as any
-          signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
+          signer = new NDKNip07Signer(LoginTimeoutMSec)
           await signer.blockUntilReady()
         }
 
         const ndk = new NDK({
           explicitRelayUrls: NostrClient.Relays,
+          autoConnectUserRelays: true,
           signer,
         })
         ndk.assertSigner()
@@ -139,7 +139,7 @@ export class NostrClient {
     let attempts = 0
     while (attempts < maxAttempts) {
       try {
-        await ndk.connect(NostrClient.LoginTimeoutMSec)
+        await ndk.connect(LoginTimeoutMSec)
         console.log('Successfully connected to relays')
         return
       } catch (error) {
@@ -168,6 +168,18 @@ export class NostrClient {
     return this.#isLoggedIn
   }
 
+  private async checkRelayConnection(): Promise<string[]> {
+    const connectedRelays: string[] = []
+    for (const relay of this.#ndk.pool.relays.values()) {
+      if (relay.connectivity.isAvailable()) {
+        connectedRelays.push(relay.url)
+      } else {
+        console.warn(`Relay ${relay.url} is not connected`)
+      }
+    }
+    return connectedRelays
+  }
+
   postEvent(event: NostrEvent): ResultAsync<void, Error> {
     return ResultAsync.fromPromise(
       (async () => {
@@ -175,11 +187,17 @@ export class NostrClient {
           throw new NostrReadOnlyError()
         }
 
+        const connectedRelays = await this.checkRelayConnection()
+        if (connectedRelays.length === 0) {
+          throw new Error('No relays are connected')
+        }
+
         const ndkEvent = new NDKEvent(this.#ndk, event)
 
         try {
           await ndkEvent.sign()
-          await ndkEvent.publish()
+          const relaySet = NDKRelaySet.fromRelayUrls(connectedRelays, this.#ndk)
+          await ndkEvent.publish(relaySet, PostEventTimeoutMSec)
         } catch (error) {
           throw new Error(`Failed to post event: ${error}`)
         }

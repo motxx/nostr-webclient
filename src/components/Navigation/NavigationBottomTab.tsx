@@ -3,30 +3,32 @@ import { PiNotePencil } from 'react-icons/pi'
 import NavigationBottomTabItem from './NavigationBottomTabItem'
 import { NavigationItem, NavigationItemId } from './Navigation'
 import { useNavigate } from 'react-router-dom'
-import { User } from '@/domain/entities/User'
+import { useAtom } from 'jotai'
+import { loggedInUserSelector } from '@/state/selectors'
 
 interface NavigationBottomTabProps {
   navigationItems: NavigationItem[]
-  user: User
   shouldFocusBottomTab: boolean
   shouldShowPostButton: boolean
   onNavigate: (to: NavigationItemId) => void
+  onPostNote: () => void
 }
 
 const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
   navigationItems,
-  user,
   shouldFocusBottomTab,
   shouldShowPostButton,
   onNavigate,
+  onPostNote,
 }) => {
   const navigate = useNavigate()
+  const [loggedInUser] = useAtom(loggedInUserSelector)
   return (
     <>
       {shouldShowPostButton && (
         <div
           className={`absolute bottom-24 right-6 p-3 z-20 bg-blue-500 active:bg-blue-600 dark:bg-blue-600 active:dark:bg-blue-700 rounded-full drop-shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-opacity duration-200 ${shouldFocusBottomTab ? 'opacity-50' : 'opacity-100'}`}
-          onClick={() => onNavigate('post')}
+          onClick={() => onPostNote()}
         >
           <PiNotePencil className="text-white text-center text-2xl" />
         </div>
@@ -43,18 +45,22 @@ const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
               onNavigate={onNavigate}
             />
           ))}
-        <div
-          className="flex flex-col items-center cursor-pointer p-1 rounded-md transition active:bg-gray-200 dark:active:bg-gray-700"
-          onClick={() =>
-            navigate(`/user/${user.profile?.nostrAddress || user.npub}`)
-          }
-        >
-          <img
-            src={user.profile?.image}
-            alt="User profile"
-            className="w-8 h-8 rounded-full"
-          />
-        </div>
+        {loggedInUser && (
+          <div
+            className="flex flex-col items-center cursor-pointer p-1 rounded-md transition active:bg-gray-200 dark:active:bg-gray-7000"
+            onClick={() =>
+              navigate(
+                `/user/${loggedInUser.profile?.nostrAddress || loggedInUser.npub}`
+              )
+            }
+          >
+            <img
+              src={loggedInUser.profile?.image}
+              alt="User profile"
+              className="w-8 h-8 rounded-full"
+            />
+          </div>
+        )}
       </div>
     </>
   )
