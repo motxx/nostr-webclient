@@ -267,7 +267,7 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
             ) as Media,
             index
           )}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 space-y-1">
             <NoteItemHeader
               note={note}
               onToggleFollow={onToggleFollow}
