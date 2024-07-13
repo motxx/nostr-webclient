@@ -17,6 +17,7 @@ import {
   NostrMaxSendableConstraintError,
   NostrMinSendableConstraintError,
   NostrUnknownUserError,
+  NostrReadOnlyError,
 } from '@/infrastructure/nostr/nostrErrors'
 import {
   LnurlPay,
@@ -31,6 +32,8 @@ import { Mutex } from 'async-mutex'
 const FetchTimeout = 5000 // 5 seconds
 const DefaultMaxRetries = 1
 const RetryDelay = 1000 // 1 second
+const LoginTimeoutMSec = 3000 // 3 seconds
+const PostEventTimeoutMSec = 10000 // 10 seconds
 
 type ZapResponse = {
   pr: string
@@ -52,7 +55,6 @@ export class NostrClient {
     this.#isLoggedIn = isLoggedIn
   }
 
-  static readonly LoginTimeoutMSec = 3000
   static readonly Relays = [
     'wss://relay.hakua.xyz',
     'wss://relay.damus.io',
@@ -76,7 +78,7 @@ export class NostrClient {
         try {
           if (window.nostr) {
             console.log('use existing nostr')
-            signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
+            signer = new NDKNip07Signer(LoginTimeoutMSec)
             await signer.blockUntilReady()
             console.log('signer', signer)
             isLoggedIn = true
@@ -88,17 +90,26 @@ export class NostrClient {
           window.nostr = {
             getPublicKey: async () => NostrClient.JapaneseUserBot,
             signEvent: async (event: NostrEvent) => {
-              throw new Error('not implemented')
+              throw new NostrReadOnlyError()
+            },
+            nip04: {
+              encrypt: async (event: NostrEvent) => {
+                throw new NostrReadOnlyError()
+              },
+              decrypt: async (event: NostrEvent) => {
+                throw new NostrReadOnlyError()
+              },
             },
             _requests: {},
             _pubkey: NostrClient.JapaneseUserBot,
           } as any
-          signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
+          signer = new NDKNip07Signer(LoginTimeoutMSec)
           await signer.blockUntilReady()
         }
 
         const ndk = new NDK({
           explicitRelayUrls: NostrClient.Relays,
+          autoConnectUserRelays: true,
           signer,
         })
         ndk.assertSigner()
@@ -128,7 +139,7 @@ export class NostrClient {
     let attempts = 0
     while (attempts < maxAttempts) {
       try {
-        await ndk.connect(NostrClient.LoginTimeoutMSec)
+        await ndk.connect(LoginTimeoutMSec)
         console.log('Successfully connected to relays')
         return
       } catch (error) {
@@ -155,6 +166,47 @@ export class NostrClient {
 
   isLoggedIn(): boolean {
     return this.#isLoggedIn
+  }
+
+  private async checkRelayConnection(): Promise<string[]> {
+    const connectedRelays: string[] = []
+    for (const relay of this.#ndk.pool.relays.values()) {
+      if (relay.connectivity.isAvailable()) {
+        connectedRelays.push(relay.url)
+      } else {
+        console.warn(`Relay ${relay.url} is not connected`)
+      }
+    }
+    return connectedRelays
+  }
+
+  postEvent(event: NostrEvent): ResultAsync<void, Error> {
+    return ResultAsync.fromPromise(
+      (async () => {
+        if (!this.#isLoggedIn) {
+          throw new NostrReadOnlyError()
+        }
+
+        const connectedRelays = await this.checkRelayConnection()
+        if (connectedRelays.length === 0) {
+          throw new Error('No relays are connected')
+        }
+
+        const ndkEvent = new NDKEvent(this.#ndk, event)
+
+        try {
+          await ndkEvent.sign()
+          const relaySet = NDKRelaySet.fromRelayUrls(connectedRelays, this.#ndk)
+          await ndkEvent.publish(relaySet, PostEventTimeoutMSec)
+        } catch (error) {
+          throw new Error(`Failed to post event: ${error}`)
+        }
+      })(),
+      (error) =>
+        error instanceof Error
+          ? error
+          : new Error(`Unknown error occurred while posting event: ${error}`)
+    )
   }
 
   subscribeEvents(
