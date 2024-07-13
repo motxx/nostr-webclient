@@ -120,24 +120,54 @@ export class NoteService implements NoteRepository {
     )()
   }
 
-  private createNoteFromEvent(
+  createNoteFromEvent(
     event: NDKEvent,
     depth: number = 0
   ): ResultAsync<Note, Error> {
     if (event.kind !== NDKKind.Text) {
-      return ResultAsync.fromSafePromise(
-        Promise.reject(new NoteServiceNotTextEvent(event))
+      return ResultAsync.fromPromise(
+        this.#userProfileRepository
+          .fetchProfile(event.author.npub)
+          .then((profile) => {
+            const user = new User({
+              npub: event.author.npub,
+              pubkey: event.author.pubkey,
+              profile: profile.isOk() ? profile.value : undefined,
+            })
+
+            return new Note({
+              id: event.id,
+              author: user,
+              text: this.getTextContentForNonTextEvent(event),
+              json: JSON.stringify(event.rawEvent()),
+              created_at: new Date(
+                event.created_at ? event.created_at * 1000 : 0
+              ),
+              reactions: new NoteReactions({}),
+            })
+          }),
+        (error) =>
+          new Error(`Failed to create note from non-text event: ${error}`)
       )
     }
 
     return this.#userProfileRepository
       .fetchProfile(event.author.npub)
-      .andThen((profile) => {
+      .andThen((userProfile) => {
+        if (userProfile) {
+          return ok(
+            new User({
+              npub: event.author.npub,
+              pubkey: event.author.pubkey,
+              profile: userProfile,
+            })
+          )
+        }
         return ok(
           new User({
             npub: event.author.npub,
             pubkey: event.author.pubkey,
-            profile,
+            profile: undefined,
           })
         )
       })
@@ -229,6 +259,19 @@ export class NoteService implements NoteRepository {
           })
         })
       })
+  }
+
+  private getTextContentForNonTextEvent(event: NDKEvent): string {
+    switch (event.kind) {
+      case NDKKind.Reaction:
+        return event.content
+      case NDKKind.Repost:
+        return ''
+      case NDKKind.Zap:
+        return ''
+      default:
+        return `kind: ${event.kind} のイベントです`
+    }
   }
 
   private cleanupText(text: string): string {
