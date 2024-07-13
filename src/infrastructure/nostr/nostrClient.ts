@@ -8,7 +8,6 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
-  NDKPrivateKeySigner,
   NDKSigner,
 } from '@nostr-dev-kit/ndk'
 import {
@@ -27,6 +26,7 @@ import {
 import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
+import { Mutex } from 'async-mutex'
 
 const FetchTimeout = 5000 // 5 seconds
 const DefaultMaxRetries = 1
@@ -42,9 +42,9 @@ type ZapResponse = {
 }
 
 export class NostrClient {
-  #ndk: NDK
-  #user: NDKUser
-  #isLoggedIn: boolean
+  readonly #ndk: NDK
+  readonly #user: NDKUser
+  readonly #isLoggedIn: boolean
 
   private constructor(ndk: NDK, user: NDKUser, isLoggedIn: boolean) {
     this.#ndk = ndk
@@ -52,34 +52,48 @@ export class NostrClient {
     this.#isLoggedIn = isLoggedIn
   }
 
-  static readonly SharedDefaultPrivateKey =
-    'deba600201c506203810e29e9d6611814aa5c771555b58f5e4b35c0099072882'
   static readonly LoginTimeoutMSec = 3000
   static readonly Relays = [
     'wss://relay.hakua.xyz',
     'wss://relay.damus.io',
     'wss://relay.nostr.band',
   ]
+  static readonly JapaneseUserBot =
+    '087c51f1926f8d3cb4ff45f53a8ee2a8511cfe113527ab0e87f9c5821201a61e'
   static #nostrClient?: NostrClient
+  static #mutex = new Mutex()
 
   static connect(): ResultAsync<NostrClient, Error> {
-    if (NostrClient.#nostrClient) {
-      return ResultAsync.fromSafePromise(
-        Promise.resolve(NostrClient.#nostrClient)
-      )
-    }
-
     return ResultAsync.fromPromise(
-      (async () => {
-        let signer: NDKSigner
+      NostrClient.#mutex.runExclusive(async () => {
+        if (NostrClient.#nostrClient) {
+          return NostrClient.#nostrClient
+        }
+
+        let signer: NDKSigner | undefined
         let isLoggedIn = false
 
         try {
+          if (window.nostr) {
+            console.log('use existing nostr')
+            signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
+            await signer.blockUntilReady()
+            console.log('signer', signer)
+            isLoggedIn = true
+          } else {
+            throw new Error('Nostr not available')
+          }
+        } catch {
+          console.log('use default nostr')
+          window.nostr = {
+            getPublicKey: async () => NostrClient.JapaneseUserBot,
+            signEvent: async (event: NostrEvent) => {
+              throw new Error('not implemented')
+            },
+            _requests: {},
+            _pubkey: NostrClient.JapaneseUserBot,
+          } as any
           signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec)
-          await signer.blockUntilReady()
-          isLoggedIn = true
-        } catch (error) {
-          signer = new NDKPrivateKeySigner(NostrClient.SharedDefaultPrivateKey)
           await signer.blockUntilReady()
         }
 
@@ -94,17 +108,24 @@ export class NostrClient {
         NostrClient.#nostrClient = new NostrClient(ndk, user, isLoggedIn)
 
         return NostrClient.#nostrClient
-      })(),
-      (error) => new Error(`Failed to connect: ${error}`)
+      }),
+      (error: unknown) => {
+        throw new Error(`Failed to connect: ${error}`)
+      }
+    )
+  }
+
+  disconnect() {
+    return ResultAsync.fromPromise(
+      NostrClient.#mutex.runExclusive(async () => {
+        NostrClient.#nostrClient = undefined
+      }),
+      (error) => new Error(`Failed to disconnect: ${error}`)
     )
   }
 
   isLoggedIn(): boolean {
     return this.#isLoggedIn
-  }
-
-  setLoggedIn(isLoggedIn: boolean): void {
-    this.#isLoggedIn = isLoggedIn
   }
 
   subscribeEvents(
