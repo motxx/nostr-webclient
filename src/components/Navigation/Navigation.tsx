@@ -143,12 +143,6 @@ const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <>
-      <PostNoteModal
-        isOpen={isPostModalOpen}
-        onClose={handleClosePostModal}
-        onSubmit={handlePostSubmit}
-      />
-
       {isMobile ? (
         <NavigationBottomTab
           navigationItems={navigationItems}
@@ -165,6 +159,12 @@ const Navigation: React.FC<NavigationProps> = ({
           onPostNote={handleClickPostNote}
         />
       )}
+
+      <PostNoteModal
+        isOpen={isPostModalOpen}
+        onClose={handleClosePostModal}
+        onSubmit={handlePostSubmit}
+      />
     </>
   )
 }
