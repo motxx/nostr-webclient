@@ -1,31 +1,15 @@
-import React, { useState } from 'react'
-import LoginModal from '@/components/Authentication/LoginModal'
+import React from 'react'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 import { isLoggedInAtom } from '@/state/atoms'
 import { useAtom } from 'jotai'
+import { init, launch } from 'nostr-login'
 
 const LoginPrompt: React.FC = () => {
   const [isLoggedIn] = useAtom(isLoggedInAtom)
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false)
 
-  const openLoginModal = () => setIsLoginModalOpen(true)
-  const closeLoginModal = () => setIsLoginModalOpen(false)
-
-  const handleLoginWithNsecApp = () => {
-    // Open Nsec app
-  }
-
-  const handleLoginWithExtension = () => {
-    // Open browser extension
-  }
-
-  const handleLoginWithImportingKeys = (nsecPrivateKey: string) => {
-    // Import keys
-  }
-
-  const handleLogin = (method: () => void) => {
-    method()
-    closeLoginModal()
+  const openLoginModal = async () => {
+    await init({})
+    await launch()
   }
 
   if (isLoggedIn) {
@@ -43,15 +27,6 @@ const LoginPrompt: React.FC = () => {
         </PrimaryButton>
       </div>
       <hr className="border-1 border-gray-200 dark:border-gray-700" />
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={closeLoginModal}
-        onLoginWithNsecApp={() => handleLogin(handleLoginWithNsecApp)}
-        onLoginWithExtension={() => handleLogin(handleLoginWithExtension)}
-        onLoginWithImportingKeys={(nsecPrivateKey: string) =>
-          handleLogin(() => handleLoginWithImportingKeys(nsecPrivateKey))
-        }
-      />
     </>
   )
 }

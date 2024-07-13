@@ -16,8 +16,9 @@ export const useNostrClient = () => {
       try {
         const result = await getNostrClient()
         if (result.isOk()) {
-          setNostrClient(result.value)
-          setIsLoggedIn(result.value.isLoggedIn())
+          const nostrClient = result.value
+          setNostrClient(nostrClient)
+          setIsLoggedIn(nostrClient.isLoggedIn())
         } else {
           setError(result.error)
         }
@@ -35,27 +36,24 @@ export const useNostrClient = () => {
     initializeClient()
   }, [initializeClient])
 
-  const login = useCallback(() => {
+  const refreshClient = useCallback(async () => {
     if (nostrClient) {
-      nostrClient.setLoggedIn(true)
-      setIsLoggedIn(true)
+      const result = await nostrClient.disconnect()
+      if (result.isOk()) {
+        setNostrClient(null)
+        initializeClient()
+      } else {
+        setError(result.error)
+      }
     }
-  }, [nostrClient, setIsLoggedIn])
-
-  const logout = useCallback(() => {
-    if (nostrClient) {
-      nostrClient.setLoggedIn(false)
-      setIsLoggedIn(false)
-    }
-  }, [nostrClient, setIsLoggedIn])
+  }, [nostrClient, setNostrClient, initializeClient])
 
   return {
     nostrClient,
     isLoggedIn,
     isLoading,
     error,
-    login,
-    logout,
     initializeClient,
+    refreshClient,
   }
 }

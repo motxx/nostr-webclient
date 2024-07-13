@@ -13,7 +13,7 @@ export const useInfiniteNotes = ({
   limit = 20,
   hashtag,
 }: UseInfiniteNotesOptions) => {
-  const { subscribe } = useSubscribeNotes()
+  const { subscribe, unsubscribeAll } = useSubscribeNotes()
   const [notes, setNotes] = useState<Note[]>([])
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const isLoading = notes.length === 0
@@ -50,6 +50,21 @@ export const useInfiniteNotes = ({
     limit,
     hashtag,
   ])
+
+  useEffect(() => {
+    document.addEventListener('nlAuth', (e: Event) => {
+      const detail = e as CustomEvent<{ type: string }>
+      if (detail.detail.type === 'login') {
+        unsubscribeAll()
+        setIsLoadingMore(false)
+        setNotes([])
+      }
+    })
+
+    return () => {
+      document.removeEventListener('nlAuth', () => {})
+    }
+  }, [isLoading, loadMoreNotes, unsubscribeAll])
 
   useEffect(() => {
     if (!isLoading) return
