@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
 import TimelineImageGrid from './TimelineImageGrid'
+import TimelineVideoSwipe from './TimelineVideoSwipe'
 import { useInfiniteNotes } from './hooks/useInfiniteNotes'
 import { HomeTimelineTabs, TimelineTabId } from './types'
 
@@ -86,6 +87,14 @@ const Timeline: React.FC<TimelineProps> = ({
         )
       case 'image-grid':
         return <TimelineImageGrid className="pt-0 sm:pt-4" notes={notes} />
+      case 'video-swipe':
+        return (
+          <TimelineVideoSwipe
+            className="pt-0 sm:pt-4"
+            notes={notes}
+            onToggleFollow={onToggleFollow}
+          />
+        )
       default:
         return null
     }

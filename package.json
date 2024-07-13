@@ -93,6 +93,7 @@
     "@types/react-sparklines": "^1.7.5",
     "@types/react-transition-group": "^4.4.10",
     "@types/slick-carousel": "^1.6.40",
+    "@types/youtube": "^0.0.50",
     "autoprefixer": "^10.4.19",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
