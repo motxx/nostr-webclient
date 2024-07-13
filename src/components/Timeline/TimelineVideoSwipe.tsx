@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { NoteType, Media } from '@/domain/entities/Note'
 import NoteDetails from '@/components/NoteDetails/NoteDetails'
 import NoteItemActions from '@/components/NoteItem/NoteItemActions'
@@ -56,6 +56,33 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const playCurrentMedia = useCallback(() => {
+    if (videoNotes.length === 0 || currentIndex >= videoNotes.length) {
+      return
+    }
+
+    const currentMedia = videoNotes[currentIndex].media?.find(
+      (m) => m.type === 'video' || m.type === 'youtube'
+    )
+    if (currentMedia?.type === 'video') {
+      const video = videoRefs.current[currentIndex]
+      if (video) {
+        video
+          .play()
+          .catch((error) => console.error('Error playing video:', error))
+      }
+    } else if (currentMedia?.type === 'youtube') {
+      const player = youtubeRefs.current[currentIndex]
+      if (player && player.playVideo) {
+        player.playVideo()
+      }
+    }
+  }, [currentIndex, videoNotes])
+
+  useEffect(() => {
+    playCurrentMedia()
+  }, [currentIndex, playCurrentMedia])
+
   useEffect(() => {
     const handleScroll = () => {
       if (containerRef.current && videoNotes.length > 0) {
@@ -79,59 +106,6 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
       }
     }
   }, [currentIndex, videoNotes.length])
-
-  useEffect(() => {
-    const playCurrentMedia = async () => {
-      if (videoNotes.length === 0 || currentIndex >= videoNotes.length) {
-        return
-      }
-
-      await pauseAllMedia()
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      const currentMedia = videoNotes[currentIndex].media?.find(
-        (m) => m.type === 'video' || m.type === 'youtube'
-      )
-      if (currentMedia?.type === 'video') {
-        const video = videoRefs.current[currentIndex]
-        if (video) {
-          try {
-            video.currentTime = 0
-            await video.play()
-          } catch (error) {
-            console.error('Error playing video:', error)
-          }
-        }
-      } else if (currentMedia?.type === 'youtube') {
-        const player = youtubeRefs.current[currentIndex]
-        if (player && player.playVideo) {
-          player.seekTo(0)
-          player.playVideo()
-        }
-      }
-    }
-
-    playCurrentMedia()
-  }, [currentIndex, videoNotes])
-
-  const pauseAllMedia = async () => {
-    const pausePromises = videoRefs.current.map(async (video) => {
-      if (video && !video.paused) {
-        try {
-          await video.pause()
-        } catch (error) {
-          console.error('Error pausing video:', error)
-        }
-      }
-    })
-
-    youtubeRefs.current.forEach((player) => {
-      if (player && player.pauseVideo) {
-        player.pauseVideo()
-      }
-    })
-
-    await Promise.all(pausePromises)
-  }
 
   const handleSwipe = (direction: 'up' | 'down') => {
     if (videoNotes.length === 0) return
@@ -202,9 +176,9 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
           ref={(el) => (videoRefs.current[index] = el)}
           src={media.url}
           className={`${mediaClassName} object-contain`}
-          loop
           playsInline
           muted
+          loop
           onClick={handleMediaClick}
         />
       )
@@ -236,10 +210,12 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
                 videoId: videoId,
                 playerVars: {
                   autoplay: 0,
-                  controls: 0,
+                  controls: 1,
                   rel: 0,
                   playsinline: 1,
                   mute: 1,
+                  loop: 1,
+                  playlist: videoId,
                 },
                 events: {
                   onReady: (event) => {
