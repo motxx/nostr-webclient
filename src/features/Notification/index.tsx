@@ -1,39 +1,73 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { FiRepeat } from 'react-icons/fi'
 import { AiFillThunderbolt } from 'react-icons/ai'
 import NoteItem from '@/components/NoteItem/NoteItem'
-import notificationList from '@/data/dummy-notifications'
 import { BsHeartFill } from 'react-icons/bs'
 import UserIdLink from '@/components/ui-elements/UserIdLink'
-import { NoteType, NotificationNoteType } from '@/domain/entities/Note'
-import { userIdForDisplay, userNameForDisplay } from '@/utils/addressConverter'
+import { NoteType } from '@/domain/entities/Note'
+import { userNameForDisplay } from '@/utils/addressConverter'
 import { formatDateAsString } from '@/utils/timeConverter'
+import { useNostrClient } from '@/hooks/useNostrClient'
+import { UserProfileService } from '@/infrastructure/services/UserProfileService'
+import { NoteService } from '@/infrastructure/services/NoteService'
+import { NotificationService } from '@/infrastructure/services/NotificationService'
+import { SubscribeNotifications } from '@/domain/use_cases/SubscribeNotifications'
+import { Notification } from '@/domain/entities/Notification'
 
 const NotificationPage: React.FC = () => {
-  const groupedNotifications = notificationList.reduce(
+  const { nostrClient } = useNostrClient()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+
+  useEffect(() => {
+    if (!nostrClient) return
+
+    const userProfileRepository = new UserProfileService(nostrClient)
+    const noteService = new NoteService(nostrClient!, userProfileRepository)
+    const notificationService = new NotificationService(
+      nostrClient,
+      userProfileRepository,
+      noteService
+    )
+    const subscribeNotifications = new SubscribeNotifications(
+      notificationService
+    )
+
+    const unsubscribePromise = subscribeNotifications.execute(
+      (notification: Notification) => {
+        setNotifications((prev: Notification[]) => [...prev, notification])
+      },
+      { limit: 50 } // You can adjust the limit as needed
+    )
+
+    return () => {
+      unsubscribePromise.then(({ unsubscribe }) => unsubscribe())
+    }
+  }, [nostrClient])
+
+  const groupedNotifications = notifications.reduce(
     (acc, notification) => {
-      if (!acc[notification.text]) {
-        acc[notification.text] = []
+      if (!acc[notification.target.text]) {
+        acc[notification.target.text] = []
       }
-      acc[notification.text].push(notification)
+      acc[notification.target.text].push(notification)
       return acc
     },
-    {} as { [key: string]: NotificationNoteType[] }
+    {} as { [key: string]: Notification[] }
   )
 
-  const renderNotificationContent = (notes: NotificationNoteType[]) => {
-    const majorNote = notes[0]
-    const majorUserName = userNameForDisplay(majorNote.author)
-    const majorCreatedAt = formatDateAsString(majorNote.created_at)
-    switch (majorNote.type) {
+  const renderNotificationContent = (notifications: Notification[]) => {
+    const majorNotification = notifications[0]
+    const majorUserName = userNameForDisplay(majorNotification.actor)
+    const majorCreatedAt = formatDateAsString(majorNotification.createdAt)
+    switch (majorNotification.type) {
       case 'like':
         return (
           <div>
             <p className="text-gray-700 dark:text-gray-300 text-sm">
-              {notes.length > 1 ? (
+              {notifications.length > 1 ? (
                 <>
                   <UserIdLink userId={majorUserName} />
-                  さんと他{notes.length - 1}
+                  さんと他{notifications.length - 1}
                   人があなたの投稿をいいねしました
                 </>
               ) : (
@@ -44,18 +78,18 @@ const NotificationPage: React.FC = () => {
               )}
             </p>
             <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-              {majorNote.text}
+              {majorNotification.target.text}
             </div>
           </div>
         )
       case 'repost':
         return (
           <div>
-            <p className="text-gray-700 dark:text-gray-300 text-sm">
-              {notes.length > 1 ? (
+            <p className="text-gray-7000 dark:text-gray-300 text-sm">
+              {notifications.length > 1 ? (
                 <>
                   <UserIdLink userId={majorUserName} />
-                  さんと他{notes.length - 1}
+                  さんと他{notifications.length - 1}
                   人があなたの投稿をリポストしました
                 </>
               ) : (
@@ -66,21 +100,21 @@ const NotificationPage: React.FC = () => {
               )}
             </p>
             <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-              {majorNote.text}
+              {majorNotification.target.text}
             </div>
           </div>
         )
       case 'zap':
         return (
           <div>
-            <p className="text-gray-700 dark:text-gray-300 text-sm">
-              {notes.length > 1 ? (
+            <p className="text-gray-700 dark:text-gray-3000 text-sm">
+              {notifications.length > 1 ? (
                 <>
                   <UserIdLink userId={majorUserName} />
-                  さんと他{notes.length - 1}
+                  さんと他{notifications.length - 1}
                   人があなたの投稿に合計
-                  {notes.reduce((acc, note) => {
-                    return acc + note.zaps
+                  {notifications.reduce((acc, notification) => {
+                    return acc + notification.target.reactions.zapsAmount
                   }, 0)}
                   satsをzapしました
                 </>
@@ -88,18 +122,18 @@ const NotificationPage: React.FC = () => {
                 <>
                   <UserIdLink userId={majorUserName} />
                   さんがあなたの投稿に
-                  {majorNote.zaps}
+                  {majorNotification.target.reactions.zapsAmount}
                   satsをzapしました ({majorCreatedAt})
                 </>
               )}
             </p>
             <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-              {majorNote.text}
+              {majorNotification.target.text}
             </div>
           </div>
         )
       case 'reply':
-        const note: NoteType = { ...majorNote }
+        const note: NoteType = { ...majorNotification.target }
         return (
           <div>
             <NoteItem note={note} onToggleFollow={() => false} />
@@ -143,8 +177,8 @@ const NotificationPage: React.FC = () => {
                   {notifications.map((notification, idx) => (
                     <img
                       key={idx}
-                      src={notification.author.profile?.image ?? ''}
-                      alt={`${notification.author.npub}'s profile`}
+                      src={notification.actor.profile?.image ?? ''}
+                      alt={`${notification.actor.npub}'s profile`}
                       className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800"
                       style={{ zIndex: notifications.length - idx }}
                     />

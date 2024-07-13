@@ -31,10 +31,6 @@ export interface NoteType {
   following?: boolean // TODO: ユーザデータなので消す
 }
 
-export type NotificationNoteType = NoteType & {
-  type: 'like' | 'reply' | 'repost' | 'zap'
-}
-
 export class Note implements NoteType {
   public readonly id: string = ''
   public readonly author: User = { npub: '', pubkey: '' }
