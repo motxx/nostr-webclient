@@ -1,6 +1,6 @@
 {
-  "short_name": "COBRA",
-  "name": "Nostr Landscape",
+  "short_name": "Zapstr",
+  "name": "Nostr Webclient",
   "icons": [
     {
       "src": "favicon.ico",

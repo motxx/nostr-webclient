@@ -46,7 +46,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const renderLoginButtons = () => (
     <>
       <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-8 font-mplus-2">
-        COBRA
+        Nostrgram
       </h1>
       <PrimaryButton
         className="w-full py-3 pl-8 pr-8 mb-4"

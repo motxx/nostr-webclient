@@ -1,6 +1,6 @@
-# COBRA - Nostr Client
+# Zapstr - Nostr Client
 
-COBRA is a Nostr client developed using React and TypeScript.
+Zapstr is a Nostr client developed using React and TypeScript.
 
 ## Installation
 
