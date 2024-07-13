@@ -77,7 +77,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
                 {formatDateAsString(note.created_at)}
               </div>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
+            <div className="text-xs text-gray-500 dark:text-gray-400 whitespace-pre-wrap break-words">
               {author.id}
             </div>
           </div>

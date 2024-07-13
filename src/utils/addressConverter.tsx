@@ -12,10 +12,24 @@ const shortenNpub = (npub: string) => {
   return npub.substring(0, 8) + '...' + npub.substring(npub.length - 4)
 }
 
+const shortenNostrAddress = (nostrAddress: string) => {
+  const atIndex = nostrAddress.indexOf('@')
+  if (atIndex === -1) return nostrAddress
+
+  const name = nostrAddress.substring(0, atIndex)
+  const domain = nostrAddress.substring(atIndex + 1)
+
+  const shortenedName = name.length > 24 ? name.substring(0, 24) + '...' : name
+  const shortenedDomain =
+    domain.length > 24 ? domain.substring(0, 24) + '...' : domain
+
+  return `${shortenedName}@${shortenedDomain}`
+}
+
 export const userIdForDisplay = (user: User) => {
   const profile = user.profile
   return profile?.nostrAddress
-    ? nostrAddressSimplified(profile.nostrAddress)
+    ? shortenNostrAddress(nostrAddressSimplified(profile.nostrAddress))
     : shortenNpub(user.npub)
 }
 
