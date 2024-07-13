@@ -48,6 +48,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
             onClick={() => onNavigate(item.id)}
           />
         ))}
+        {/* TODO: マイニング機能の実装
         <div
           className="flex justify-center lg:justify-start items-center lg:space-x-2 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md transition cursor-pointer active:text-gray-400 dark:active:text-gray-400"
           onClick={handleToggleMining}
@@ -63,6 +64,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
             {isMining ? 'マイニング ON' : 'マイニング OFF'}
           </span>
         </div>
+        */}
       </div>
       <NavigationSidebarUserSection user={user} />
     </div>
