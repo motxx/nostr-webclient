@@ -17,6 +17,7 @@ import {
   NostrMaxSendableConstraintError,
   NostrMinSendableConstraintError,
   NostrUnknownUserError,
+  NostrReadOnlyError,
 } from '@/infrastructure/nostr/nostrErrors'
 import {
   LnurlPay,
@@ -55,8 +56,10 @@ export class NostrClient {
   static readonly LoginTimeoutMSec = 3000
   static readonly Relays = [
     'wss://relay.hakua.xyz',
+    /*
     'wss://relay.damus.io',
     'wss://relay.nostr.band',
+    */
   ]
   static readonly JapaneseUserBot =
     '087c51f1926f8d3cb4ff45f53a8ee2a8511cfe113527ab0e87f9c5821201a61e'
@@ -88,7 +91,15 @@ export class NostrClient {
           window.nostr = {
             getPublicKey: async () => NostrClient.JapaneseUserBot,
             signEvent: async (event: NostrEvent) => {
-              throw new Error('not implemented')
+              throw new NostrReadOnlyError()
+            },
+            nip04: {
+              encrypt: async (event: NostrEvent) => {
+                throw new NostrReadOnlyError()
+              },
+              decrypt: async (event: NostrEvent) => {
+                throw new NostrReadOnlyError()
+              },
             },
             _requests: {},
             _pubkey: NostrClient.JapaneseUserBot,
@@ -155,6 +166,29 @@ export class NostrClient {
 
   isLoggedIn(): boolean {
     return this.#isLoggedIn
+  }
+
+  postEvent(event: NostrEvent): ResultAsync<void, Error> {
+    return ResultAsync.fromPromise(
+      (async () => {
+        if (!this.#isLoggedIn) {
+          throw new NostrReadOnlyError()
+        }
+
+        const ndkEvent = new NDKEvent(this.#ndk, event)
+
+        try {
+          await ndkEvent.sign()
+          await ndkEvent.publish()
+        } catch (error) {
+          throw new Error(`Failed to post event: ${error}`)
+        }
+      })(),
+      (error) =>
+        error instanceof Error
+          ? error
+          : new Error(`Unknown error occurred while posting event: ${error}`)
+    )
   }
 
   subscribeEvents(

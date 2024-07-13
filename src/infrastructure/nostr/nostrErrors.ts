@@ -64,3 +64,9 @@ export class NostrInvoiceNotFoundError extends Error {
     super(`Invoice not found. response:${JSON.stringify(response)}`)
   }
 }
+
+export class NostrReadOnlyError extends Error {
+  constructor() {
+    super('Read-only account. Write forbidden.')
+  }
+}

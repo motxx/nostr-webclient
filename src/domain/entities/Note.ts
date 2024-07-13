@@ -1,6 +1,7 @@
 import emojiRegex from 'emoji-regex'
 import { NoteReactions, NoteReactionsType } from './NoteReactions'
 import { User } from './User'
+import { NDKKind, NostrEvent } from '@nostr-dev-kit/ndk'
 
 export type EmojiString = string
 export type PostActionType = 'reply' | 'repost' | 'like' | 'zap' | EmojiString
@@ -27,6 +28,7 @@ export interface NoteType {
   replyTargetNotes?: NoteType[] // リプライ先のポスト
   receivedReplyNotes?: NoteType[] // 自分のノートにリプライしたノート
   reactions: NoteReactionsType
+  relays: string[]
 
   following?: boolean // TODO: ユーザデータなので消す
 }
@@ -38,6 +40,7 @@ export class Note implements NoteType {
   public readonly media?: Media[]
   public readonly json: string = ''
   public readonly created_at: Date = new Date('1970-01-01T00:00:00Z')
+  public readonly relays: string[] = []
 
   public replyTargetNotes?: NoteType[]
   public receivedReplyNotes?: NoteType[]
@@ -52,5 +55,45 @@ export class Note implements NoteType {
 
   constructor(data: NoteType) {
     Object.assign(this, data)
+  }
+
+  toUnsignedNostrEvent(): NostrEvent {
+    return {
+      id: this.id,
+      pubkey: this.author.pubkey,
+      created_at: this.created_at.getTime(),
+      kind: NDKKind.Text,
+      tags:
+        this.replyTargetNotes?.map((replyNote) => ['e', replyNote.id]) || [],
+      content: this.text,
+    }
+  }
+
+  createRepostNostrEvent(): NostrEvent {
+    return {
+      id: this.id,
+      pubkey: this.author.pubkey,
+      created_at: this.created_at.getTime(),
+      kind: NDKKind.Repost,
+      tags: [
+        ['e', this.id, this.relays[0]],
+        ['p', this.author.pubkey],
+      ],
+      content: this.json,
+    }
+  }
+
+  createLikeNostrEvent(): NostrEvent {
+    return {
+      id: this.id,
+      pubkey: this.author.pubkey,
+      created_at: this.created_at.getTime(),
+      kind: NDKKind.Reaction,
+      tags: [
+        ['e', this.id],
+        ['p', this.author.pubkey],
+      ],
+      content: '+',
+    }
   }
 }

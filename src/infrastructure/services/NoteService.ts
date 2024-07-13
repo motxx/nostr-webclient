@@ -11,7 +11,6 @@ import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { unixtimeOf } from '../nostr/utils'
 import { NoteReactions } from '@/domain/entities/NoteReactions'
 import { bech32ToHex } from '@/utils/addressConverter'
-import { NoteServiceNotTextEvent } from './serviceErrors'
 import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
@@ -35,9 +34,7 @@ export class NoteService implements NoteRepository {
   }
 
   postNote(note: Note): ResultAsync<void, Error> {
-    return ResultAsync.fromSafePromise(
-      Promise.reject(new Error('Method not implemented.'))
-    )
+    return this.#nostrClient.postEvent(note.toUnsignedNostrEvent())
   }
 
   subscribeNotes(
