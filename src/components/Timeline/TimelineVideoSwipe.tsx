@@ -58,11 +58,11 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
 
   useEffect(() => {
     const handleScroll = () => {
-      if (containerRef.current) {
+      if (containerRef.current && videoNotes.length > 0) {
         const scrollPosition = containerRef.current.scrollTop
         const videoHeight = containerRef.current.clientHeight
         const newIndex = Math.round(scrollPosition / videoHeight)
-        if (newIndex !== currentIndex) {
+        if (newIndex !== currentIndex && newIndex < videoNotes.length) {
           setCurrentIndex(newIndex)
         }
       }
@@ -78,10 +78,14 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
         container.removeEventListener('scroll', handleScroll)
       }
     }
-  }, [currentIndex])
+  }, [currentIndex, videoNotes.length])
 
   useEffect(() => {
     const playCurrentMedia = async () => {
+      if (videoNotes.length === 0 || currentIndex >= videoNotes.length) {
+        return
+      }
+
       await pauseAllMedia()
       await new Promise((resolve) => setTimeout(resolve, 100))
       const currentMedia = videoNotes[currentIndex].media?.find(
@@ -130,6 +134,8 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
   }
 
   const handleSwipe = (direction: 'up' | 'down') => {
+    if (videoNotes.length === 0) return
+
     const newIndex =
       direction === 'up'
         ? Math.min(currentIndex + 1, videoNotes.length - 1)
@@ -180,9 +186,11 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
   }
 
   const handleClickAction = (type: PostActionType) => {
-    console.log(
-      `Action ${type} clicked for note ${videoNotes[currentIndex].id}`
-    )
+    if (videoNotes.length > 0) {
+      console.log(
+        `Action ${type} clicked for note ${videoNotes[currentIndex].id}`
+      )
+    }
   }
 
   const renderMedia = (media: Media, index: number) => {
@@ -252,6 +260,16 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
     ? 'h-[calc(100vh-12rem)]'
     : 'h-screen max-w-4xl mx-auto'
 
+  if (videoNotes.length === 0) {
+    return (
+      <div
+        className={`${containerClassName} ${className} flex items-center justify-center`}
+      >
+        <p className="text-center text-gray-500">No video content available.</p>
+      </div>
+    )
+  }
+
   return (
     <div
       ref={containerRef}
@@ -291,7 +309,7 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
           </div>
         </div>
       ))}
-      {isDetailsOpen && (
+      {isDetailsOpen && videoNotes.length > 0 && (
         <NoteDetails
           isOpen={isDetailsOpen}
           onClose={closeDetails}
