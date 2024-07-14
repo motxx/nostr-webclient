@@ -42,12 +42,14 @@ export class NotificationService implements NotificationRepository {
           }
 
           const onEvent = (event: NDKEvent) =>
-            this.createNotificationFromEvent(event)
-              .map((notification) => onNotification(notification))
-              .orElse((e) => {
-                console.error({ error: e, event })
-                return ok(undefined)
-              })
+            event.pubkey === user.pubkey // 自己言及のリプライを除外
+              ? ResultAsync.fromSafePromise(Promise.resolve(undefined))
+              : this.createNotificationFromEvent(event)
+                  .map((notification) => onNotification(notification))
+                  .orElse((e) => {
+                    console.error({ error: e, event })
+                    return ok(undefined)
+                  })
 
           return this.nostrClient.subscribeEvents(filter, onEvent).match(
             (value) => Promise.resolve(value),
