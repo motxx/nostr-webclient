@@ -2,11 +2,18 @@ import { User } from '@/domain/entities/User'
 import { Note } from '@/domain/entities/Note'
 import { NoteReactions } from '@/domain/entities/NoteReactions'
 
-export type NotificationReactionType = 'like' | 'reply' | 'repost' | 'zap'
+export type NotificationReactionType =
+  | 'like'
+  | 'dislike'
+  | 'reply'
+  | 'repost'
+  | 'zap'
+  | 'custom-reaction'
 
 export interface NotificationType {
   id: string
   type: NotificationReactionType
+  customReaction?: string
   actor: User
   target: Note
   createdAt: Date
@@ -16,6 +23,7 @@ export interface NotificationType {
 export class Notification implements NotificationType {
   id: string = ''
   type: NotificationReactionType = 'like'
+  customReaction?: string
   actor: User = new User({ pubkey: '', npub: '' })
   target: Note = new Note({
     id: '',

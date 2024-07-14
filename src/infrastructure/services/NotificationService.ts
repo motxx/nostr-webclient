@@ -81,15 +81,26 @@ export class NotificationService implements NotificationRepository {
           return err(new Error('No target event found in notification'))
         }
 
-        return this.noteService
-          .createNoteFromEvent(event)
+        return this.nostrClient
+          .fetchEvent(targetEventId)
+          .andThen((targetEvent) =>
+            this.noteService.createNoteFromEvent(targetEvent)
+          )
           .andThen((targetNote) => {
             let type: NotificationReactionType
+            let customReaction: string | undefined
             let zaps: number | undefined
 
             switch (event.kind) {
               case NDKKind.Reaction:
-                type = 'like'
+                if (event.content === '+') {
+                  type = 'like'
+                } else if (event.content === '-') {
+                  type = 'dislike'
+                } else {
+                  type = 'custom-reaction'
+                  customReaction = event.content
+                }
                 break
               case NDKKind.Text:
                 type = 'reply'
@@ -116,6 +127,7 @@ export class NotificationService implements NotificationRepository {
                     event.created_at ? event.created_at * 1000 : 0
                   ),
                   zaps,
+                  customReaction,
                 })
               ),
               (error) => error as Error

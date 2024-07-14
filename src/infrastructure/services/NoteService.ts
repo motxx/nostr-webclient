@@ -137,10 +137,16 @@ export class NoteService implements NoteRepository {
               author: user,
               text: this.getTextContentForNonTextEvent(event),
               json: JSON.stringify(event.rawEvent()),
+              relays: [],
               created_at: new Date(
                 event.created_at ? event.created_at * 1000 : 0
               ),
-              reactions: new NoteReactions({}),
+              reactions: new NoteReactions({
+                likesCount: 0,
+                repostsCount: 0,
+                zapsAmount: 0,
+                customReactions: {},
+              }),
             })
           }),
         (error) =>
@@ -250,6 +256,7 @@ export class NoteService implements NoteRepository {
               ...mentionedNotes,
             ],
             reactions,
+            relays: [],
             created_at: new Date(
               event.created_at ? event.created_at * 1000 : 0
             ),
