@@ -30,7 +30,7 @@ export const useNotifications = () => {
         setNotifications((prev: Notification[]) => [...prev, notification])
         setIsLoading(false)
       },
-      { limit: 50 }
+      { limit: 1000 }
     )
 
     return () => {
