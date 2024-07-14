@@ -1,7 +1,7 @@
 import React from 'react'
-import { Notification } from '../types'
+import { Notification } from '@/domain/entities/Notification'
 import NotificationIcon from './NotificationIcon'
-import ImageStack from '@/components/ui-parts/ImageStack'
+import UserAvatarStack from '@/components/ui-parts/UserAvatarStack'
 import NotificationContent from './NotificationContent'
 
 interface NotificationItemProps {
@@ -20,8 +20,11 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           <div className="mr-4">
             <NotificationIcon type={majorNotification.type!} />
           </div>
-          <ImageStack
-            images={notifications.map((n) => n.actor.profile?.image ?? '')}
+          <UserAvatarStack
+            users={notifications.map((n) => ({
+              image: n.actor.profile?.image,
+              name: n.actor.profile?.name || n.actor.npub,
+            }))}
             size={8}
           />
         </div>

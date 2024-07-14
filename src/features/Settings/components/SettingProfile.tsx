@@ -1,6 +1,6 @@
 import React, { useState, DragEvent } from 'react'
-import Avatar from 'boring-avatars'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
+import UserAvatar from '@/components/ui-elements/UserAvatar'
 
 const SettingProfile: React.FC = () => {
   const [avatar, setAvatar] = useState<File | null>(null)
@@ -72,25 +72,11 @@ const SettingProfile: React.FC = () => {
           onDrop={handleDrop(setAvatar)}
         >
           <div className="relative group w-full h-full flex items-center justify-center">
-            {renderImagePreview(
-              avatar,
-              'w-full h-full object-cover rounded-full group-hover:opacity-70 transition-opacity duration-300 ease-in-out'
-            ) || (
-              <div className="w-full h-full object-cover group-hover:opacity-70 transition-opacity duration-300 ease-in-out">
-                <Avatar
-                  size={124}
-                  name={username}
-                  variant="beam"
-                  colors={[
-                    '#92A1C6',
-                    '#146A7C',
-                    '#F0AB3D',
-                    '#C271B4',
-                    '#C20D90',
-                  ]}
-                />
-              </div>
-            )}
+            <UserAvatar
+              src={avatar ? URL.createObjectURL(avatar) : undefined}
+              name={username || ''}
+              size={124}
+            />
             {!avatar && (
               <p className="absolute font-thin text-white text-center group-hover:opacity-70 transition-opacity duration-300 ease-in-out">
                 Upload Avatar
