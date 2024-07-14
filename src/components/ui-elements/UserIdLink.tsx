@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom'
 
-const UserIdLink = ({ userId }: { userId: string }) => {
+const UserIdLink = ({
+  userId,
+  userName,
+}: {
+  userId: string
+  userName: string
+}) => {
   return (
     <Link to={`/user/${userId}`} className="font-bold hover:underline">
-      {userId}
+      {userName}
     </Link>
   )
 }

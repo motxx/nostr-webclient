@@ -5,8 +5,8 @@ interface IconProps {
   icon: React.ReactElement
 }
 
-const Icon: React.FC<IconProps> = ({ className, icon }) => (
-  <div className={className}>{icon}</div>
-)
+const Icon: React.FC<IconProps> = ({ className, icon }) => {
+  return React.cloneElement(icon, { className })
+}
 
 export default Icon
