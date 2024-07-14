@@ -16,7 +16,7 @@ const UserAvatarStack: React.FC<UserAvatarStackProps> = ({
     {users.map((user, idx) => (
       <div
         key={idx}
-        className={`w-${size} h-${size} rounded-full border-2 ${borderColor}`}
+        className={`w-${size + 1} h-${size + 1} rounded-full border-2 ${borderColor}`}
         style={{ zIndex: users.length - idx }}
       >
         <UserAvatar src={user.image} name={user.name} size={size * 4} />
