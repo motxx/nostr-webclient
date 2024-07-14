@@ -45,8 +45,13 @@ export class NoteService implements NoteRepository {
       ? ResultAsync.fromSafePromise(Promise.resolve(options.authorPubkeys))
       : this.#nostrClient
           .getLoggedInUser()
-          .asyncAndThen((user) => ResultAsync.fromSafePromise(user.follows()))
-          .map((follows) => Array.from(follows).map((a) => a.pubkey))
+          .asyncAndThen((user) =>
+            ResultAsync.fromSafePromise(user.follows()).map((follows) => ({
+              user: user.pubkey,
+              follows: Array.from(follows).map((a) => a.pubkey),
+            }))
+          )
+          .map(({ user, follows }) => [user, ...follows])
 
     return getAuthors
       .map((authors) => ({
