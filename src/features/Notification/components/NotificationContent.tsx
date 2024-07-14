@@ -23,27 +23,25 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
   const majorCreatedAt = formatDateAsString(majorNotification.createdAt)
 
   const renderLikeNotification = () => (
-    <p className="text-gray-700 dark:text-gray-300 text-sm">
-      {notifications.length > 1 ? (
-        <>
-          <UserIdLink userId={majorUserId} userName={majorUserName} />
-          さんと他{notifications.length - 1}
-          人があなたの投稿を
-          {majorNotification.target.text === '+'
-            ? 'いいねしました'
-            : `${majorNotification.target.text}しました`}
-        </>
-      ) : (
-        <>
-          <UserIdLink userId={majorUserId} userName={majorUserName} />
-          さんがあなたの投稿を
-          {majorNotification.target.text === '+'
-            ? 'いいねしました'
-            : `${majorNotification.target.text}しました`}{' '}
-          ({majorCreatedAt})
-        </>
-      )}
-    </p>
+    <>
+      <p className="text-gray-700 dark:text-gray-300 text-sm">
+        {notifications.length > 1 ? (
+          <>
+            <UserIdLink userId={majorUserId} userName={majorUserName} />
+            さんと他{notifications.length - 1}
+            人があなたの投稿をいいねしました
+          </>
+        ) : (
+          <>
+            <UserIdLink userId={majorUserId} userName={majorUserName} />
+            さんがあなたの投稿をいいねしました ({majorCreatedAt})
+          </>
+        )}
+      </p>
+      <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm whitespace-pre-wrap break-words">
+        {majorNotification.target.text}
+      </div>
+    </>
   )
 
   const renderRepostNotification = () => (
@@ -62,7 +60,7 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
           </>
         )}
       </p>
-      <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
+      <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm whitespace-pre-wrap break-words">
         {majorNotification.target.text}
       </div>
     </>
@@ -90,7 +88,7 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
           </>
         )}
       </p>
-      <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
+      <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm whitespace-pre-wrap break-words">
         {majorNotification.target.text}
       </div>
     </>
@@ -100,9 +98,58 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
     <NoteItem note={majorNotification.target} onToggleFollow={() => false} />
   )
 
+  const renderDislikeNotification = () => (
+    <>
+      <p className="text-gray-700 dark:text-gray-300 text-sm">
+        {notifications.length > 1 ? (
+          <>
+            <UserIdLink userId={majorUserId} userName={majorUserName} />
+            さんと他{notifications.length - 1}
+            人があなたの投稿をdislikeしました
+          </>
+        ) : (
+          <>
+            <UserIdLink userId={majorUserId} userName={majorUserName} />
+            さんがあなたの投稿をdislikeしました ({majorCreatedAt})
+          </>
+        )}
+      </p>
+      <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm whitespace-pre-wrap break-words">
+        {majorNotification.target.text}
+      </div>
+    </>
+  )
+
+  const renderCustomReactionNotification = () => (
+    <>
+      <p className="text-gray-700 dark:text-gray-300 text-sm">
+        {notifications.length > 1 ? (
+          <>
+            <UserIdLink userId={majorUserId} userName={majorUserName} />
+            さんと他{notifications.length - 1}
+            人があなたの投稿に{notifications[0].customReaction}しました
+          </>
+        ) : (
+          <>
+            <UserIdLink userId={majorUserId} userName={majorUserName} />
+            さんがあなたの投稿に{notifications[0].customReaction}しました (
+            {majorCreatedAt})
+          </>
+        )}
+      </p>
+      <div className="text-gray-600 dark:text-gray-400 mt-2 text-sm whitespace-pre-wrap break-words">
+        {majorNotification.target.text}
+      </div>
+    </>
+  )
+
   switch (majorNotification.type) {
     case 'like':
       return renderLikeNotification()
+    case 'dislike':
+      return renderDislikeNotification()
+    case 'custom-reaction':
+      return renderCustomReactionNotification()
     case 'repost':
       return renderRepostNotification()
     case 'zap':

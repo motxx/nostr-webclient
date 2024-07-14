@@ -18,7 +18,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       {majorNotification.type !== 'reply' && (
         <div className="flex items-center">
           <div className="mr-4">
-            <NotificationIcon type={majorNotification.type!} />
+            <NotificationIcon
+              type={majorNotification.type}
+              customReaction={majorNotification.customReaction}
+            />
           </div>
           <UserAvatarStack
             users={notifications.map((n) => ({
