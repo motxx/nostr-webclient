@@ -11,7 +11,7 @@ import {
   userNameForDisplay,
 } from '@/utils/addressConverter'
 import { formatDateAsString } from '@/utils/timeConverter'
-import Avatar from 'boring-avatars'
+import UserAvatar from '@/components/ui-elements/UserAvatar'
 
 interface NoteItemHeaderProps {
   note: NoteType
@@ -51,20 +51,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
             )
           }
         >
-          {author.image ? (
-            <img
-              src={author.image}
-              alt={`${author.name}'s profile`}
-              className="w-8 h-8 rounded-full"
-            />
-          ) : (
-            <Avatar
-              size={32}
-              name={author.name}
-              variant="beam"
-              colors={['#92A1C6', '#146A7C', '#F0AB3D', '#C271B4', '#C20D90']}
-            />
-          )}
+          <UserAvatar src={author.image} name={author.name} size={32} />
           <div>
             <div className="flex items-center">
               <div className="font-semibold text-xs text-gray-700 dark:text-gray-300">
