@@ -9,6 +9,7 @@ import { Notification } from '@/domain/entities/Notification'
 export const useNotifications = () => {
   const { nostrClient } = useNostrClient()
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (!nostrClient) return
@@ -27,6 +28,7 @@ export const useNotifications = () => {
     const unsubscribePromise = subscribeNotifications.execute(
       (notification: Notification) => {
         setNotifications((prev: Notification[]) => [...prev, notification])
+        setIsLoading(false)
       },
       { limit: 50 }
     )
@@ -36,5 +38,5 @@ export const useNotifications = () => {
     }
   }, [nostrClient])
 
-  return { notifications }
+  return { notifications, isLoading }
 }

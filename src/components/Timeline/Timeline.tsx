@@ -5,6 +5,7 @@ import TimelineImageGrid from './TimelineImageGrid'
 import TimelineVideoSwipe from './TimelineVideoSwipe'
 import { useInfiniteNotes } from './hooks/useInfiniteNotes'
 import { HomeTimelineTabs, TimelineTabId } from './types'
+import Spinner from '../ui-elements/Spinner'
 
 interface TimelineProps {
   onScrollUp: () => void
@@ -145,9 +146,7 @@ const Timeline: React.FC<TimelineProps> = ({
         <div ref={contentRef} className="flex flex-col items-center w-full">
           {renderFeed()}
           <div className="w-full h-16 flex items-center justify-center">
-            {showSpinner && (
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
-            )}
+            {showSpinner && <Spinner size="md" color="blue-500" />}
           </div>
         </div>
       </div>
