@@ -1,5 +1,5 @@
 import React from 'react'
-import SearchBar from '@/components/ui-parts/SearchBar'
+import HashSearchBar from '@/components/ui-parts/HashSearchBar'
 import LoginPrompt from '@/components/ui-parts/LoginPrompt'
 import Widgets from '@/components/Widgets/Widgets'
 
@@ -16,8 +16,8 @@ const TimelineLayout: React.FC<TimelineLayoutProps> = ({ children }) => {
       </div>
       <aside className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px]">
         <div className="bg-white dark:bg-black z-10 pl-8 py-4">
-          <SearchBar
-            onSearch={() => {
+          <HashSearchBar
+            onSearch={(term, hashtags) => {
               /* routerでexploreに飛ぶ */
             }}
           />

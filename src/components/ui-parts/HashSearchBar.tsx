@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { users } from '@/data/dummy-users'
-import SearchInput from '@/components/ui-parts/SearchInput'
+import HashSearchInput from './HashSearchInput'
 
-const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
-  onSearch,
-}) => {
+const HashSearchBar: React.FC<{
+  onSearch: (term: string, tags: string[]) => void
+}> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('')
+  const [hashtags, setHashtags] = useState<string[]>([])
   const [suggestions, setSuggestions] = useState<any[]>([])
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (searchTerm.length > 0) {
+    if (hashtags.length === 0 && searchTerm.length > 0) {
       const filteredUsers = users.filter(
         (user) =>
           user.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -21,16 +22,17 @@ const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
     } else {
       setSuggestions([])
     }
-  }, [searchTerm])
+  }, [searchTerm, hashtags.length])
 
   const handleSuggestionClick = (userId: string) => {
     navigate(`/user/${userId}`)
     setSearchTerm('')
+    setHashtags([])
     setSuggestions([])
   }
 
   const handleSearchSubmit = () => {
-    onSearch(searchTerm)
+    onSearch(searchTerm, hashtags)
     setSuggestions([])
   }
 
@@ -42,20 +44,25 @@ const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
   return (
     <div className="relative">
       <form onSubmit={handleFormSubmit}>
-        <SearchInput
+        <HashSearchInput
+          hashtags={hashtags}
+          setHashtags={setHashtags}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          className="w-full bg-gray-200 dark:bg-gray-700 rounded-full"
+          placeholder="ユーザーまたはハッシュタグを検索..."
+          className="w-full"
         />
         <button type="submit" className="hidden"></button>
       </form>
-      {searchTerm.length > 0 && (
+      {(searchTerm.length > 0 || hashtags.length > 0) && (
         <div className="absolute z-50 top-full left-0 w-full bg-white dark:bg-gray-800 mt-2 rounded-lg shadow-lg">
           <div
             onClick={handleSearchSubmit}
             className="p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
           >
-            <div className="flex text-gray-800 dark:text-gray-200">{`「${searchTerm}」を検索`}</div>
+            <div className="flex text-gray-800 dark:text-gray-200">
+              {`「${searchTerm}${hashtags.length > 0 ? ' ' : ''}${hashtags.join(' ')}」を検索`}
+            </div>
           </div>
           <hr className="border-gray-300 dark:border-gray-700" />
           <div className="pb-2">
@@ -89,4 +96,4 @@ const SearchBar: React.FC<{ onSearch: (term: string) => void }> = ({
   )
 }
 
-export default SearchBar
+export default HashSearchBar

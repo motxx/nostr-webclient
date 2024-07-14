@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react'
-import SearchBar from '@/components/ui-parts/SearchBar'
+import HashSearchBar from '@/components/ui-parts/HashSearchBar'
 import Widgets from '@/components/Widgets/Widgets'
 import ExploreFilters from './components/ExploreFilters'
 import ExploreOutput from './components/ExploreOutput'
@@ -23,7 +23,8 @@ const ExplorePage: React.FC = () => {
     limit: 20,
   })
 
-  const handleFinalSearch = (term: string) => {
+  const handleFinalSearch = (term: string, hashtags: string[]) => {
+    // TODO: hashtags search
     setFinalSearchTerm(term)
   }
 
@@ -84,7 +85,7 @@ const ExplorePage: React.FC = () => {
       >
         <div className="sticky top-0 z-10 bg-white dark:bg-black p-4 sm:pb-4">
           <div className="mb-2">
-            <SearchBar onSearch={handleFinalSearch} />
+            <HashSearchBar onSearch={handleFinalSearch} />
           </div>
           <ExploreFilters
             accountFilter={accountFilter}
