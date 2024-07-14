@@ -32,6 +32,7 @@ export class Notification implements NotificationType {
       zapsAmount: 0,
       customReactions: {},
     }),
+    relays: [],
   })
   createdAt: Date = new Date()
   zaps?: number
