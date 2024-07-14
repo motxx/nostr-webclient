@@ -34,6 +34,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
   const author = {
     image: note.author.profile?.image,
     name: userNameForDisplay(note.author),
+    fullName: note.author.profile?.name || note.author.npub,
     nostrAddress: note.author.profile?.nostrAddress,
     npub: note.author.npub,
     id: userIdForDisplay(note.author),
@@ -51,7 +52,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
             )
           }
         >
-          <UserAvatar src={author.image} name={author.name} size={32} />
+          <UserAvatar src={author.image} name={author.fullName} size={32} />
           <div>
             <div className="flex items-center">
               <div className="font-semibold text-xs text-gray-700 dark:text-gray-300">
