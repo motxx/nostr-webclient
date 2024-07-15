@@ -9,7 +9,7 @@ import { AccountFilter, ExploreMetricWithNull } from '../types'
 
 interface ExploreFiltersProps {
   accountFilter: string
-  setAccountFilter: (filter: string) => void
+  setAccountFilter: (filter: AccountFilter) => void
   outputFormat: string
   setOutputFormat: (format: string) => void
   showFilters: boolean
