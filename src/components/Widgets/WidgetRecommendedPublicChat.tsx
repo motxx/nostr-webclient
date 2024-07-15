@@ -11,7 +11,7 @@ type Channel = {
   channeldId: string
 }
 
-const WidgetRecommendedPublicChannel: React.FC = () => {
+const WidgetRecommendedPublicChat: React.FC = () => {
   const channels: Channel[] = [
     {
       id: 1,
@@ -137,4 +137,4 @@ const WidgetRecommendedPublicChannel: React.FC = () => {
   )
 }
 
-export default WidgetRecommendedPublicChannel
+export default WidgetRecommendedPublicChat
