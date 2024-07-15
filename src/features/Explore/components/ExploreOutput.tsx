@@ -3,10 +3,11 @@ import TimelineStandard from '@/components/Timeline/TimelineStandard'
 import TimelineImageGrid from '@/components/Timeline/TimelineImageGrid'
 import ExploreUserInfluenceGraph from './ExploreUserInfluenceGraph'
 import { ExploreMetricWithNull } from '../types'
+import { Note } from '@/domain/entities/Note'
 
 interface ExploreOutputProps {
   outputFormat: string
-  sortedNotes: any[]
+  sortedNotes: Note[]
   metric: ExploreMetricWithNull
 }
 
@@ -20,7 +21,12 @@ const ExploreOutput: React.FC<ExploreOutputProps> = ({
       case 'timeline':
         return (
           <div className="pt-4 sm:pt-8">
-            <TimelineStandard notes={sortedNotes} />
+            <TimelineStandard
+              notes={sortedNotes}
+              onToggleFollow={() => {
+                return true
+              }}
+            />
           </div>
         )
       case 'image-grid':

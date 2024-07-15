@@ -5,10 +5,11 @@ import ExploreFilters from './components/ExploreFilters'
 import ExploreOutput from './components/ExploreOutput'
 import { ExploreMetricWithNull } from './types'
 import { useInfiniteNotes } from '@/components/Timeline/hooks/useInfiniteNotes'
+import { NoteType } from '@/domain/entities/Note'
 
 const ExplorePage: React.FC = () => {
   const [accountFilter, setAccountFilter] = useState('all')
-  const [metric, setMetric] = useState(null as ExploreMetricWithNull)
+  const [metric, setMetric] = useState<ExploreMetricWithNull>(null)
   const [timeframe, setTimeframe] = useState('all')
   const [outputFormat, setOutputFormat] = useState('timeline')
   const [showFilters, setShowFilters] = useState(false)
@@ -24,21 +25,52 @@ const ExplorePage: React.FC = () => {
   })
 
   const handleFinalSearch = (term: string, hashtags: string[]) => {
-    // TODO: hashtags search
+    // TODO: Implement hashtags search
     setFinalSearchTerm(term)
   }
 
+  const detectLanguageGroup = (
+    text: string,
+    profile?: { name?: string; displayName?: string }
+  ): string => {
+    const content = (
+      text +
+      ' ' +
+      (profile?.name || '') +
+      ' ' +
+      (profile?.displayName || '')
+    ).toLowerCase()
+
+    if (/[ぁ-んァ-ン]/.test(content)) return 'japanese'
+    if (/[\u4e00-\u9fa5]/.test(content)) return 'chinese'
+    if (/[а-яА-Я]/.test(content)) return 'russian'
+    if (/[ا-ي]/.test(content)) return 'arabic'
+    if (/[á-úñ]/.test(content)) return 'spanish'
+    if (/[à-ùû]/.test(content)) return 'french'
+    if (/[ß-öü]/.test(content)) return 'german'
+    if (/[ã-õç]/.test(content)) return 'portuguese'
+    if (/[देवनागरी]/.test(content)) return 'hindi'
+
+    // デフォルトは英語とする
+    return 'english'
+  }
+
   const filteredNotes = useMemo(() => {
-    return notes.filter((note) => {
+    return notes.filter((note: NoteType) => {
       const matchesSearchTerm = note.text
         .toLowerCase()
         .includes(finalSearchTerm.toLowerCase())
-      const matchesAccountFilter =
-        accountFilter === 'all' || note.accountType === accountFilter
-      const matchesTimeframe = true // Implement your timeframe filtering logic here
+      const matchesAccountFilter = accountFilter === 'all' // TODO: Implement account filter 'followers' and 'tribe'
+      const matchesTimeframe = true // TODO: Implement timeframe filtering logic
+
+      const noteLanguageGroup = detectLanguageGroup(
+        note.text,
+        note.author.profile
+      )
       const matchesLanguageGroupFilter =
         languageGroupFilter === 'all' ||
-        note.languageGroup === languageGroupFilter
+        noteLanguageGroup === languageGroupFilter
+
       return (
         matchesSearchTerm &&
         matchesAccountFilter &&
@@ -48,9 +80,42 @@ const ExplorePage: React.FC = () => {
     })
   }, [notes, finalSearchTerm, accountFilter, languageGroupFilter])
 
+  const calculateEngagement = (note: NoteType): number => {
+    const repostsWeight = 2
+    const likesWeight = 1
+    const zapsWeight = 0.1
+
+    return (
+      (note.reactions.repostsCount ?? 0) * repostsWeight +
+      (note.reactions.likesCount ?? 0) * likesWeight +
+      (note.reactions.zapsAmount ?? 0) * zapsWeight
+    )
+  }
+
   const sortedNotes = useMemo(() => {
     if (sortByMetric && metric) {
-      return [...filteredNotes].sort((a, b) => b[metric] - a[metric])
+      return [...filteredNotes].sort((a: NoteType, b: NoteType) => {
+        if (metric === 'engagement') {
+          return calculateEngagement(b) - calculateEngagement(a)
+        }
+        if (metric === 'followers') {
+          return (
+            (b.author.profile?.followersCount || 0) -
+            (a.author.profile?.followersCount || 0)
+          )
+        }
+        if (metric === 'zaps') {
+          return (b.reactions.zapsAmount ?? 0) - (a.reactions.zapsAmount ?? 0)
+        }
+        return (
+          ((b.reactions[
+            `${metric}Count` as keyof NoteType['reactions']
+          ] as number) ?? 0) -
+          ((a.reactions[
+            `${metric}Count` as keyof NoteType['reactions']
+          ] as number) ?? 0)
+        )
+      })
     }
     return filteredNotes
   }, [filteredNotes, sortByMetric, metric])
