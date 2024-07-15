@@ -10,7 +10,7 @@ import HomePage from '@/features/Home'
 import HashtagPage from '@/features/Hashtag'
 import ExplorePage from '@/features/Explore'
 import NotificationPage from '@/features/Notification'
-import PublicChannelPage from '@/features/PublicChannel'
+import PublicChatPage from '@/features/PublicChat'
 import MessagePage from '@/features/Message'
 import SettingsPage from '@/features/Settings'
 import DashboardPage from '@/features/Dashboard'
@@ -76,10 +76,10 @@ const App: React.FC = () => {
             />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/notification" element={<NotificationPage />} />
-            <Route path="/public-channel" element={<PublicChannelPage />} />
+            <Route path="/public-chat" element={<PublicChatPage />} />
             <Route
-              path="/public-channel/:channelId"
-              element={<PublicChannelPage />}
+              path="/public-chat/:channelId"
+              element={<PublicChatPage />}
             />
             <Route path="/message" element={<MessagePage />} />
             <Route

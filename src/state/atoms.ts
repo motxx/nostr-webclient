@@ -3,11 +3,12 @@ import { atomFamily } from 'jotai/utils'
 import { User } from '@/domain/entities/User'
 import { UserProfile } from '@/domain/entities/UserProfile'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
+import { PublicChatMessage } from '@/domain/entities/PublicChat'
 
 export const isLoggedInAtom = atom<boolean>(false)
 export const loggedInUserAtom = atom<User | null>(null)
 
-export const publicChannelScrollPositionAtom = atom<{
+export const publicChatScrollPositionAtom = atom<{
   [channelId: string]: number
 }>({})
 
@@ -20,3 +21,7 @@ export const npubFromNostrAddressFamily = atomFamily((nostrAddress: string) =>
 )
 
 export const nostrClientAtom = atom<NostrClient | null>(null)
+
+export const publicChatMessagesFamily = atomFamily((channelId: string) =>
+  atom<PublicChatMessage[]>([])
+)

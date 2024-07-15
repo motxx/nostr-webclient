@@ -26,7 +26,7 @@ export type NavigationItemId =
   | 'home'
   | 'explore'
   | 'notification'
-  | 'public-channel'
+  | 'public-chat'
   | 'message'
   | 'post'
   | 'dashboard'
@@ -46,7 +46,7 @@ const navigationItems: NavigationItem[] = [
   { id: 'explore', icon: FiCompass, label: '探索', hasPostNoteButton: true },
   { id: 'notification', icon: FiBell, label: '通知' },
   {
-    id: 'public-channel',
+    id: 'public-chat',
     icon: FiUsers,
     label: '公開チャンネル',
   },
@@ -97,8 +97,8 @@ const Navigation: React.FC<NavigationProps> = ({
   const getActiveItemId = (): NavigationItemId => {
     const path = location.pathname.substring(1) // Remove leading '/'
 
-    if (path.startsWith('public-channel')) {
-      return 'public-channel'
+    if (path.startsWith('public-chat')) {
+      return 'public-chat'
     }
 
     switch (path) {
