@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { FiSearch } from 'react-icons/fi'
 import classNames from 'classnames'
 
@@ -20,6 +20,7 @@ const HashSearchInput: React.FC<SearchInputProps> = ({
   className,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isComposing, setIsComposing] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
@@ -34,26 +35,30 @@ const HashSearchInput: React.FC<SearchInputProps> = ({
       e.preventDefault()
       const newHashtags = hashtags.slice(0, -1)
       setHashtags(newHashtags)
-      return
-    }
-
-    if (e.key !== 'Enter' && e.key !== ' ') {
-      return
-    }
-
-    const words = searchTerm.split(' ')
-    const lastWord = words[words.length - 1]
-    if (lastWord.startsWith('#') && lastWord.length > 1) {
-      if (!hashtags.includes(lastWord)) {
-        const newHashtags = [...hashtags, lastWord]
-        setHashtags(newHashtags)
+    } else if ((e.key === 'Enter' || e.key === ' ') && !isComposing) {
+      e.preventDefault()
+      const words = searchTerm.split(' ')
+      const lastWord = words[words.length - 1]
+      if (lastWord.startsWith('#') && lastWord.length > 1) {
+        if (!hashtags.includes(lastWord)) {
+          const newHashtags = [...hashtags, lastWord]
+          setHashtags(newHashtags)
+        }
+        const newSearchTerm = searchTerm.replace(lastWord, '').trim()
+        setSearchTerm(newSearchTerm)
+      } else {
+        const newSearchTerm = searchTerm.trim() + ' '
+        setSearchTerm(newSearchTerm)
       }
-      const newSearchTerm = searchTerm.replace(lastWord, '').trim()
-      setSearchTerm(newSearchTerm)
-    } else {
-      const newSearchTerm = searchTerm.trim()
-      setSearchTerm(newSearchTerm)
     }
+  }
+
+  const handleCompositionStart = () => {
+    setIsComposing(true)
+  }
+
+  const handleCompositionEnd = () => {
+    setIsComposing(false)
   }
 
   const handleHashtagClick = (hashtag: string) => {
@@ -94,6 +99,8 @@ const HashSearchInput: React.FC<SearchInputProps> = ({
             value={searchTerm}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
             placeholder={hashtags.length > 0 ? '' : placeholder || '検索...'}
             className="bg-transparent min-w-0 flex-grow text-sm text-gray-700 dark:text-gray-300 outline-none placeholder-gray-400 dark:placeholder-gray-500"
           />

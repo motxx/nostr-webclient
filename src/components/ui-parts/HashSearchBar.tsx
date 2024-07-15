@@ -49,7 +49,6 @@ const HashSearchBar: React.FC<{
           setHashtags={setHashtags}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          placeholder="ユーザーまたはハッシュタグを検索..."
           className="w-full"
         />
         <button type="submit" className="hidden"></button>
