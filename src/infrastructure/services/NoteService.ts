@@ -1,5 +1,5 @@
 import { Result, ResultAsync, ok } from 'neverthrow'
-import { NDKEvent, NDKKind } from '@nostr-dev-kit/ndk'
+import { NDKEvent, NDKFilter, NDKKind } from '@nostr-dev-kit/ndk'
 import { isEmoji, Media, Note } from '@/domain/entities/Note'
 import {
   NoteRepository,
@@ -41,17 +41,19 @@ export class NoteService implements NoteRepository {
     onNote: (note: Note) => void,
     options?: SubscribeNotesOptions
   ): ResultAsync<{ unsubscribe: () => void }, Error> {
-    const getAuthors = options?.authorPubkeys
-      ? ResultAsync.fromSafePromise(Promise.resolve(options.authorPubkeys))
-      : this.#nostrClient
-          .getLoggedInUser()
-          .asyncAndThen((user) =>
-            ResultAsync.fromSafePromise(user.follows()).map((follows) => ({
-              user: user.pubkey,
-              follows: Array.from(follows).map((a) => a.pubkey),
-            }))
-          )
-          .map(({ user, follows }) => [user, ...follows])
+    const getAuthors: ResultAsync<undefined | string[], Error> = options?.global
+      ? ResultAsync.fromSafePromise(Promise.resolve(undefined))
+      : options?.authorPubkeys
+        ? ResultAsync.fromSafePromise(Promise.resolve(options.authorPubkeys))
+        : this.#nostrClient
+            .getLoggedInUser()
+            .asyncAndThen((user) =>
+              ResultAsync.fromSafePromise(user.follows()).map((follows) => ({
+                user: user.pubkey,
+                follows: Array.from(follows).map((a) => a.pubkey),
+              }))
+            )
+            .map(({ user, follows }) => [user, ...follows])
 
     return getAuthors
       .map((authors) => ({
@@ -65,22 +67,26 @@ export class NoteService implements NoteRepository {
           : undefined,
         '#t': options?.hashtag ? [options.hashtag] : undefined,
       }))
-      .andThen((filterOptions) => {
-        const onEvent = (event: NDKEvent) =>
-          this.createNoteFromEvent(event)
-            .map((note) => onNote(note))
-            .orElse((e) => {
-              console.error({
-                error: e,
-                event: event,
+      .andThen(
+        (
+          filterOptions
+        ): Result<{ unsubscribe: () => void }, ErrorWithDetails> => {
+          const onEvent = (event: NDKEvent) =>
+            this.createNoteFromEvent(event)
+              .map((note) => onNote(note))
+              .orElse((e) => {
+                console.error({
+                  error: e,
+                  event: event,
+                })
+                return ok(undefined)
               })
-              return ok(undefined)
-            })
 
-        return this.#nostrClient
-          .subscribeEvents(filterOptions, onEvent, options?.isForever)
-          .mapErr((e) => new ErrorWithDetails('subscribeNotes', e))
-      })
+          return this.#nostrClient
+            .subscribeEvents(filterOptions, onEvent, options?.isForever)
+            .mapErr((e) => new ErrorWithDetails('subscribeNotes', e))
+        }
+      )
   }
 
   subscribeZaps(

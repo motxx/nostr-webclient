@@ -3,12 +3,14 @@ import { useSubscribeNotes } from './useSubscribeNotes'
 import { Note } from '@/domain/entities/Note'
 
 interface UseInfiniteNotesOptions {
+  global?: boolean
   authorPubkeys?: string[]
   limit?: number
   hashtag?: string // TODO: implement hashtag filtering
 }
 
 export const useInfiniteNotes = ({
+  global,
   authorPubkeys,
   limit = 20,
   hashtag,
@@ -33,6 +35,7 @@ export const useInfiniteNotes = ({
     setIsLoadingMore(true)
     const oldestNote = notes[notes.length - 1]
     subscribe((note) => handleNote(note), {
+      global,
       authorPubkeys,
       until: oldestNote.created_at,
       limit,
@@ -49,6 +52,7 @@ export const useInfiniteNotes = ({
     authorPubkeys,
     limit,
     hashtag,
+    global,
   ])
 
   useEffect(() => {
@@ -70,12 +74,22 @@ export const useInfiniteNotes = ({
     if (!isLoading) return
 
     subscribe((note) => handleNote(note), {
+      global,
       authorPubkeys,
       limit,
       hashtag,
       isForever: true,
     })
-  }, [notes, isLoading, subscribe, handleNote, authorPubkeys, limit, hashtag])
+  }, [
+    notes,
+    isLoading,
+    subscribe,
+    handleNote,
+    authorPubkeys,
+    limit,
+    hashtag,
+    global,
+  ])
 
   return { notes, isLoading, isLoadingMore, loadMoreNotes }
 }

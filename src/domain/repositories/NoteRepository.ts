@@ -12,6 +12,7 @@ export type SubscribeNotesOptions = {
   youtube?: boolean
   hashtag?: string
   authorPubkeys?: string[]
+  global?: boolean
   isForever?: boolean
 }
 
