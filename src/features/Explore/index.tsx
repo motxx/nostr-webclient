@@ -3,12 +3,12 @@ import HashSearchBar from '@/components/ui-parts/HashSearchBar'
 import Widgets from '@/components/Widgets/Widgets'
 import ExploreFilters from './components/ExploreFilters'
 import ExploreOutput from './components/ExploreOutput'
-import { ExploreMetricWithNull } from './types'
+import { AccountFilter, ExploreMetricWithNull } from './types'
 import { useInfiniteNotes } from '@/components/Timeline/hooks/useInfiniteNotes'
 import { NoteType } from '@/domain/entities/Note'
 
 const ExplorePage: React.FC = () => {
-  const [accountFilter, setAccountFilter] = useState('all')
+  const [accountFilter, setAccountFilter] = useState<AccountFilter>('global')
   const [metric, setMetric] = useState<ExploreMetricWithNull>(null)
   const [timeframe, setTimeframe] = useState('all')
   const [outputFormat, setOutputFormat] = useState('timeline')
@@ -21,6 +21,8 @@ const ExplorePage: React.FC = () => {
   const timelineRef = useRef<HTMLDivElement>(null)
 
   const { notes, isLoading, isLoadingMore, loadMoreNotes } = useInfiniteNotes({
+    global: accountFilter === 'global',
+    // TODO: Implement authorPubkeys when accountFilter === 'network'
     limit: 20,
   })
 
@@ -51,7 +53,6 @@ const ExplorePage: React.FC = () => {
     if (/[ã-õç]/.test(content)) return 'portuguese'
     if (/[देवनागरी]/.test(content)) return 'hindi'
 
-    // デフォルトは英語とする
     return 'english'
   }
 
@@ -60,7 +61,7 @@ const ExplorePage: React.FC = () => {
       const matchesSearchTerm = note.text
         .toLowerCase()
         .includes(finalSearchTerm.toLowerCase())
-      const matchesAccountFilter = accountFilter === 'all' // TODO: Implement account filter 'followers' and 'tribe'
+      const matchesAccountFilter = accountFilter === 'global'
       const matchesTimeframe = true // TODO: Implement timeframe filtering logic
 
       const noteLanguageGroup = detectLanguageGroup(

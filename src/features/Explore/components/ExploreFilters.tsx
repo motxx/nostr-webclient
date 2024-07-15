@@ -5,7 +5,7 @@ import ExploreMetrics from './ExploreMetrics'
 import ExploreLanguageFilter from './ExploreLanguageFilter'
 import Button from '@/components/ui-elements/Button'
 import FilterButton from '@/components/ui-parts/FilterButton'
-import { ExploreMetricWithNull } from '../types'
+import { AccountFilter, ExploreMetricWithNull } from '../types'
 
 interface ExploreFiltersProps {
   accountFilter: string
@@ -40,7 +40,8 @@ const ExploreFilters: React.FC<ExploreFiltersProps> = ({
   languageGroupFilter,
   setLanguageGroupFilter,
 }) => {
-  const handleAccountFilterChange = (filter: string) => setAccountFilter(filter)
+  const handleAccountFilterChange = (filter: AccountFilter) =>
+    setAccountFilter(filter)
   const handleOutputFormatChange = (format: string) => setOutputFormat(format)
   const handleSortByMetricChange = () => {
     const nextSortByMetric = !sortByMetric
@@ -60,18 +61,18 @@ const ExploreFilters: React.FC<ExploreFiltersProps> = ({
         </label>
         <div className="grid grid-cols-3 gap-2">
           <FilterButton
-            onClick={() => handleAccountFilterChange('all')}
-            active={accountFilter === 'all'}
+            onClick={() => handleAccountFilterChange('global')}
+            active={accountFilter === 'global'}
             icon={<BsGlobe />}
           />
           <FilterButton
-            onClick={() => handleAccountFilterChange('follow')}
-            active={accountFilter === 'follow'}
+            onClick={() => handleAccountFilterChange('follows')}
+            active={accountFilter === 'follows'}
             icon={<BsPersonFill />}
           />
           <FilterButton
-            onClick={() => handleAccountFilterChange('follow-of-follow')}
-            active={accountFilter === 'follow-of-follow'}
+            onClick={() => handleAccountFilterChange('network')}
+            active={accountFilter === 'network'}
             icon={<BsPeopleFill />}
           />
         </div>

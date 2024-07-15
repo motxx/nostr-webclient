@@ -5,3 +5,5 @@ export type ExploreMetric =
   | 'zaps'
   | 'followers'
 export type ExploreMetricWithNull = ExploreMetric | null
+
+export type AccountFilter = 'global' | 'follows' | 'network'
