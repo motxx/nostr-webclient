@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, TouchEvent } from 'react'
 import NoteDetails from '@/components/NoteDetails/NoteDetails'
 import { NoteType } from '@/domain/entities/Note'
 import { userIdForDisplay } from '@/utils/addressConverter'
@@ -13,8 +13,9 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
   className,
 }) => {
   const [selectedNote, setSelectedNote] = useState<NoteType | null>(null)
+  const touchStartX = useRef<number | null>(null)
+  const touchEndX = useRef<number | null>(null)
 
-  // 画像メディアのみを含むノートをフィルタリング
   const imageNotes = notes.filter((note) =>
     note.media?.some((m) => m.type === 'image')
   )
@@ -30,7 +31,6 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
   const selectPrevPost = () => {
     if (!selectedNote) return
     const currentIndex = imageNotes.findIndex(
-      // TODO: Use eventId instead of userId and timestamp
       (note) =>
         note.id === selectedNote.id &&
         note.created_at === selectedNote.created_at
@@ -46,12 +46,36 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
     const currentIndex = imageNotes.findIndex(
       (note) =>
         note.id === selectedNote.id &&
-        note.created_at === selectedNote.created_at // XXX: idが被ることがある. TODO:subscribeに問題ないか確認.
+        note.created_at === selectedNote.created_at
     )
     const nextIndex = currentIndex + 1
     if (nextIndex < imageNotes.length) {
       setSelectedNote(imageNotes[nextIndex])
     }
+  }
+
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  const handleTouchMove = (e: TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return
+
+    const diffX = touchStartX.current - touchEndX.current
+    const threshold = 50
+
+    if (diffX > threshold) {
+      selectNextPost()
+    } else if (diffX < -threshold) {
+      selectPrevPost()
+    }
+
+    touchStartX.current = null
+    touchEndX.current = null
   }
 
   return (
@@ -72,15 +96,21 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
         ))}
       </div>
       {selectedNote && (
-        <NoteDetails
-          isOpen={!!selectedNote}
-          onClose={closeDetails}
-          originalNote={selectedNote}
-          onClickAction={() => {}}
-          onToggleFollow={() => false}
-          onClickPrevPost={selectPrevPost}
-          onClickNextPost={selectNextPost}
-        />
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <NoteDetails
+            isOpen={!!selectedNote}
+            onClose={closeDetails}
+            originalNote={selectedNote}
+            onClickAction={() => {}}
+            onToggleFollow={() => false}
+            onClickPrevPost={selectPrevPost}
+            onClickNextPost={selectNextPost}
+          />
+        </div>
       )}
     </div>
   )
