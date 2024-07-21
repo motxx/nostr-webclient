@@ -50,7 +50,7 @@ export class PublicChatService implements PublicChatRepository {
                   id: event.id,
                   channel_id: channelId,
                   author: new User({
-                    npub: event.pubkey,
+                    npub: event.author.npub,
                     pubkey: event.pubkey,
                     profile,
                   }),
