@@ -66,3 +66,20 @@ export const bech32ToHex = (encoded: string): Result<string, Error> => {
     (error) => error as Error
   )()
 }
+
+// XXX: Not verified yet.
+export const hexToBech32 = (
+  hex: string,
+  prefix: string = 'npub'
+): Result<string, Error> => {
+  return Result.fromThrowable(
+    () => {
+      const bytes = new Uint8Array(
+        hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
+      )
+      const words = bech32.toWords(bytes)
+      return bech32.encode(prefix, words, 1000)
+    },
+    (error) => error as Error
+  )()
+}
