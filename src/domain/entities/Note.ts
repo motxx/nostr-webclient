@@ -67,11 +67,12 @@ export class Note implements NoteType {
       content: text,
       tags: [],
     }
+    const id = generateEventId(rawNostrEvent)
     return new Note({
-      id: generateEventId(rawNostrEvent),
+      id,
       author: user,
       text,
-      json: JSON.stringify(rawNostrEvent),
+      json: JSON.stringify({ ...rawNostrEvent, id }),
       created_at: createdAt,
       reactions: {
         likesCount: 0,
