@@ -5,6 +5,7 @@ import App from './App'
 import { Provider } from 'jotai'
 import reportWebVitals from './reportWebVitals'
 import { ThemeProvider } from './context/ThemeContext'
+import './polyfills'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
