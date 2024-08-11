@@ -1,4 +1,3 @@
-const { whenProd } = require('@craco/craco')
 const webpack = require('webpack')
 const path = require('path')
 
@@ -88,9 +87,5 @@ module.exports = {
 
       return webpackConfig
     },
-  },
-  babel: {
-    presets: [],
-    plugins: [...whenProd(() => ['transform-remove-console'], [])],
   },
 }
