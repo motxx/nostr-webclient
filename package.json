@@ -63,7 +63,7 @@
     "sha256-uint8array": "^0.10.7",
     "slick-carousel": "^1.8.1",
     "stream-browserify": "^3.0.0",
-    "tseep": "^1.2.1",
+    "tseep": "^1.2.2",
     "typescript": "^4.9.5",
     "vis-network": "^9.1.9",
     "vm-browserify": "^1.1.2",
@@ -96,6 +96,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@craco/craco": "^7.1.0",
     "@types/dompurify": "^3.0.5",
     "@types/react-dnd": "^3.0.2",
