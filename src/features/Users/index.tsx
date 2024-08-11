@@ -8,6 +8,7 @@ import { useNostrClient } from '@/hooks/useNostrClient'
 import { FetchNpubFromNostrAddress } from '@/domain/use_cases/FetchNpubFromNostrAddress'
 import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
+import { ok, ResultAsync } from 'neverthrow'
 
 interface UserPageProps {
   isFollowing: boolean
@@ -22,34 +23,42 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
   useEffect(() => {
     if (!nostrClient) return
 
-    const fetchUserData = async () => {
+    const fetchUserData = () => {
       const userProfileService = new UserProfileService(nostrClient)
       const npubPattern = new RegExp('/user/(npub[^/]+)/?')
       const npubMatch = location.pathname.match(npubPattern)
 
-      let npub: string
-      if (npubMatch) {
-        npub = npubMatch[1]
-      } else {
-        const nostrAddressPattern = new RegExp('/user/([^/]*@[^/]+)/?')
-        const nostrAddressMatch = location.pathname.match(nostrAddressPattern)
-        if (!nostrAddressMatch) return
+      const getNpub = (): ResultAsync<string, Error> => {
+        if (npubMatch) {
+          return ResultAsync.fromSafePromise(Promise.resolve(npubMatch[1]))
+        } else {
+          const nostrAddressPattern = new RegExp('/user/([^/]*@[^/]+)/?')
+          const nostrAddressMatch = location.pathname.match(nostrAddressPattern)
+          if (!nostrAddressMatch) {
+            return ResultAsync.fromSafePromise(
+              Promise.reject(new Error('Invalid URL'))
+            )
+          }
 
-        let nostrAddress = nostrAddressMatch[1]
-        if (nostrAddress.startsWith('@')) {
-          nostrAddress = `_${nostrAddress}`
-        }
-        try {
-          npub = await new FetchNpubFromNostrAddress(
-            userProfileService
-          ).execute(nostrAddress)
-        } catch {
-          console.log('npub not found')
-          return
+          let nostrAddress = nostrAddressMatch[1]
+          if (nostrAddress.startsWith('@')) {
+            nostrAddress = `_${nostrAddress}`
+          }
+          return new FetchNpubFromNostrAddress(userProfileService).execute(
+            nostrAddress
+          )
         }
       }
-      const user = await new FetchUser(userProfileService).execute(npub)
-      setUser(user)
+
+      getNpub()
+        .andThen((npub) => new FetchUser(userProfileService).execute(npub))
+        .andThen((user) => {
+          setUser(user)
+          return ok(undefined)
+        })
+        .mapErr((error) => {
+          console.error('Failed to fetch user data:', error)
+        })
     }
 
     fetchUserData()

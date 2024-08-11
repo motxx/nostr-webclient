@@ -23,7 +23,7 @@ export class UserSettingsService implements UserSettingsRepository {
   }
 
   async fetchUserSettings(npub: string): Promise<UserSettings> {
-    let settings = new UserSettings('', '', 1)
+    let settings = new UserSettings('', '', 1, 'wss://relay.hakua.xyz') // TODO: Relay URL定数の置き場を考える
     try {
       const s = this.userStore.get(npub)
       if (s !== null) {
