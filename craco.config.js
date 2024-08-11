@@ -1,3 +1,4 @@
+const webpack = require('webpack')
 const path = require('path')
 
 module.exports = {
@@ -5,24 +6,47 @@ module.exports = {
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
-    configure: (webpackConfig) => {
-      webpackConfig.devtool = false
+    configure: (webpackConfig, { env, paths }) => {
+      webpackConfig.resolve.plugins = webpackConfig.resolve.plugins.filter(
+        (plugin) => plugin.constructor.name !== 'ModuleScopePlugin'
+      )
 
-      const newRules = webpackConfig.module.rules.map((rule) => {
-        if (
-          rule.enforce === 'pre' &&
-          rule.loader &&
-          rule.loader.includes('source-map-loader')
-        ) {
-          return {
-            ...rule,
-            exclude: /node_modules/,
+      webpackConfig.resolve.fallback = {
+        ...webpackConfig.resolve.fallback,
+        crypto: require.resolve('crypto-browserify'),
+        stream: require.resolve('stream-browserify'),
+        assert: require.resolve('assert'),
+        buffer: require.resolve('buffer'),
+        process: require.resolve('process/browser'),
+      }
+
+      webpackConfig.plugins = [
+        ...(webpackConfig.plugins || []),
+        new webpack.ProvidePlugin({
+          process: 'process/browser',
+          Buffer: ['buffer', 'Buffer'],
+        }),
+        new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
+          const mod = resource.request.replace(/^node:/, '')
+          switch (mod) {
+            case 'buffer':
+              resource.request = 'buffer'
+              break
+            case 'stream':
+              resource.request = 'readable-stream'
+              break
+            default:
+              throw new Error(`Not found ${mod}`)
           }
-        }
-        return rule
-      })
+        }),
+      ]
 
-      webpackConfig.module.rules = newRules
+      webpackConfig.module.rules.push({
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
+      })
 
       return webpackConfig
     },

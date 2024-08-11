@@ -2,13 +2,12 @@ import React from 'react'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 import { isLoggedInAtom } from '@/state/atoms'
 import { useAtom } from 'jotai'
-import { init, launch } from 'nostr-login'
+import { launch } from 'nostr-login'
 
 const LoginPrompt: React.FC = () => {
   const [isLoggedIn] = useAtom(isLoggedInAtom)
 
   const openLoginModal = async () => {
-    await init({})
     await launch()
   }
 

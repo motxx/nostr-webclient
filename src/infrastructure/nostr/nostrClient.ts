@@ -29,6 +29,13 @@ import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
 import { Mutex } from 'async-mutex'
 import { CommonRelays } from './commonRelays'
+import { init as initAsNostrLogin } from 'nostr-login'
+import { Nostr } from 'nostr-login/dist/modules'
+import { ErrorWithDetails } from '../errors/ErrorWithDetails'
+import { KeyPair } from '@/domain/entities/KeyPair'
+import { nip44 } from 'nostr-tools'
+import { hexToUint8Array, uint8ArrayToHex } from '@/utils/addressConverter'
+import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 
 const FetchTimeout = 5000 // 5 seconds
 const DefaultMaxRetries = 1
@@ -49,10 +56,17 @@ export class NostrClient {
   readonly #ndk: NDK
   readonly #user: NDKUser
   readonly #isLoggedIn: boolean
+  readonly #nostrLoginWindowNostr: Nostr
 
-  private constructor(ndk: NDK, user: NDKUser, isLoggedIn: boolean) {
+  private constructor(
+    ndk: NDK,
+    user: NDKUser,
+    nostrLoginWindowNostr: Nostr,
+    isLoggedIn: boolean
+  ) {
     this.#ndk = ndk
     this.#user = user
+    this.#nostrLoginWindowNostr = nostrLoginWindowNostr
     this.#isLoggedIn = isLoggedIn
   }
 
@@ -80,6 +94,7 @@ export class NostrClient {
         let signer: NDKSigner | undefined
         let isLoggedIn = false
 
+        // TODO: nostr-loginのwindow.nostrと未ログイン時のwindow.nostrの関係が極めて分かりにくいので修正
         try {
           if (window.nostr) {
             console.log('use existing nostr')
@@ -121,6 +136,15 @@ export class NostrClient {
 
         await NostrClient.connectWithRetry(ndk)
 
+        initAsNostrLogin({})
+        const nostrLoginWindowNostr = window.nostr as unknown as Nostr
+        if (
+          !nostrLoginWindowNostr.encrypt44 ||
+          !nostrLoginWindowNostr.decrypt44
+        ) {
+          throw new Error('nostr-login not available')
+        }
+
         const user = await ndk!.signer!.user()
         const profileResult = await NostrClient.#fetchWithRetry(() =>
           user.fetchProfile()
@@ -129,7 +153,12 @@ export class NostrClient {
           throw profileResult.error
         }
 
-        NostrClient.#nostrClient = new NostrClient(ndk, user, isLoggedIn)
+        NostrClient.#nostrClient = new NostrClient(
+          ndk,
+          user,
+          nostrLoginWindowNostr,
+          isLoggedIn
+        )
         return NostrClient.#nostrClient
       }),
       (error: unknown) => new Error(`Failed to connect: ${error}`)
@@ -212,6 +241,169 @@ export class NostrClient {
           ? error
           : new Error(`Unknown error occurred while posting event: ${error}`)
     )
+  }
+
+  private encryptPayload(
+    unsignedKind14: NostrEvent,
+    receiverPubkey: string
+  ): ResultAsync<string, Error> {
+    return ResultAsync.fromPromise(
+      this.#nostrLoginWindowNostr.encrypt44(
+        receiverPubkey,
+        JSON.stringify(unsignedKind14)
+      ),
+      (e: unknown) =>
+        new ErrorWithDetails('Failed to encrypt content', e as Error)
+    )
+  }
+
+  private decryptPayload(
+    encryptedContent: string
+  ): ResultAsync<NostrEvent, Error> {
+    return ResultAsync.fromPromise(
+      this.#nostrLoginWindowNostr
+        .decrypt44(this.#user.pubkey, encryptedContent)
+        .then(JSON.parse),
+      (e: unknown) =>
+        new ErrorWithDetails('Failed to decrypt content', e as Error)
+    )
+  }
+
+  private createSealNostrEvent(
+    unsignedKind14: NostrEvent,
+    receiverPubkey: string
+  ): ResultAsync<NostrEvent, Error> {
+    return this.encryptPayload(unsignedKind14, receiverPubkey).andThen(
+      (encryptedContent) => {
+        const unsignedSeal: NostrEvent = {
+          pubkey: this.#user.pubkey,
+          created_at: this.randomTimeUpTo2DaysInThePast(),
+          kind: NDKKind_Seal,
+          tags: [],
+          content: encryptedContent,
+        }
+        const event = new NDKEvent(this.#ndk, {
+          ...unsignedSeal,
+          id: generateEventId(unsignedSeal),
+        })
+
+        return ResultAsync.fromPromise(
+          event.sign(),
+          (e) => new ErrorWithDetails('Failed to sign event', e as Error)
+        ).map((sig) => ({
+          ...event.rawEvent(),
+          sig,
+        }))
+      }
+    )
+  }
+
+  private randomTimeUpTo2DaysInThePast(): number {
+    return Math.floor(Date.now() / 1000 - Math.random() * 172800)
+  }
+
+  createGiftWrapNostrEvent(
+    unsignedKind14: NostrEvent,
+    receiverPubkey: string
+  ): ResultAsync<NostrEvent, Error> {
+    const randomKeyPair = KeyPair.generate()
+    return this.createSealNostrEvent(unsignedKind14, receiverPubkey)
+      .andThen((sealNostrEvent) =>
+        this.encryptSealNostrEvent(
+          sealNostrEvent,
+          randomKeyPair,
+          receiverPubkey
+        )
+      )
+      .andThen((giftWrappedContent) =>
+        this.createGiftWrapUnsignedNostrEvent(
+          giftWrappedContent,
+          randomKeyPair,
+          receiverPubkey
+        )
+      )
+      .andThen(this.signNostrEvent)
+  }
+
+  private encryptSealNostrEvent(
+    sealNostrEvent: NostrEvent,
+    randomKeyPair: KeyPair,
+    receiverPubkey: string
+  ): Result<string, Error> {
+    return Result.fromThrowable(
+      () =>
+        nip44.encrypt(
+          JSON.stringify(sealNostrEvent),
+          // senderのprivateKeyは取得できないため、conversationKeyは使わずにNIP-17の仕様通りにランダム鍵を使う
+          randomKeyPair.privateKey,
+          hexToUint8Array(receiverPubkey)
+        ),
+      (e) => new ErrorWithDetails('Failed to encryptSealNostrEvent', e as Error)
+    )()
+  }
+
+  private decryptSealNostrEvent(
+    giftWrappedContent: string,
+    randomPubkey: Uint8Array
+  ): Result<NostrEvent, Error> {
+    return Result.fromThrowable(
+      () => {
+        const json = nip44.decrypt(giftWrappedContent, randomPubkey)
+        return JSON.parse(json) as NostrEvent
+      },
+      (e) => new ErrorWithDetails('Failed to decryptSealNostrEvent', e as Error)
+    )()
+  }
+
+  private createGiftWrapUnsignedNostrEvent(
+    giftWrappedContent: string,
+    randomKeyPair: KeyPair,
+    receiverPubkey: string
+  ): ResultAsync<NostrEvent, Error> {
+    const event: NostrEvent = {
+      kind: NDKKind_GiftWrap,
+      pubkey: uint8ArrayToHex(randomKeyPair.publicKey),
+      created_at: this.randomTimeUpTo2DaysInThePast(),
+      tags: [['p', receiverPubkey]],
+      content: giftWrappedContent,
+      id: '',
+      sig: '',
+    }
+    event.id = generateEventId(event)
+    return ResultAsync.fromPromise(
+      Promise.resolve(event),
+      (e) =>
+        new ErrorWithDetails('Failed to create gift wrap event', e as Error)
+    )
+  }
+
+  private signNostrEvent(event: NostrEvent): ResultAsync<NostrEvent, Error> {
+    return ResultAsync.fromPromise(
+      (async () => {
+        const nostr = window.nostr
+        if (!nostr?.signEvent) {
+          throw new Error('window.nostr signEvent not available')
+        }
+        const signedEvent = await nostr.signEvent(event)
+        return { ...event, sig: signedEvent.sig }
+      })(),
+      (error) => new ErrorWithDetails('Event signing failed', error as Error)
+    )
+  }
+
+  decryptGiftWrapNostrEvent(event: NostrEvent): ResultAsync<NostrEvent, Error> {
+    const giftWrappedContent = event.content
+    return this.decryptSealNostrEvent(
+      giftWrappedContent,
+      hexToUint8Array(event.pubkey)
+    ).asyncAndThen((sealEvent) => {
+      if (sealEvent.kind !== NDKKind_Seal) {
+        return ResultAsync.fromSafePromise(
+          Promise.reject(new Error('Decrypted content is not a Seal'))
+        )
+      }
+      return this.decryptPayload(sealEvent.content)
+    })
   }
 
   subscribeEvents(

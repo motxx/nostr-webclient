@@ -38,10 +38,14 @@ export const userNameForDisplay = (user: User) => {
   return profile?.name ? profile.name : shortenNpub(user.npub)
 }
 
-const uint8ArrayToHex = (bytes: Uint8Array): string => {
+export const uint8ArrayToHex = (bytes: Uint8Array): string => {
   return Array.from(bytes)
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('')
+}
+
+export const hexToUint8Array = (hex: string): Uint8Array => {
+  return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
 }
 
 export const bech32ToHex = (encoded: string): Result<string, Error> => {
@@ -62,6 +66,23 @@ export const bech32ToHex = (encoded: string): Result<string, Error> => {
         default:
           throw new Error(`Unsupported prefix: ${prefix}`)
       }
+    },
+    (error) => error as Error
+  )()
+}
+
+// XXX: Not verified yet.
+export const hexToBech32 = (
+  hex: string,
+  prefix: string = 'npub'
+): Result<string, Error> => {
+  return Result.fromThrowable(
+    () => {
+      const bytes = new Uint8Array(
+        hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
+      )
+      const words = bech32.toWords(bytes)
+      return bech32.encode(prefix, words, 1000)
     },
     (error) => error as Error
   )()
