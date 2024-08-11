@@ -29,6 +29,9 @@ import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
 import { Mutex } from 'async-mutex'
 import { CommonRelays } from './commonRelays'
+import { init as initAsNostrLogin } from 'nostr-login'
+import { Nostr } from 'nostr-login/dist/modules'
+import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 
 const FetchTimeout = 5000 // 5 seconds
 const DefaultMaxRetries = 1
@@ -49,10 +52,17 @@ export class NostrClient {
   readonly #ndk: NDK
   readonly #user: NDKUser
   readonly #isLoggedIn: boolean
+  readonly #nostrLoginWindowNostr: Nostr
 
-  private constructor(ndk: NDK, user: NDKUser, isLoggedIn: boolean) {
+  private constructor(
+    ndk: NDK,
+    user: NDKUser,
+    nostrLoginWindowNostr: Nostr,
+    isLoggedIn: boolean
+  ) {
     this.#ndk = ndk
     this.#user = user
+    this.#nostrLoginWindowNostr = nostrLoginWindowNostr
     this.#isLoggedIn = isLoggedIn
   }
 
@@ -80,6 +90,7 @@ export class NostrClient {
         let signer: NDKSigner | undefined
         let isLoggedIn = false
 
+        // TODO: nostr-loginのwindow.nostrと未ログイン時のwindow.nostrの関係が極めて分かりにくいので修正
         try {
           if (window.nostr) {
             console.log('use existing nostr')
@@ -121,6 +132,15 @@ export class NostrClient {
 
         await NostrClient.connectWithRetry(ndk)
 
+        initAsNostrLogin({})
+        const nostrLoginWindowNostr = window.nostr as unknown as Nostr
+        if (
+          !nostrLoginWindowNostr.encrypt44 ||
+          !nostrLoginWindowNostr.decrypt44
+        ) {
+          throw new Error('nostr-login not available')
+        }
+
         const user = await ndk!.signer!.user()
         const profileResult = await NostrClient.#fetchWithRetry(() =>
           user.fetchProfile()
@@ -129,7 +149,12 @@ export class NostrClient {
           throw profileResult.error
         }
 
-        NostrClient.#nostrClient = new NostrClient(ndk, user, isLoggedIn)
+        NostrClient.#nostrClient = new NostrClient(
+          ndk,
+          user,
+          nostrLoginWindowNostr,
+          isLoggedIn
+        )
         return NostrClient.#nostrClient
       }),
       (error: unknown) => new Error(`Failed to connect: ${error}`)
@@ -211,6 +236,27 @@ export class NostrClient {
         error instanceof Error
           ? error
           : new Error(`Unknown error occurred while posting event: ${error}`)
+    )
+  }
+
+  encryptPayload(
+    plaintext: string,
+    receiverPubkey: string
+  ): ResultAsync<string, Error> {
+    return ResultAsync.fromPromise(
+      this.#nostrLoginWindowNostr.encrypt44(receiverPubkey, plaintext),
+      (e: unknown) =>
+        new ErrorWithDetails('Failed to encrypt content', e as Error)
+    )
+  }
+
+  decryptPayload(encryptedContent: string): ResultAsync<string, Error> {
+    return ResultAsync.fromPromise(
+      this.#nostrLoginWindowNostr
+        .decrypt44(this.#user.pubkey, encryptedContent)
+        .then(JSON.parse),
+      (e: unknown) =>
+        new ErrorWithDetails('Failed to decrypt content', e as Error)
     )
   }
 
