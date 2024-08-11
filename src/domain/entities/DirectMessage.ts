@@ -1,9 +1,10 @@
-import { NDKKind, NostrEvent } from '@nostr-dev-kit/ndk'
+import { NDKEvent, NostrEvent } from '@nostr-dev-kit/ndk'
 import { User } from './User'
 import { generateEventId } from '@/infrastructure/nostr/utils'
 import { Participant } from './Participant'
 import { hexToBech32 } from '@/utils/addressConverter'
 import { ok, err, Result } from 'neverthrow'
+import { NDKKind_DirectMessage } from '@/infrastructure/nostr/kindExtensions'
 
 // https://github.com/nostr-protocol/nips/blob/7dfb11b435a903c703bc38216eca805cefa494d4/17.md
 // Private Direct Messages
@@ -13,7 +14,6 @@ export interface DirectMessageType {
   receivers: Participant[]
   content: string // message in plain text
   subject?: string // conversation title
-  json: string
   createdAt: Date
   replyTo?: string
 }
@@ -37,7 +37,7 @@ export class DirectMessage implements DirectMessageType {
     return this.data.subject
   }
   get json(): string {
-    return this.data.json
+    return JSON.stringify(this.toNostrEvent())
   }
   get createdAt(): Date {
     return this.data.createdAt
@@ -66,8 +66,8 @@ export class DirectMessage implements DirectMessageType {
     }
     const rawNostrEvent = {
       pubkey: sender.pubkey,
-      created_at: new Date().getTime(),
-      kind: NDKKind.EncryptedDirectMessage,
+      created_at: new Date().getTime() / 1000,
+      kind: NDKKind_DirectMessage,
       tags,
       content,
     }
@@ -78,7 +78,6 @@ export class DirectMessage implements DirectMessageType {
       receivers,
       content,
       subject,
-      json: JSON.stringify(rawNostrEvent),
       createdAt: new Date(rawNostrEvent.created_at * 1000),
       replyTo,
     })
@@ -132,14 +131,39 @@ export class DirectMessage implements DirectMessageType {
         receivers,
         content: event.content,
         subject,
-        json: JSON.stringify(event),
         createdAt: new Date(event.created_at * 1000),
         replyTo,
       })
     )
   }
 
+  static fromNDKEvent(event: NDKEvent): Result<DirectMessage, Error> {
+    const nostrEvent = event.rawEvent()
+    return this.fromNostrEvent(nostrEvent)
+  }
+
   toNostrEvent(): NostrEvent {
-    return JSON.parse(this.json) as NostrEvent
+    const tags = this.receivers.map((receiver) => [
+      'p',
+      receiver.user.pubkey,
+      receiver.relay,
+    ])
+    if (this.subject) {
+      tags.push(['subject', this.subject])
+    }
+    if (this.replyTo) {
+      tags.push(['e', this.replyTo, '', 'reply'])
+    }
+    return {
+      id: this.id,
+      pubkey: this.sender.pubkey,
+      created_at: this.createdAt.getTime() / 1000,
+      kind: 14,
+      tags,
+      content: this.content,
+      // unsignedKind14
+      // https://github.com/nostr-protocol/nips/blob/744bce8fcae0aca07b936b6662db635c8b4253dd/17.md#encrypting
+      sig: '',
+    }
   }
 }

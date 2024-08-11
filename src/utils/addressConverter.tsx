@@ -38,10 +38,14 @@ export const userNameForDisplay = (user: User) => {
   return profile?.name ? profile.name : shortenNpub(user.npub)
 }
 
-const uint8ArrayToHex = (bytes: Uint8Array): string => {
+export const uint8ArrayToHex = (bytes: Uint8Array): string => {
   return Array.from(bytes)
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('')
+}
+
+export const hexToUint8Array = (hex: string): Uint8Array => {
+  return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
 }
 
 export const bech32ToHex = (encoded: string): Result<string, Error> => {
