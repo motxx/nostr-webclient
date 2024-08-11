@@ -5,7 +5,7 @@
   "dependencies": {
     "@getalby/sdk": "^3.5.1",
     "@noble/secp256k1": "^2.1.0",
-    "@nostr-dev-kit/ndk": "^2.8.2",
+    "@nostr-dev-kit/ndk": "^2.10.0",
     "@scure/base": "^1.1.6",
     "@scure/bip39": "^1.3.0",
     "@testing-library/jest-dom": "^5.17.0",
@@ -35,7 +35,7 @@
     "neverthrow": "^6.2.2",
     "node-emoji": "^2.1.3",
     "nostr-login": "^1.5.2",
-    "nostr-tools": "^2.7.1",
+    "nostr-tools": "^2.7.2",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
@@ -63,9 +63,10 @@
     "sha256-uint8array": "^0.10.7",
     "slick-carousel": "^1.8.1",
     "stream-browserify": "^3.0.0",
-    "tseep": "^1.2.1",
+    "tseep": "^1.2.2",
     "typescript": "^4.9.5",
     "vis-network": "^9.1.9",
+    "vm-browserify": "^1.1.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -95,6 +96,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@craco/craco": "^7.1.0",
     "@types/dompurify": "^3.0.5",
     "@types/react-dnd": "^3.0.2",

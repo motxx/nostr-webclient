@@ -1,5 +1,5 @@
 import { Result, ResultAsync, ok } from 'neverthrow'
-import { NDKEvent, NDKFilter, NDKKind } from '@nostr-dev-kit/ndk'
+import { NDKEvent, NDKKind } from '@nostr-dev-kit/ndk'
 import { isEmoji, Media, Note } from '@/domain/entities/Note'
 import {
   NoteRepository,

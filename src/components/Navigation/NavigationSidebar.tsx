@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { FaToggleOn, FaToggleOff } from 'react-icons/fa'
 import NavigationSidebarItem from './NavigationSidebarItem'
 import NavigationSidebarUserSection from './NavigationSidebarUserSection'
 import { NavigationItem, NavigationItemId } from './Navigation'

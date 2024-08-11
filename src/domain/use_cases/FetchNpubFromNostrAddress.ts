@@ -1,5 +1,5 @@
 import { UserProfileRepository } from '@/domain/repositories/UserProfileRepository'
-import { Result, Ok } from 'neverthrow'
+import { Result } from 'neverthrow'
 
 export class FetchNpubFromNostrAddress {
   constructor(private userProfileRepository: UserProfileRepository) {}
