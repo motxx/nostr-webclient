@@ -36,7 +36,8 @@ import { nip44 } from 'nostr-tools'
 import { hexToUint8Array, uint8ArrayToHex } from '@/utils/addressConverter'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 
-const LoginTimeoutMSec = 3000 // 3 seconds
+const NIP07TimeoutMSec = 3000 // 3 seconds
+const NDKConnectTimeoutMSec = 1000 // 1 second
 const PostEventTimeoutMSec = 10000 // 10 seconds
 
 type ZapResponse = {
@@ -115,7 +116,7 @@ export class NostrClient {
           } as any
         }
 
-        signer = new NDKNip07Signer(LoginTimeoutMSec)
+        signer = new NDKNip07Signer(NIP07TimeoutMSec)
         await signer.blockUntilReady()
         console.log('signer', { signer })
 
@@ -126,7 +127,7 @@ export class NostrClient {
         })
         ndk.assertSigner()
 
-        await ndk.connect()
+        await ndk.connect(NDKConnectTimeoutMSec)
 
         const user = await ndk!.signer!.user()
         const profile = await user.fetchProfile()
