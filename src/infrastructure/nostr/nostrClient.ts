@@ -29,7 +29,6 @@ import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
 import { Mutex } from 'async-mutex'
 import { CommonRelays } from './commonRelays'
-import { init as initAsNostrLogin } from 'nostr-login'
 import { Nostr } from 'nostr-login/dist/modules'
 import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
@@ -71,13 +70,11 @@ export class NostrClient {
   }
 
   static readonly Relays = [
-    'wss://relay.hakua.xyz',
-    /*
+    //'wss://relay.hakua.xyz',
     'wss://relay.damus.io',
     'wss://relay.nostr.band',
-    ...CommonRelays.Iris,
-    */
-    ...CommonRelays.JapaneseRelays,
+    //...CommonRelays.Iris,
+    //CommonRelays.JapaneseRelays,
   ].filter((relay, index, self) => self.indexOf(relay) === index)
   static readonly JapaneseUserBot =
     '087c51f1926f8d3cb4ff45f53a8ee2a8511cfe113527ab0e87f9c5821201a61e'
@@ -94,19 +91,7 @@ export class NostrClient {
         let signer: NDKSigner | undefined
         let isLoggedIn = false
 
-        // TODO: nostr-loginのwindow.nostrと未ログイン時のwindow.nostrの関係が極めて分かりにくいので修正
-        try {
-          if (window.nostr) {
-            console.log('use existing nostr')
-            signer = new NDKNip07Signer(LoginTimeoutMSec)
-            await signer.blockUntilReady()
-            console.log('signer', signer)
-            isLoggedIn = true
-          } else {
-            throw new Error('Nostr not available')
-          }
-        } catch {
-          console.log('use default nostr')
+        if (!window.nostr) {
           window.nostr = {
             getPublicKey: async () => NostrClient.JapaneseUserBot,
             signEvent: async (event: NostrEvent) => {
@@ -120,12 +105,22 @@ export class NostrClient {
                 throw new NostrReadOnlyError()
               },
             },
+            nip44: {
+              encrypt: async () => {
+                throw new NostrReadOnlyError()
+              },
+              decrypt: async () => {
+                throw new NostrReadOnlyError()
+              },
+            },
             _requests: {},
             _pubkey: NostrClient.JapaneseUserBot,
           } as any
-          signer = new NDKNip07Signer(LoginTimeoutMSec)
-          await signer.blockUntilReady()
         }
+
+        signer = new NDKNip07Signer(LoginTimeoutMSec)
+        await signer.blockUntilReady()
+        console.log('signer', { signer })
 
         const ndk = new NDK({
           explicitRelayUrls: NostrClient.Relays,
@@ -136,18 +131,10 @@ export class NostrClient {
 
         await NostrClient.connectWithRetry(ndk)
 
-        initAsNostrLogin({})
-        const nostrLoginWindowNostr = window.nostr as unknown as Nostr
-        if (
-          !nostrLoginWindowNostr.encrypt44 ||
-          !nostrLoginWindowNostr.decrypt44
-        ) {
-          throw new Error('nostr-login not available')
-        }
-
         const user = await ndk!.signer!.user()
-        const profileResult = await NostrClient.#fetchWithRetry(() =>
-          user.fetchProfile()
+        const profileResult = await NostrClient.#fetchWithRetry(
+          () => user.fetchProfile(),
+          1
         )
         if (profileResult.isErr()) {
           throw profileResult.error
@@ -156,7 +143,7 @@ export class NostrClient {
         NostrClient.#nostrClient = new NostrClient(
           ndk,
           user,
-          nostrLoginWindowNostr,
+          window.nostr as any,
           isLoggedIn
         )
         return NostrClient.#nostrClient
