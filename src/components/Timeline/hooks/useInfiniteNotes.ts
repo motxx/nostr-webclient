@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useSubscribeNotes } from './useSubscribeNotes'
 import { Note } from '@/domain/entities/Note'
+import { eventBus } from '@/utils/eventBus'
 
 interface UseInfiniteNotesOptions {
   global?: boolean
@@ -56,17 +57,16 @@ export const useInfiniteNotes = ({
   ])
 
   useEffect(() => {
-    document.addEventListener('nlAuth', (e: Event) => {
-      const detail = e as CustomEvent<{ type: string }>
-      if (detail.detail.type === 'login') {
-        unsubscribeAll()
-        setIsLoadingMore(false)
-        setNotes([])
-      }
-    })
+    const cleanupWhenLoggedIn = () => {
+      unsubscribeAll()
+      setIsLoadingMore(false)
+      setNotes([])
+    }
+
+    eventBus.on('login', cleanupWhenLoggedIn)
 
     return () => {
-      document.removeEventListener('nlAuth', () => {})
+      eventBus.off('login', cleanupWhenLoggedIn)
     }
   }, [isLoading, loadMoreNotes, unsubscribeAll])
 
