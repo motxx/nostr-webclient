@@ -74,8 +74,35 @@ export class NostrClient {
     //...CommonRelays.Iris,
     //...CommonRelays.JapaneseRelays,
   ].filter((relay, index, self) => self.indexOf(relay) === index)
+
   static readonly JapaneseUserBot =
     '087c51f1926f8d3cb4ff45f53a8ee2a8511cfe113527ab0e87f9c5821201a61e'
+
+  static readonly DefaultWindowNostr = {
+    getPublicKey: async () => NostrClient.JapaneseUserBot,
+    signEvent: async (event: NostrEvent) => {
+      throw new NostrReadOnlyError()
+    },
+    nip04: {
+      encrypt: async (event: NostrEvent) => {
+        throw new NostrReadOnlyError()
+      },
+      decrypt: async (event: NostrEvent) => {
+        throw new NostrReadOnlyError()
+      },
+    },
+    nip44: {
+      encrypt: async () => {
+        throw new NostrReadOnlyError()
+      },
+      decrypt: async () => {
+        throw new NostrReadOnlyError()
+      },
+    },
+    _requests: {},
+    _pubkey: NostrClient.JapaneseUserBot,
+  } as any
+
   static #nostrClient?: NostrClient
   static #mutex = new Mutex()
 
@@ -86,39 +113,14 @@ export class NostrClient {
           return NostrClient.#nostrClient
         }
 
-        let signer: NDKSigner | undefined
-        let isLoggedIn = false
-
+        let isLoggedIn = true
         if (!window.nostr) {
-          window.nostr = {
-            getPublicKey: async () => NostrClient.JapaneseUserBot,
-            signEvent: async (event: NostrEvent) => {
-              throw new NostrReadOnlyError()
-            },
-            nip04: {
-              encrypt: async (event: NostrEvent) => {
-                throw new NostrReadOnlyError()
-              },
-              decrypt: async (event: NostrEvent) => {
-                throw new NostrReadOnlyError()
-              },
-            },
-            nip44: {
-              encrypt: async () => {
-                throw new NostrReadOnlyError()
-              },
-              decrypt: async () => {
-                throw new NostrReadOnlyError()
-              },
-            },
-            _requests: {},
-            _pubkey: NostrClient.JapaneseUserBot,
-          } as any
+          window.nostr = NostrClient.DefaultWindowNostr
+          isLoggedIn = false
         }
 
-        signer = new NDKNip07Signer(NIP07TimeoutMSec)
+        const signer = new NDKNip07Signer(NIP07TimeoutMSec)
         await signer.blockUntilReady()
-        console.log('signer', { signer })
 
         const ndk = new NDK({
           explicitRelayUrls: NostrClient.Relays,
