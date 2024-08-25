@@ -12,7 +12,7 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribeNotes = () => {
-  const { nostrClient, refreshClient } = useNostrClient()
+  const { nostrClient } = useNostrClient()
 
   const subscribe = useCallback(
     async (onNote: (note: Note) => void, options?: SubscribeNotesOptions) => {
@@ -53,8 +53,7 @@ export const useSubscribeNotes = () => {
       }
     })
     subscriptions.length = 0
-    refreshClient()
-  }, [refreshClient])
+  }, [])
 
   useEffect(() => {
     return () => {
