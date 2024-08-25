@@ -36,9 +36,6 @@ import { nip44 } from 'nostr-tools'
 import { hexToUint8Array, uint8ArrayToHex } from '@/utils/addressConverter'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 
-const FetchTimeout = 5000 // 5 seconds
-const DefaultMaxRetries = 1
-const RetryDelay = 1000 // 1 second
 const LoginTimeoutMSec = 3000 // 3 seconds
 const PostEventTimeoutMSec = 10000 // 10 seconds
 
@@ -129,15 +126,12 @@ export class NostrClient {
         })
         ndk.assertSigner()
 
-        await NostrClient.connectWithRetry(ndk)
+        await ndk.connect()
 
         const user = await ndk!.signer!.user()
-        const profileResult = await NostrClient.#fetchWithRetry(
-          () => user.fetchProfile(),
-          1
-        )
-        if (profileResult.isErr()) {
-          throw profileResult.error
+        const profile = await user.fetchProfile()
+        if (!profile) {
+          throw new Error('Failed to fetch profile')
         }
 
         NostrClient.#nostrClient = new NostrClient(
@@ -150,30 +144,6 @@ export class NostrClient {
       }),
       (error: unknown) => new Error(`Failed to connect: ${error}`)
     )
-  }
-
-  private static async connectWithRetry(
-    ndk: NDK,
-    maxAttempts = 3,
-    initialDelay = 1000
-  ) {
-    let attempts = 0
-    while (attempts < maxAttempts) {
-      try {
-        await ndk.connect(LoginTimeoutMSec)
-        console.log('Successfully connected to relays')
-        return
-      } catch (error) {
-        attempts++
-        console.error(`Connection attempt ${attempts} failed: ${error}`)
-        if (attempts < maxAttempts) {
-          const delay = initialDelay * Math.pow(2, attempts - 1)
-          console.log(`Retrying in ${delay}ms...`)
-          await new Promise((resolve) => setTimeout(resolve, delay))
-        }
-      }
-    }
-    throw new Error('Failed to connect after multiple attempts')
   }
 
   disconnect() {
@@ -479,15 +449,8 @@ export class NostrClient {
 
         while (events.length < limit) {
           const batchSize = Math.min(currentLimit, 100)
-          const batchEventsResult = await NostrClient.#fetchWithRetry(() =>
-            fetchBatch(batchSize)
-          )
+          const batchEvents = await fetchBatch(batchSize)
 
-          if (batchEventsResult.isErr()) {
-            throw batchEventsResult.error
-          }
-
-          const batchEvents = batchEventsResult.value
           events.push(...batchEvents)
 
           if (batchEvents.length < batchSize) break
@@ -518,47 +481,6 @@ export class NostrClient {
     await new Promise((resolve) => setTimeout(resolve, ms))
   }
 
-  static #fetchWithRetry(
-    operation: () => Promise<any>,
-    maxRetries = DefaultMaxRetries,
-    currentRetries = 0
-  ): ResultAsync<any, Error> {
-    const fetchWithTimeout = (): ResultAsync<any, Error> =>
-      ResultAsync.fromPromise(
-        Promise.race([
-          operation(),
-          new Promise((_, reject) =>
-            setTimeout(
-              () =>
-                reject(
-                  new Error(
-                    `Operation timeout. operation:${JSON.stringify(operation)}`
-                  )
-                ),
-              FetchTimeout
-            )
-          ),
-        ]),
-        (error) => new Error(`fetchWithRetry: ${error}`)
-      )
-
-    return fetchWithTimeout().orElse((error) => {
-      if (currentRetries < maxRetries - 1) {
-        const delay =
-          RetryDelay * Math.pow(2, currentRetries * (1.0 + Math.random()))
-        return ResultAsync.fromSafePromise(NostrClient.delay(delay)).andThen(
-          () =>
-            NostrClient.#fetchWithRetry(
-              operation,
-              maxRetries,
-              currentRetries + 1
-            )
-        )
-      }
-      return err(error)
-    })
-  }
-
   getUserWithProfile(npub: string): ResultAsync<NDKUser, Error> {
     if (npub.length !== 63 || !npub.startsWith('npub')) {
       return ResultAsync.fromSafePromise(
@@ -568,7 +490,7 @@ export class NostrClient {
     return ResultAsync.fromPromise(
       (async () => {
         const user = this.#ndk.getUser({ npub })
-        await NostrClient.#fetchWithRetry(() => user.fetchProfile())
+        await user.fetchProfile()
         return user
       })(),
       (error) => new Error(`Failed to get user with profile: ${error}`)
