@@ -20,10 +20,6 @@ export const useNostrClient = () => {
   const initializeClient = useCallback(async () => {
     const mutex = new Mutex()
     await mutex.runExclusive(async () => {
-      if (nostrClient || isLoggedIn) return
-
-      console.log('initializeClient')
-
       setIsLoading(true)
       setError(null)
 
@@ -59,31 +55,33 @@ export const useNostrClient = () => {
       })
       setLoggedInUser(user)
     })
-  }, [
-    nostrClient,
-    isLoggedIn,
-    setIsLoggedIn,
-    setError,
-    setLoggedInUser,
-    setNostrClient,
-  ])
+  }, [setIsLoggedIn, setError, setLoggedInUser, setNostrClient])
 
   useEffect(() => {
+    if (nostrClient || isLoggedIn) return
+
     initializeClient()
-  }, [initializeClient])
+  }, [initializeClient, nostrClient, isLoggedIn])
 
   const refreshClient = useCallback(async () => {
     if (nostrClient) {
       const result = await nostrClient.disconnect()
       if (result.isOk()) {
         setNostrClient(null)
+        setIsLoggedIn(false)
         setLoggedInUser(null)
         initializeClient()
       } else {
         setError(result.error)
       }
     }
-  }, [nostrClient, setNostrClient, setLoggedInUser, initializeClient])
+  }, [
+    nostrClient,
+    setNostrClient,
+    setIsLoggedIn,
+    setLoggedInUser,
+    initializeClient,
+  ])
 
   return {
     nostrClient,

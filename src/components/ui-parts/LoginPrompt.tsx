@@ -3,13 +3,18 @@ import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 import { isLoggedInAtom } from '@/state/atoms'
 import { useAtom } from 'jotai'
 import { init } from 'nostr-login'
+import { useNostrClient } from '@/hooks/useNostrClient'
 
 const LoginPrompt: React.FC = () => {
+  const { refreshClient } = useNostrClient()
   const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom)
 
   const openLoginModal = async () => {
     await init({
-      onAuth: () => setIsLoggedIn(true),
+      onAuth: () => {
+        setIsLoggedIn(true)
+        refreshClient()
+      },
     })
   }
 
