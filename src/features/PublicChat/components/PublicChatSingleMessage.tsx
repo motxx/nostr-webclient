@@ -1,3 +1,4 @@
+import { TextConverter } from '@/components/functional/TextConverter'
 import UserAvatar from '@/components/ui-elements/UserAvatar'
 import { PublicChatMessage } from '@/domain/entities/PublicChat'
 import React from 'react'
@@ -29,7 +30,7 @@ const PublicChatSingleMessage: React.FC<PublicChatSingleMessageProps> = ({
           </div>
         </div>
         <div className="mt-2 text-gray-700 dark:text-gray-300">
-          {message.content}
+          <TextConverter text={message.content} />
         </div>
       </div>
     </div>
