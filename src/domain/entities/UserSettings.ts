@@ -8,6 +8,7 @@ export class UserSettings implements UserSettingsType {
   constructor(
     public readonly connectionUri?: string,
     public readonly walletAuthUri?: string,
-    public defaultZapAmount?: number
+    public readonly defaultZapAmount?: number,
+    public readonly relay?: string
   ) {}
 }

@@ -3,13 +3,13 @@ import { LuMessageSquarePlus } from 'react-icons/lu'
 import classNames from 'classnames'
 import SearchInput from '@/components/ui-parts/SearchInput'
 import Button from '@/components/ui-elements/Button'
-import { MessageConversationType } from '../types'
+import { Conversation } from '@/domain/entities/Conversation'
 
 interface MessageChatSidebarProps {
-  conversations: MessageConversationType[]
+  conversations: Conversation[]
   searchTerm: string
   setSearchTerm: (term: string) => void
-  filteredConversations: MessageConversationType[]
+  filteredConversations: Conversation[]
   handleSelectConversation: (conversationId: string) => void
   setIsModalOpen: (isOpen: boolean) => void
   className?: string
@@ -54,23 +54,15 @@ const MessageChatSidebar = forwardRef<HTMLDivElement, MessageChatSidebarProps>(
             className="px-4 sm:px-6 py-2 flex items-center hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-300 ease-in-out cursor-pointer"
             onClick={() => handleSelectConversation(conversation.id)}
           >
-            <img
-              src={conversation.avatar}
-              alt={conversation.name}
-              className="w-8 h-8 rounded-full mr-2"
-            />
             <div className="flex flex-col">
-              <span>{conversation.name}</span>
-              {conversation.members.length > 2 && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {conversation.members.join(', ')}
-                </span>
-              )}
+              <span>{conversation.subject || 'Conversation'}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {Array.from(conversation.participants)
+                  .map((p) => p.user.npub)
+                  .join(', ')}
+              </span>
               <span className="text-xs text-gray-400 dark:text-gray-500 truncate">
-                {
-                  conversation.messages[conversation.messages.length - 1]
-                    .content
-                }
+                {conversation.lastMessage?.content || 'No messages yet'}
               </span>
             </div>
           </li>

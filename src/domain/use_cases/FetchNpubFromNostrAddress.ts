@@ -1,17 +1,10 @@
 import { UserProfileRepository } from '@/domain/repositories/UserProfileRepository'
-import { Result } from 'neverthrow'
+import { ResultAsync } from 'neverthrow'
 
 export class FetchNpubFromNostrAddress {
   constructor(private userProfileRepository: UserProfileRepository) {}
 
-  async execute(nostrAddress: string): Promise<string> {
-    const result: Result<string, Error> =
-      await this.userProfileRepository.fetchNpubFromNostrAddress(nostrAddress)
-
-    if (result.isOk()) {
-      return result.value
-    } else {
-      throw result.error
-    }
+  execute(nostrAddress: string): ResultAsync<string, Error> {
+    return this.userProfileRepository.fetchNpubFromNostrAddress(nostrAddress)
   }
 }

@@ -8,7 +8,6 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
-  NDKSigner,
 } from '@nostr-dev-kit/ndk'
 import {
   NostrCallZapEndpointError,
@@ -29,12 +28,12 @@ import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
 import { Mutex } from 'async-mutex'
 import { CommonRelays } from './commonRelays'
-import { Nostr } from 'nostr-login/dist/modules'
 import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
 import { nip44 } from 'nostr-tools'
 import { hexToUint8Array, uint8ArrayToHex } from '@/utils/addressConverter'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
+import { eventBus } from '@/utils/eventBus'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
 const NDKConnectTimeoutMSec = 1000 // 1 second
@@ -49,16 +48,29 @@ type ZapResponse = {
   }
 }
 
+type WindowNostr = {
+  getPublicKey: () => Promise<string>
+  signEvent: (event: NostrEvent) => Promise<NostrEvent>
+  nip04: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string>
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string>
+  }
+  nip44: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string>
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string>
+  }
+}
+
 export class NostrClient {
   readonly #ndk: NDK
   readonly #user: NDKUser
   readonly #isLoggedIn: boolean
-  readonly #nostrLoginWindowNostr: Nostr
+  readonly #nostrLoginWindowNostr: WindowNostr
 
   private constructor(
     ndk: NDK,
     user: NDKUser,
-    nostrLoginWindowNostr: Nostr,
+    nostrLoginWindowNostr: WindowNostr,
     isLoggedIn: boolean
   ) {
     this.#ndk = ndk
@@ -78,24 +90,24 @@ export class NostrClient {
   static readonly JapaneseUserBot =
     '087c51f1926f8d3cb4ff45f53a8ee2a8511cfe113527ab0e87f9c5821201a61e'
 
-  static readonly DefaultWindowNostr = {
+  static readonly DefaultWindowNostr: WindowNostr = {
     getPublicKey: async () => NostrClient.JapaneseUserBot,
     signEvent: async (event: NostrEvent) => {
       throw new NostrReadOnlyError()
     },
     nip04: {
-      encrypt: async (event: NostrEvent) => {
+      encrypt: async (pubkey: string, plaintext: string) => {
         throw new NostrReadOnlyError()
       },
-      decrypt: async (event: NostrEvent) => {
+      decrypt: async (pubkey: string, ciphertext: string) => {
         throw new NostrReadOnlyError()
       },
     },
     nip44: {
-      encrypt: async () => {
+      encrypt: async (pubkey: string, plaintext: string) => {
         throw new NostrReadOnlyError()
       },
-      decrypt: async () => {
+      decrypt: async (pubkey: string, ciphertext: string) => {
         throw new NostrReadOnlyError()
       },
     },
@@ -115,7 +127,7 @@ export class NostrClient {
 
         let isLoggedIn = true
         if (!window.nostr) {
-          window.nostr = NostrClient.DefaultWindowNostr
+          ;(window.nostr as any) = NostrClient.DefaultWindowNostr
           isLoggedIn = false
         }
 
@@ -130,6 +142,7 @@ export class NostrClient {
         ndk.assertSigner()
 
         await ndk.connect(NDKConnectTimeoutMSec)
+        eventBus.emit('login')
 
         const user = await ndk!.signer!.user()
         const profile = await user.fetchProfile()
@@ -191,6 +204,7 @@ export class NostrClient {
         try {
           await ndkEvent.sign()
           const relaySet = NDKRelaySet.fromRelayUrls(connectedRelays, this.#ndk)
+          console.log('postEvent: publish event', { ndkEvent, relaySet })
           await ndkEvent.publish(relaySet, PostEventTimeoutMSec)
         } catch (error) {
           throw new Error(`Failed to post event: ${error}`)
@@ -208,7 +222,7 @@ export class NostrClient {
     receiverPubkey: string
   ): ResultAsync<string, Error> {
     return ResultAsync.fromPromise(
-      this.#nostrLoginWindowNostr.encrypt44(
+      this.#nostrLoginWindowNostr.nip44.encrypt(
         receiverPubkey,
         JSON.stringify(unsignedKind14)
       ),
@@ -221,8 +235,8 @@ export class NostrClient {
     encryptedContent: string
   ): ResultAsync<NostrEvent, Error> {
     return ResultAsync.fromPromise(
-      this.#nostrLoginWindowNostr
-        .decrypt44(this.#user.pubkey, encryptedContent)
+      this.#nostrLoginWindowNostr.nip44
+        .decrypt(this.#user.pubkey, encryptedContent)
         .then(JSON.parse),
       (e: unknown) =>
         new ErrorWithDetails('Failed to decrypt content', e as Error)

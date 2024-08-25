@@ -1,27 +1,11 @@
 import { User } from '@/domain/entities/User'
 import { UserRepository } from '@/domain/repositories/UserRepository'
-import { UserSettingsRepository } from '@/domain/repositories/UserSettingsRepository'
+import { Result } from 'neverthrow'
 
 export class LoginMyUser {
-  constructor(
-    private userRepository: UserRepository,
-    private userSettingsRepository: UserSettingsRepository
-  ) {}
+  constructor(private userRepository: UserRepository) {}
 
-  async execute(): Promise<User> {
-    const result = this.userRepository.login()
-    if (result.isErr()) {
-      throw result.error
-    }
-    const user = result.value
-    const settings = await this.userSettingsRepository.fetchUserSettings(
-      user.npub
-    )
-    return new User({
-      npub: user.npub,
-      pubkey: user.pubkey,
-      profile: user.profile,
-      settings,
-    })
+  execute(): Result<User, Error> {
+    return this.userRepository.login()
   }
 }

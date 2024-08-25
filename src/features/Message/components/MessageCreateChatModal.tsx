@@ -64,7 +64,7 @@ const MessageCreateChatModal: React.FC<MessageCreateChatModalProps> = ({
             <Input
               value={participantInput}
               onChange={(e) => setParticipantInput(e.target.value)}
-              placeholder="ユーザー名を入力..."
+              placeholder="ユーザーのpubkeyを入力..."
               className="flex-grow bg-transparent border"
             />
             <Button

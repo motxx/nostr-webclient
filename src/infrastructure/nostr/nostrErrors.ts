@@ -13,6 +13,12 @@ export class NostrClientConnectError extends ErrorWithDetails {
   }
 }
 
+export class NostrClientAlreadyConnected extends Error {
+  constructor() {
+    super('NostrClient already connected')
+  }
+}
+
 export class NostrNWCNotInitializedError extends Error {
   constructor() {
     super('nwc is not initialized.')
