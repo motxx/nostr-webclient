@@ -68,11 +68,11 @@ export class NostrClient {
   }
 
   static readonly Relays = [
-    //'wss://relay.hakua.xyz',
+    'wss://relay.hakua.xyz',
     'wss://relay.damus.io',
     'wss://relay.nostr.band',
     //...CommonRelays.Iris,
-    //CommonRelays.JapaneseRelays,
+    //...CommonRelays.JapaneseRelays,
   ].filter((relay, index, self) => self.indexOf(relay) === index)
   static readonly JapaneseUserBot =
     '087c51f1926f8d3cb4ff45f53a8ee2a8511cfe113527ab0e87f9c5821201a61e'
