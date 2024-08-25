@@ -39,9 +39,7 @@ export const userNameForDisplay = (user: User) => {
 }
 
 export const uint8ArrayToHex = (bytes: Uint8Array): string => {
-  return Array.from(bytes)
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('')
+  return Buffer.from(bytes).toString('hex')
 }
 
 export const hexToUint8Array = (hex: string): Uint8Array => {
