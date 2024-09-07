@@ -30,8 +30,8 @@ import { Mutex } from 'async-mutex'
 import { CommonRelays } from './commonRelays'
 import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
-import { nip44 } from 'nostr-tools'
-import { hexToUint8Array, uint8ArrayToHex } from '@/utils/addressConverter'
+import { finalizeEvent, nip44 } from 'nostr-tools'
+import { hexToUint8Array } from '@/utils/addressConverter'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 import { eventBus } from '@/utils/eventBus'
 
@@ -204,7 +204,11 @@ export class NostrClient {
         try {
           await ndkEvent.sign()
           const relaySet = NDKRelaySet.fromRelayUrls(connectedRelays, this.#ndk)
-          console.log('postEvent: publish event', { ndkEvent, relaySet })
+          console.log('postEvent: publish event', {
+            ndkEvent,
+            relaySet,
+            event: ndkEvent.rawEvent(),
+          })
           await ndkEvent.publish(relaySet, PostEventTimeoutMSec)
         } catch (error) {
           throw new Error(`Failed to post event: ${error}`)
@@ -296,7 +300,9 @@ export class NostrClient {
           receiverPubkey
         )
       )
-      .andThen(this.signNostrEvent)
+      .andThen((unsignedEvent) =>
+        this.signNostrEvent(unsignedEvent, randomKeyPair)
+      )
   }
 
   private encryptSealNostrEvent(
@@ -351,15 +357,18 @@ export class NostrClient {
     )
   }
 
-  private signNostrEvent(event: NostrEvent): ResultAsync<NostrEvent, Error> {
+  private signNostrEvent(
+    event: NostrEvent,
+    randomKeyPair: KeyPair
+  ): ResultAsync<NostrEvent, Error> {
     return ResultAsync.fromPromise(
       (async () => {
-        const nostr = window.nostr
-        if (!nostr?.signEvent) {
-          throw new Error('window.nostr signEvent not available')
-        }
-        const { sig } = await nostr.signEvent(event)
-        return { ...event, sig }
+        const kind = event.kind as number
+        const signedEvent = finalizeEvent(
+          { ...event, kind },
+          randomKeyPair.privateKey
+        )
+        return signedEvent
       })(),
       (error) => new ErrorWithDetails('Event signing failed', error as Error)
     )
