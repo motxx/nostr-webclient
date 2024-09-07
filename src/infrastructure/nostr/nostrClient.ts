@@ -336,7 +336,7 @@ export class NostrClient {
   ): ResultAsync<NostrEvent, Error> {
     const event: NostrEvent = {
       kind: NDKKind_GiftWrap,
-      pubkey: uint8ArrayToHex(randomKeyPair.publicKey),
+      pubkey: randomKeyPair.publicKeyHex,
       created_at: this.randomTimeUpTo2DaysInThePast(),
       tags: [['p', receiverPubkey]],
       content: giftWrappedContent,
