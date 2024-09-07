@@ -81,8 +81,8 @@ export class NostrClient {
 
   static readonly Relays = [
     'wss://relay.hakua.xyz',
-    'wss://relay.damus.io',
-    'wss://relay.nostr.band',
+    //'wss://relay.damus.io',
+    //'wss://relay.nostr.band',
     //...CommonRelays.Iris,
     //...CommonRelays.JapaneseRelays,
   ].filter((relay, index, self) => self.indexOf(relay) === index)
@@ -338,7 +338,7 @@ export class NostrClient {
       kind: NDKKind_GiftWrap,
       pubkey: randomKeyPair.publicKeyHex,
       created_at: this.randomTimeUpTo2DaysInThePast(),
-      tags: [['p', receiverPubkey]],
+      tags: [['p', receiverPubkey, 'wss://relay.hakua.xyz']], // TODO: リレーURLを修正
       content: giftWrappedContent,
       id: '',
       sig: '',
