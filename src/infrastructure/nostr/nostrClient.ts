@@ -358,8 +358,8 @@ export class NostrClient {
         if (!nostr?.signEvent) {
           throw new Error('window.nostr signEvent not available')
         }
-        const signedEvent = await nostr.signEvent(event)
-        return { ...event, sig: signedEvent.sig }
+        const { sig } = await nostr.signEvent(event)
+        return { ...event, sig }
       })(),
       (error) => new ErrorWithDetails('Event signing failed', error as Error)
     )
