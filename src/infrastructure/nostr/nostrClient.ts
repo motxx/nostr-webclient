@@ -389,6 +389,7 @@ export class NostrClient {
 
   decryptGiftWrapNostrEvent(event: NostrEvent): ResultAsync<NostrEvent, Error> {
     const giftWrappedContent = event.content
+    console.log('GiftwrappedContent', { giftWrappedContent })
     return this.decryptSealNostrEvent(
       giftWrappedContent,
       hexToUint8Array(event.pubkey)
@@ -489,6 +490,8 @@ export class NostrClient {
         while (events.length < limit) {
           const batchSize = Math.min(currentLimit, 100)
           const batchEvents = await fetchBatch(batchSize)
+          // TODO: DMのイベントが0件. 何かがおかしい.
+          console.log('fetchEvents: batchEvents', { batchEvents })
 
           events.push(...batchEvents)
 
