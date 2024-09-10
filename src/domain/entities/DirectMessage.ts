@@ -163,7 +163,6 @@ export class DirectMessage implements DirectMessageType {
       content: this.content,
       // unsignedKind14
       // https://github.com/nostr-protocol/nips/blob/744bce8fcae0aca07b936b6662db635c8b4253dd/17.md#encrypting
-      sig: '',
     }
   }
 }
