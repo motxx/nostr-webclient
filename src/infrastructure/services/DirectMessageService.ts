@@ -19,7 +19,7 @@ export class DirectMessageService implements DirectMessageRepository {
             message.toNostrEvent(),
             receiver.user.pubkey
           )
-          .andThen((giftWrap) => this.nostrClient.postEvent(giftWrap))
+          .andThen((giftWrap) => this.nostrClient.postSignedEvent(giftWrap))
       )
     ).map(() => void 0)
   }

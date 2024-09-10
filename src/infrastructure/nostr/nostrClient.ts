@@ -187,7 +187,10 @@ export class NostrClient {
     return connectedRelays
   }
 
-  postEvent(event: NostrEvent): ResultAsync<void, Error> {
+  #postEvent(
+    event: NostrEvent,
+    alreadySigned: boolean
+  ): ResultAsync<void, Error> {
     return ResultAsync.fromPromise(
       (async () => {
         if (!this.#isLoggedIn) {
@@ -202,7 +205,9 @@ export class NostrClient {
         const ndkEvent = new NDKEvent(this.#ndk, event)
 
         try {
-          await ndkEvent.sign()
+          if (!alreadySigned) {
+            await ndkEvent.sign()
+          }
           const relaySet = NDKRelaySet.fromRelayUrls(connectedRelays, this.#ndk)
           console.log('postEvent: publish event', {
             ndkEvent,
@@ -219,6 +224,14 @@ export class NostrClient {
           ? error
           : new Error(`Unknown error occurred while posting event: ${error}`)
     )
+  }
+
+  postEvent(event: NostrEvent): ResultAsync<void, Error> {
+    return this.#postEvent(event, false)
+  }
+
+  postSignedEvent(event: NostrEvent): ResultAsync<void, Error> {
+    return this.#postEvent(event, true)
   }
 
   private encryptPayload(
