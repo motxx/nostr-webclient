@@ -463,44 +463,40 @@ export class NostrClient {
     filter: NDKFilter,
     limit: number = 20
   ): ResultAsync<NDKEvent[], Error> {
-    const fetchBatch = (batchSize: number): Promise<NDKEvent[]> =>
+    const batchFetchEvents = (batchSize: number): Promise<NDKEvent[]> =>
       new Promise((resolve) => {
         const batchEvents: NDKEvent[] = []
         const subscription = this.#ndk.subscribe(
           { ...filter, limit: batchSize },
-          { closeOnEose: true },
-          undefined,
-          true
+          { closeOnEose: true }
         )
 
-        subscription.on('event', (event: NDKEvent) => {
-          batchEvents.push(event)
-        })
+        subscription.on('event', (event: NDKEvent) => batchEvents.push(event))
         subscription.on('eose', () => {
           subscription.stop()
           resolve(batchEvents)
         })
       })
 
+    const fetchAllEvents = async (): Promise<NDKEvent[]> => {
+      const events: NDKEvent[] = []
+      let remainingLimit = limit
+
+      while (events.length < limit) {
+        const batchSize = Math.min(remainingLimit, 100)
+        const batchEvents = await batchFetchEvents(batchSize)
+
+        events.push(...batchEvents)
+
+        if (batchEvents.length < batchSize) break
+        remainingLimit -= batchEvents.length
+      }
+
+      return events.slice(0, limit)
+    }
+
     return ResultAsync.fromPromise(
-      (async () => {
-        const events: NDKEvent[] = []
-        let currentLimit = limit
-
-        while (events.length < limit) {
-          const batchSize = Math.min(currentLimit, 100)
-          const batchEvents = await fetchBatch(batchSize)
-          // TODO: DMのイベントが0件. 何かがおかしい.
-          console.log('fetchEvents: batchEvents', { batchEvents })
-
-          events.push(...batchEvents)
-
-          if (batchEvents.length < batchSize) break
-          currentLimit -= batchEvents.length
-        }
-
-        return events.slice(0, limit)
-      })(),
+      fetchAllEvents(),
       (error) => new Error(`Failed to fetch events: ${error}`)
     )
   }
