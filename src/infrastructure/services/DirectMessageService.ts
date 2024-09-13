@@ -11,6 +11,7 @@ import {
 } from '../nostr/kindExtensions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { Participant } from '@/domain/entities/Participant'
+import { bech32ToHex } from '@/utils/addressConverter'
 
 export class DirectMessageService implements DirectMessageRepository {
   constructor(private nostrClient: NostrClient) {}
@@ -119,31 +120,38 @@ export class DirectMessageService implements DirectMessageRepository {
         )
       )
       .map((messages) => {
-        console.log('fetchUserConversations: fetched messages', { messages })
-        const conversationMap = new Map<string, Conversation>()
-
-        messages.forEach((message) => {
-          const participants = new Set(message.receivers)
-          participants.add(
-            new Participant(message.sender, 'wss://relay.hakua.xyz') // TODO: Relay URL定数の置き場を考える
-          )
-          const conversationId = Array.from(participants)
-            .map((p) => p.user.pubkey)
-            .sort()
-            .join('-')
-
-          if (!conversationMap.has(conversationId)) {
-            conversationMap.set(
-              conversationId,
-              Conversation.create(participants, message.subject)
+        const groupMessagesByConversation = (
+          messages: DirectMessage[]
+        ): Map<string, Conversation> => {
+          return messages.reduce((conversationMap, message) => {
+            const participantsNpubs = new Set([
+              message.sender.npub,
+              ...message.receivers.map((r) => r.user.npub),
+            ])
+            const conversationId = Array.from(participantsNpubs)
+              .sort()
+              .join('-')
+            const participants = new Set(
+              Array.from(participantsNpubs).map((npub) => {
+                return new Participant(
+                  new User({ npub, pubkey: bech32ToHex(npub).unwrapOr('') }),
+                  'wss://relay.hakua.xyz'
+                )
+              })
             )
-          }
 
-          const conversation = conversationMap.get(conversationId)!
-          conversationMap.set(conversationId, conversation.addMessage(message))
-        })
+            const conversation =
+              conversationMap.get(conversationId) ||
+              Conversation.create(participants, message.subject)
 
-        return Array.from(conversationMap.values())
+            return conversationMap.set(
+              conversationId,
+              conversation.addMessage(message)
+            )
+          }, new Map<string, Conversation>())
+        }
+
+        return Array.from(groupMessagesByConversation(messages).values())
       })
   }
 }
