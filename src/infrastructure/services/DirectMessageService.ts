@@ -38,56 +38,6 @@ export class DirectMessageService implements DirectMessageRepository {
       .andThen((decryptedEvent) => DirectMessage.fromNostrEvent(decryptedEvent))
   }
 
-  fetchConversation(participants: User[]): ResultAsync<Conversation, Error> {
-    const pubkeys = participants.map((user) => user.pubkey)
-    const filter: NDKFilter = {
-      kinds: [NDKKind_GiftWrap as any],
-      '#p': pubkeys,
-      limit: 100,
-      since: 0,
-    }
-
-    return this.nostrClient
-      .fetchEvents(filter)
-      .andThen((events) =>
-        ResultAsync.combine(
-          events.map((event) =>
-            this.nostrClient
-              .decryptGiftWrapNostrEvent(event.rawEvent())
-              .orElse((error) => {
-                console.error('Failed to decrypt gift wrap event', error)
-                return ResultAsync.fromSafePromise(
-                  Promise.resolve({
-                    kind: NDKKind_Seal,
-                    content: 'Error decrypting gift wrap event',
-                    tags: [],
-                    pubkey: '',
-                    created_at: 0,
-                  })
-                )
-              })
-              .andThen(DirectMessage.fromNostrEvent)
-          )
-        )
-      )
-      .map((messages) =>
-        messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-      )
-      .map((messages) => {
-        const conversation = Conversation.create(
-          new Set([
-            new Participant(messages[0].sender, 'wss://relay.hakua.xyz'),
-            ...messages.flatMap((message) => message.receivers),
-          ]),
-          messages[0].subject
-        )
-        return messages.reduce(
-          (conversation, message) => conversation.addMessage(message),
-          conversation
-        )
-      })
-  }
-
   fetchUserConversations(user: User): ResultAsync<Conversation[], Error> {
     const filter: NDKFilter = {
       kinds: [NDKKind_GiftWrap as any],

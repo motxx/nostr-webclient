@@ -6,6 +6,5 @@ import { Conversation } from '../entities/Conversation'
 export interface DirectMessageRepository {
   send(message: DirectMessage): ResultAsync<void, Error>
   fetch(id: string): ResultAsync<DirectMessage, Error>
-  fetchConversation(participants: User[]): ResultAsync<Conversation, Error>
   fetchUserConversations(user: User): ResultAsync<Conversation[], Error>
 }
