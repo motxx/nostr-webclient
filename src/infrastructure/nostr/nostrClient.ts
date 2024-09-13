@@ -322,28 +322,31 @@ export class NostrClient {
   private encryptSealNostrEvent(
     sealNostrEvent: NostrEvent,
     randomKeyPair: KeyPair,
-    receiverPubkey: string
+    receiverPubkeyHex: string
   ): Result<string, Error> {
     return Result.fromThrowable(
-      () =>
-        nip44.encrypt(
-          JSON.stringify(sealNostrEvent),
-          // senderのprivateKeyは取得できないため、getConversationKey()は使えない。
-          // senderとreceiverで使用可能な共有鍵を使う必要がある。pubkeyはeventで公開されてしまっているため使えない。
-          hexToUint8Array(randomKeyPair.publicKeyHex), // FIXME: 二者間のみの共有鍵を使用する
-          hexToUint8Array(receiverPubkey)
-        ),
+      () => {
+        const conversationKey = nip44.getConversationKey(
+          randomKeyPair.privateKey,
+          receiverPubkeyHex
+        )
+        return nip44.encrypt(JSON.stringify(sealNostrEvent), conversationKey)
+      },
       (e) => new ErrorWithDetails('Failed to encryptSealNostrEvent', e as Error)
     )()
   }
 
   private decryptSealNostrEvent(
     giftWrappedContent: string,
-    randomPubkey: Uint8Array
+    randomPubkeyHex: string
   ): Result<NostrEvent, Error> {
     return Result.fromThrowable(
       () => {
-        const json = nip44.decrypt(giftWrappedContent, randomPubkey)
+        const conversationKey = nip44.getConversationKey(
+          new Uint8Array(), // FIXME: ここにreceiverの秘密鍵
+          randomPubkeyHex
+        )
+        const json = nip44.decrypt(giftWrappedContent, conversationKey)
         return JSON.parse(json) as NostrEvent
       },
       (e) => new ErrorWithDetails('Failed to decryptSealNostrEvent', e as Error)
@@ -394,7 +397,7 @@ export class NostrClient {
     console.log('GiftwrappedContent', { giftWrappedContent })
     return this.decryptSealNostrEvent(
       giftWrappedContent,
-      hexToUint8Array(event.pubkey)
+      event.pubkey
     ).asyncAndThen((sealEvent) => {
       if (sealEvent.kind !== NDKKind_Seal) {
         return ResultAsync.fromSafePromise(
