@@ -4,7 +4,11 @@ import { User } from '@/domain/entities/User'
 import { NostrClient } from '../nostr/nostrClient'
 import { ResultAsync } from 'neverthrow'
 import { NDKFilter } from '@nostr-dev-kit/ndk'
-import { NDKKind_GiftWrap } from '../nostr/kindExtensions'
+import {
+  NDKKind_DirectMessage,
+  NDKKind_GiftWrap,
+  NDKKind_Seal,
+} from '../nostr/kindExtensions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { Participant } from '@/domain/entities/Participant'
 
@@ -37,9 +41,9 @@ export class DirectMessageService implements DirectMessageRepository {
     const pubkeys = participants.map((user) => user.pubkey)
     const filter: NDKFilter = {
       kinds: [NDKKind_GiftWrap as any],
-      authors: pubkeys,
       '#p': pubkeys,
       limit: 100,
+      since: 0,
     }
 
     return this.nostrClient
@@ -49,6 +53,18 @@ export class DirectMessageService implements DirectMessageRepository {
           events.map((event) =>
             this.nostrClient
               .decryptGiftWrapNostrEvent(event.rawEvent())
+              .orElse((error) => {
+                console.error('Failed to decrypt gift wrap event', error)
+                return ResultAsync.fromSafePromise(
+                  Promise.resolve({
+                    kind: NDKKind_Seal,
+                    content: 'Error decrypting gift wrap event',
+                    tags: [],
+                    pubkey: '',
+                    created_at: 0,
+                  })
+                )
+              })
               .andThen(DirectMessage.fromNostrEvent)
           )
         )
@@ -74,7 +90,6 @@ export class DirectMessageService implements DirectMessageRepository {
   fetchUserConversations(user: User): ResultAsync<Conversation[], Error> {
     const filter: NDKFilter = {
       kinds: [NDKKind_GiftWrap as any],
-      authors: [user.pubkey],
       '#p': [user.pubkey],
       limit: 1000,
     }
@@ -86,6 +101,19 @@ export class DirectMessageService implements DirectMessageRepository {
           events.map((event) =>
             this.nostrClient
               .decryptGiftWrapNostrEvent(event.rawEvent())
+              .orElse((error) => {
+                console.error('Failed to decrypt gift wrap event', error)
+                return ResultAsync.fromSafePromise(
+                  Promise.resolve({
+                    kind: NDKKind_DirectMessage,
+                    content: 'Error decrypting gift wrap event',
+                    tags: [],
+                    pubkey:
+                      '58f4c2db955531458a1077d97d98216a7443cd440c8df07391d18f721d3e15ca',
+                    created_at: 0,
+                  })
+                )
+              })
               .andThen(DirectMessage.fromNostrEvent)
           )
         )

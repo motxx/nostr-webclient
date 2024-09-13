@@ -249,11 +249,12 @@ export class NostrClient {
   }
 
   private decryptPayload(
-    encryptedContent: string
+    encryptedContent: string,
+    senderPubkey: string
   ): ResultAsync<NostrEvent, Error> {
     return ResultAsync.fromPromise(
       this.#nostrLoginWindowNostr.nip44
-        .decrypt(this.#user.pubkey, encryptedContent)
+        .decrypt(senderPubkey, encryptedContent)
         .then(JSON.parse),
       (e: unknown) =>
         new ErrorWithDetails('Failed to decrypt content', e as Error)
@@ -327,8 +328,9 @@ export class NostrClient {
       () =>
         nip44.encrypt(
           JSON.stringify(sealNostrEvent),
-          // senderのprivateKeyは取得できないため、conversationKeyは使わずにNIP-17の仕様通りにランダム鍵を使う
-          randomKeyPair.privateKey,
+          // senderのprivateKeyは取得できないため、getConversationKey()は使えない。
+          // senderとreceiverで使用可能な共有鍵を使う必要がある。pubkeyはeventで公開されてしまっているため使えない。
+          hexToUint8Array(randomKeyPair.publicKeyHex), // FIXME: 二者間のみの共有鍵を使用する
           hexToUint8Array(receiverPubkey)
         ),
       (e) => new ErrorWithDetails('Failed to encryptSealNostrEvent', e as Error)
@@ -399,7 +401,8 @@ export class NostrClient {
           Promise.reject(new Error('Decrypted content is not a Seal'))
         )
       }
-      return this.decryptPayload(sealEvent.content)
+      console.log('sealEvent', { sealEvent })
+      return this.decryptPayload(sealEvent.content, sealEvent.pubkey)
     })
   }
 
@@ -487,6 +490,7 @@ export class NostrClient {
         const batchEvents = await batchFetchEvents(batchSize)
 
         events.push(...batchEvents)
+        console.log('events', { events })
 
         if (batchEvents.length < batchSize) break
         remainingLimit -= batchEvents.length
