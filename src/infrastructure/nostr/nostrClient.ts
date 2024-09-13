@@ -34,6 +34,7 @@ import { finalizeEvent, nip44 } from 'nostr-tools'
 import { hexToUint8Array } from '@/utils/addressConverter'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 import { eventBus } from '@/utils/eventBus'
+import { randomBytes } from 'crypto'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
 const NDKConnectTimeoutMSec = 1000 // 1 second
@@ -252,13 +253,16 @@ export class NostrClient {
     encryptedContent: string,
     senderPubkey: string
   ): ResultAsync<NostrEvent, Error> {
-    return ResultAsync.fromPromise(
-      this.#nostrLoginWindowNostr.nip44
-        .decrypt(senderPubkey, encryptedContent)
-        .then(JSON.parse),
-      (e: unknown) =>
-        new ErrorWithDetails('Failed to decrypt content', e as Error)
-    )
+    return ResultAsync.fromThrowable(
+      async () => {
+        const json = await this.#nostrLoginWindowNostr.nip44.decrypt(
+          senderPubkey,
+          encryptedContent
+        )
+        return JSON.parse(json) as NostrEvent
+      },
+      (e) => new ErrorWithDetails('Failed to decryptPayload', e as Error)
+    )()
   }
 
   private createSealNostrEvent(
@@ -326,11 +330,16 @@ export class NostrClient {
   ): Result<string, Error> {
     return Result.fromThrowable(
       () => {
-        const conversationKey = nip44.getConversationKey(
+        const conversationKey = nip44.v2.utils.getConversationKey(
           randomKeyPair.privateKey,
           receiverPubkeyHex
         )
-        return nip44.encrypt(JSON.stringify(sealNostrEvent), conversationKey)
+        const nonce = new Uint8Array(randomBytes(32))
+        return nip44.encrypt(
+          JSON.stringify(sealNostrEvent),
+          conversationKey,
+          nonce
+        )
       },
       (e) => new ErrorWithDetails('Failed to encryptSealNostrEvent', e as Error)
     )()
@@ -339,14 +348,13 @@ export class NostrClient {
   private decryptSealNostrEvent(
     giftWrappedContent: string,
     randomPubkeyHex: string
-  ): Result<NostrEvent, Error> {
-    return Result.fromThrowable(
-      () => {
-        const conversationKey = nip44.getConversationKey(
-          new Uint8Array(), // FIXME: ここにreceiverの秘密鍵
-          randomPubkeyHex
+  ): ResultAsync<NostrEvent, Error> {
+    return ResultAsync.fromThrowable(
+      async () => {
+        const json = await this.#nostrLoginWindowNostr.nip44.decrypt(
+          randomPubkeyHex,
+          giftWrappedContent
         )
-        const json = nip44.decrypt(giftWrappedContent, conversationKey)
         return JSON.parse(json) as NostrEvent
       },
       (e) => new ErrorWithDetails('Failed to decryptSealNostrEvent', e as Error)
@@ -394,19 +402,16 @@ export class NostrClient {
 
   decryptGiftWrapNostrEvent(event: NostrEvent): ResultAsync<NostrEvent, Error> {
     const giftWrappedContent = event.content
-    console.log('GiftwrappedContent', { giftWrappedContent })
-    return this.decryptSealNostrEvent(
-      giftWrappedContent,
-      event.pubkey
-    ).asyncAndThen((sealEvent) => {
-      if (sealEvent.kind !== NDKKind_Seal) {
-        return ResultAsync.fromSafePromise(
-          Promise.reject(new Error('Decrypted content is not a Seal'))
-        )
+    return this.decryptSealNostrEvent(giftWrappedContent, event.pubkey).andThen(
+      (sealEvent) => {
+        if (sealEvent.kind !== NDKKind_Seal) {
+          return ResultAsync.fromSafePromise(
+            Promise.reject(new Error('Decrypted content is not a Seal'))
+          )
+        }
+        return this.decryptPayload(sealEvent.content, sealEvent.pubkey)
       }
-      console.log('sealEvent', { sealEvent })
-      return this.decryptPayload(sealEvent.content, sealEvent.pubkey)
-    })
+    )
   }
 
   subscribeEvents(
