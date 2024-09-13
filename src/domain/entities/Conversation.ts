@@ -58,7 +58,9 @@ export class Conversation implements ConversationType {
   addMessage(message: DirectMessage): Conversation {
     return new Conversation({
       ...this.data,
-      messages: [...this.data.messages, message],
+      messages: [...this.data.messages, message].sort((a, b) => {
+        return a.createdAt.getTime() - b.createdAt.getTime()
+      }),
       updatedAt: new Date(),
     })
   }
