@@ -78,9 +78,12 @@ export class DirectMessageService implements DirectMessageRepository {
               message.sender.npub,
               ...message.receivers.map((r) => r.user.npub),
             ])
-            const conversationId = Array.from(participantsNpubs)
-              .sort()
-              .join('-')
+
+            const id =
+              Array.from(participantsNpubs).sort().join('-') +
+              ':' +
+              message.subject
+
             const participants = new Set(
               Array.from(participantsNpubs).map((npub) => {
                 return new Participant(
@@ -91,13 +94,10 @@ export class DirectMessageService implements DirectMessageRepository {
             )
 
             const conversation =
-              conversationMap.get(conversationId) ||
+              conversationMap.get(id) ||
               Conversation.create(participants, message.subject)
 
-            return conversationMap.set(
-              conversationId,
-              conversation.addMessage(message)
-            )
+            return conversationMap.set(id, conversation.addMessage(message))
           }, new Map<string, Conversation>())
         }
 
