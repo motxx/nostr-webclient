@@ -504,7 +504,11 @@ export class NostrClient {
         remainingLimit -= batchEvents.length
       }
 
-      return events.slice(0, limit)
+      const uniqueEvents = Array.from(
+        new Map(events.map((event) => [event.id, event])).values()
+      )
+
+      return uniqueEvents.slice(0, limit)
     }
 
     return ResultAsync.fromPromise(
