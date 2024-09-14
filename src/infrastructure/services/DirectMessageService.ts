@@ -7,7 +7,6 @@ import { NDKFilter } from '@nostr-dev-kit/ndk'
 import {
   NDKKind_DirectMessage,
   NDKKind_GiftWrap,
-  NDKKind_Seal,
 } from '../nostr/kindExtensions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { Participant } from '@/domain/entities/Participant'
