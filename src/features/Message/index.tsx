@@ -46,9 +46,12 @@ const MessagePage: React.FC = () => {
     initializeAndFetchData()
   }, [loggedInUser, nostrClient])
 
-  const handleSelectConversation = (conversationId: string) => {
+  const handleSelectConversation = (
+    conversationId: string,
+    subject?: string
+  ) => {
     const conversation = conversations.find(
-      (conv) => conv.id === conversationId
+      (conv) => conv.id === conversationId && conv.subject === subject
     )
     setSelectedConversation(conversation ?? null)
   }
