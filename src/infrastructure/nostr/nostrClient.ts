@@ -329,7 +329,7 @@ export class NostrClient {
   ): Result<string, Error> {
     return Result.fromThrowable(
       () => {
-        const conversationKey = nip44.v2.utils.getConversationKey(
+        const conversationKey = nip44.getConversationKey(
           randomKeyPair.privateKey,
           receiverPubkeyHex
         )
