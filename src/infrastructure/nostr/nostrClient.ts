@@ -31,7 +31,6 @@ import { CommonRelays } from './commonRelays'
 import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
 import { finalizeEvent, nip44 } from 'nostr-tools'
-import { hexToUint8Array } from '@/utils/addressConverter'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 import { eventBus } from '@/utils/eventBus'
 import { randomBytes } from 'crypto'
@@ -531,10 +530,6 @@ export class NostrClient {
     )
   }
 
-  private static async delay(ms: number) {
-    await new Promise((resolve) => setTimeout(resolve, ms))
-  }
-
   getUserWithProfile(npub: string): ResultAsync<NDKUser, Error> {
     if (npub.length !== 63 || !npub.startsWith('npub')) {
       return ResultAsync.fromSafePromise(
@@ -605,20 +600,6 @@ export class NostrClient {
     }
 
     return err(new Error('Failed to extract amount from bolt11 invoice'))
-  }
-
-  private validateZapReceipt(
-    zapEvent: NDKEvent,
-    lnurlProviderPubkey: string
-  ): boolean {
-    // Implement zap receipt validation as per Appendix F
-    if (zapEvent.pubkey !== lnurlProviderPubkey) {
-      return false
-    }
-
-    // Add more validation steps here...
-
-    return true
   }
 
   sendZapRequest(
