@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import MessageConversation from './components/MessageConversation'
 import MessageCreateChatModal from './components/MessageCreateChatModal'
 import MessageChatSidebar from './components/MessageChatSidebar'
@@ -25,26 +25,26 @@ const MessagePage: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
-    const initializeAndFetchData = async () => {
-      if (!nostrClient || !loggedInUser) {
-        return
-      }
-
-      const directMessageService = new DirectMessageService(nostrClient)
-      new FetchUserConversations(directMessageService)
-        .execute(loggedInUser)
-        .andThen((conversations) => {
-          setConversations(conversations)
-          return ok(undefined)
-        })
-        .mapErr((error) => {
-          console.error('Failed to fetch conversations:', error)
-        })
+  const fetchData = useCallback(async () => {
+    if (!nostrClient || !loggedInUser) {
+      return
     }
 
-    initializeAndFetchData()
+    const directMessageService = new DirectMessageService(nostrClient)
+    new FetchUserConversations(directMessageService)
+      .execute(loggedInUser)
+      .andThen((conversations) => {
+        setConversations(conversations)
+        return ok(undefined)
+      })
+      .mapErr((error) => {
+        console.error('Failed to fetch conversations:', error)
+      })
   }, [loggedInUser, nostrClient])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData, loggedInUser, nostrClient])
 
   const handleSelectConversation = (
     conversationId: string,
@@ -70,13 +70,7 @@ const MessagePage: React.FC = () => {
     new SendDirectMessage(directMessageService)
       .execute(newMessage)
       .andThen(() => {
-        const updatedConversation = selectedConversation.addMessage(newMessage)
-        setSelectedConversation(updatedConversation)
-        setConversations(
-          conversations.map((conv) =>
-            conv.id === updatedConversation.id ? updatedConversation : conv
-          )
-        )
+        fetchData()
         return ok(undefined)
       })
       .mapErr((error) => {
