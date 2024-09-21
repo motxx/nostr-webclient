@@ -8,7 +8,6 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
-  NDKSigner,
 } from '@nostr-dev-kit/ndk'
 import {
   NostrCallZapEndpointError,
@@ -29,12 +28,12 @@ import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
 import { Mutex } from 'async-mutex'
 import { CommonRelays } from './commonRelays'
-import { Nostr } from 'nostr-login/dist/modules'
 import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
-import { nip44 } from 'nostr-tools'
-import { hexToUint8Array, uint8ArrayToHex } from '@/utils/addressConverter'
+import { finalizeEvent, nip44 } from 'nostr-tools'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
+import { eventBus } from '@/utils/eventBus'
+import { randomBytes } from 'crypto'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
 const NDKConnectTimeoutMSec = 1000 // 1 second
@@ -49,16 +48,29 @@ type ZapResponse = {
   }
 }
 
+type WindowNostr = {
+  getPublicKey: () => Promise<string>
+  signEvent: (event: NostrEvent) => Promise<NostrEvent>
+  nip04: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string>
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string>
+  }
+  nip44: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string>
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string>
+  }
+}
+
 export class NostrClient {
   readonly #ndk: NDK
   readonly #user: NDKUser
   readonly #isLoggedIn: boolean
-  readonly #nostrLoginWindowNostr: Nostr
+  readonly #nostrLoginWindowNostr: WindowNostr
 
   private constructor(
     ndk: NDK,
     user: NDKUser,
-    nostrLoginWindowNostr: Nostr,
+    nostrLoginWindowNostr: WindowNostr,
     isLoggedIn: boolean
   ) {
     this.#ndk = ndk
@@ -69,8 +81,9 @@ export class NostrClient {
 
   static readonly Relays = [
     'wss://relay.hakua.xyz',
-    'wss://relay.damus.io',
-    'wss://relay.nostr.band',
+    //'wss://relay.damus.io',
+    //'wss://relay.nostr.band',
+    //'wss://r.kojira.io',
     //...CommonRelays.Iris,
     //...CommonRelays.JapaneseRelays,
   ].filter((relay, index, self) => self.indexOf(relay) === index)
@@ -78,24 +91,24 @@ export class NostrClient {
   static readonly JapaneseUserBot =
     '087c51f1926f8d3cb4ff45f53a8ee2a8511cfe113527ab0e87f9c5821201a61e'
 
-  static readonly DefaultWindowNostr = {
+  static readonly DefaultWindowNostr: WindowNostr = {
     getPublicKey: async () => NostrClient.JapaneseUserBot,
     signEvent: async (event: NostrEvent) => {
       throw new NostrReadOnlyError()
     },
     nip04: {
-      encrypt: async (event: NostrEvent) => {
+      encrypt: async (pubkey: string, plaintext: string) => {
         throw new NostrReadOnlyError()
       },
-      decrypt: async (event: NostrEvent) => {
+      decrypt: async (pubkey: string, ciphertext: string) => {
         throw new NostrReadOnlyError()
       },
     },
     nip44: {
-      encrypt: async () => {
+      encrypt: async (pubkey: string, plaintext: string) => {
         throw new NostrReadOnlyError()
       },
-      decrypt: async () => {
+      decrypt: async (pubkey: string, ciphertext: string) => {
         throw new NostrReadOnlyError()
       },
     },
@@ -115,7 +128,7 @@ export class NostrClient {
 
         let isLoggedIn = true
         if (!window.nostr) {
-          window.nostr = NostrClient.DefaultWindowNostr
+          ;(window.nostr as any) = NostrClient.DefaultWindowNostr
           isLoggedIn = false
         }
 
@@ -130,6 +143,7 @@ export class NostrClient {
         ndk.assertSigner()
 
         await ndk.connect(NDKConnectTimeoutMSec)
+        eventBus.emit('login')
 
         const user = await ndk!.signer!.user()
         const profile = await user.fetchProfile()
@@ -174,7 +188,10 @@ export class NostrClient {
     return connectedRelays
   }
 
-  postEvent(event: NostrEvent): ResultAsync<void, Error> {
+  #postEvent(
+    event: NostrEvent,
+    alreadySigned: boolean
+  ): ResultAsync<void, Error> {
     return ResultAsync.fromPromise(
       (async () => {
         if (!this.#isLoggedIn) {
@@ -189,8 +206,15 @@ export class NostrClient {
         const ndkEvent = new NDKEvent(this.#ndk, event)
 
         try {
-          await ndkEvent.sign()
+          if (!alreadySigned) {
+            await ndkEvent.sign()
+          }
           const relaySet = NDKRelaySet.fromRelayUrls(connectedRelays, this.#ndk)
+          console.log('postEvent: publish event', {
+            ndkEvent,
+            relaySet,
+            event: ndkEvent.rawEvent(),
+          })
           await ndkEvent.publish(relaySet, PostEventTimeoutMSec)
         } catch (error) {
           throw new Error(`Failed to post event: ${error}`)
@@ -203,12 +227,20 @@ export class NostrClient {
     )
   }
 
+  postEvent(event: NostrEvent): ResultAsync<void, Error> {
+    return this.#postEvent(event, false)
+  }
+
+  postSignedEvent(event: NostrEvent): ResultAsync<void, Error> {
+    return this.#postEvent(event, true)
+  }
+
   private encryptPayload(
     unsignedKind14: NostrEvent,
     receiverPubkey: string
   ): ResultAsync<string, Error> {
     return ResultAsync.fromPromise(
-      this.#nostrLoginWindowNostr.encrypt44(
+      this.#nostrLoginWindowNostr.nip44.encrypt(
         receiverPubkey,
         JSON.stringify(unsignedKind14)
       ),
@@ -218,15 +250,19 @@ export class NostrClient {
   }
 
   private decryptPayload(
-    encryptedContent: string
+    encryptedContent: string,
+    senderPubkey: string
   ): ResultAsync<NostrEvent, Error> {
-    return ResultAsync.fromPromise(
-      this.#nostrLoginWindowNostr
-        .decrypt44(this.#user.pubkey, encryptedContent)
-        .then(JSON.parse),
-      (e: unknown) =>
-        new ErrorWithDetails('Failed to decrypt content', e as Error)
-    )
+    return ResultAsync.fromThrowable(
+      async () => {
+        const json = await this.#nostrLoginWindowNostr.nip44.decrypt(
+          senderPubkey,
+          encryptedContent
+        )
+        return JSON.parse(json) as NostrEvent
+      },
+      (e) => new ErrorWithDetails('Failed to decryptPayload', e as Error)
+    )()
   }
 
   private createSealNostrEvent(
@@ -282,33 +318,43 @@ export class NostrClient {
           receiverPubkey
         )
       )
-      .andThen(this.signNostrEvent)
+      .andThen((unsignedEvent) =>
+        this.signNostrEvent(unsignedEvent, randomKeyPair)
+      )
   }
 
   private encryptSealNostrEvent(
     sealNostrEvent: NostrEvent,
     randomKeyPair: KeyPair,
-    receiverPubkey: string
+    receiverPubkeyHex: string
   ): Result<string, Error> {
     return Result.fromThrowable(
-      () =>
-        nip44.encrypt(
-          JSON.stringify(sealNostrEvent),
-          // senderのprivateKeyは取得できないため、conversationKeyは使わずにNIP-17の仕様通りにランダム鍵を使う
+      () => {
+        const conversationKey = nip44.getConversationKey(
           randomKeyPair.privateKey,
-          hexToUint8Array(receiverPubkey)
-        ),
+          receiverPubkeyHex
+        )
+        const nonce = new Uint8Array(randomBytes(32))
+        return nip44.encrypt(
+          JSON.stringify(sealNostrEvent),
+          conversationKey,
+          nonce
+        )
+      },
       (e) => new ErrorWithDetails('Failed to encryptSealNostrEvent', e as Error)
     )()
   }
 
   private decryptSealNostrEvent(
     giftWrappedContent: string,
-    randomPubkey: Uint8Array
-  ): Result<NostrEvent, Error> {
-    return Result.fromThrowable(
-      () => {
-        const json = nip44.decrypt(giftWrappedContent, randomPubkey)
+    randomPubkeyHex: string
+  ): ResultAsync<NostrEvent, Error> {
+    return ResultAsync.fromThrowable(
+      async () => {
+        const json = await this.#nostrLoginWindowNostr.nip44.decrypt(
+          randomPubkeyHex,
+          giftWrappedContent
+        )
         return JSON.parse(json) as NostrEvent
       },
       (e) => new ErrorWithDetails('Failed to decryptSealNostrEvent', e as Error)
@@ -322,9 +368,9 @@ export class NostrClient {
   ): ResultAsync<NostrEvent, Error> {
     const event: NostrEvent = {
       kind: NDKKind_GiftWrap,
-      pubkey: uint8ArrayToHex(randomKeyPair.publicKey),
+      pubkey: randomKeyPair.publicKeyHex,
       created_at: this.randomTimeUpTo2DaysInThePast(),
-      tags: [['p', receiverPubkey]],
+      tags: [['p', receiverPubkey, 'wss://relay.hakua.xyz']], // TODO: リレーURLを修正
       content: giftWrappedContent,
       id: '',
       sig: '',
@@ -337,15 +383,18 @@ export class NostrClient {
     )
   }
 
-  private signNostrEvent(event: NostrEvent): ResultAsync<NostrEvent, Error> {
+  private signNostrEvent(
+    event: NostrEvent,
+    randomKeyPair: KeyPair
+  ): ResultAsync<NostrEvent, Error> {
     return ResultAsync.fromPromise(
       (async () => {
-        const nostr = window.nostr
-        if (!nostr?.signEvent) {
-          throw new Error('window.nostr signEvent not available')
-        }
-        const signedEvent = await nostr.signEvent(event)
-        return { ...event, sig: signedEvent.sig }
+        const kind = event.kind as number
+        const signedEvent = finalizeEvent(
+          { ...event, kind },
+          randomKeyPair.privateKey
+        )
+        return signedEvent
       })(),
       (error) => new ErrorWithDetails('Event signing failed', error as Error)
     )
@@ -353,22 +402,21 @@ export class NostrClient {
 
   decryptGiftWrapNostrEvent(event: NostrEvent): ResultAsync<NostrEvent, Error> {
     const giftWrappedContent = event.content
-    return this.decryptSealNostrEvent(
-      giftWrappedContent,
-      hexToUint8Array(event.pubkey)
-    ).asyncAndThen((sealEvent) => {
-      if (sealEvent.kind !== NDKKind_Seal) {
-        return ResultAsync.fromSafePromise(
-          Promise.reject(new Error('Decrypted content is not a Seal'))
-        )
+    return this.decryptSealNostrEvent(giftWrappedContent, event.pubkey).andThen(
+      (sealEvent) => {
+        if (sealEvent.kind !== NDKKind_Seal) {
+          return ResultAsync.fromSafePromise(
+            Promise.reject(new Error('Decrypted content is not a Seal'))
+          )
+        }
+        return this.decryptPayload(sealEvent.content, sealEvent.pubkey)
       }
-      return this.decryptPayload(sealEvent.content)
-    })
+    )
   }
 
   subscribeEvents(
     filters: NDKFilter,
-    onEvent: (event: NDKEvent) => ResultAsync<void, never>,
+    onEvent: (event: NDKEvent) => ResultAsync<void, never | Error>,
     isForever: boolean = true
   ): Result<{ unsubscribe: () => void }, Error> {
     return Result.fromThrowable(
@@ -426,42 +474,45 @@ export class NostrClient {
     filter: NDKFilter,
     limit: number = 20
   ): ResultAsync<NDKEvent[], Error> {
-    const fetchBatch = (batchSize: number): Promise<NDKEvent[]> =>
+    const batchFetchEvents = (batchSize: number): Promise<NDKEvent[]> =>
       new Promise((resolve) => {
         const batchEvents: NDKEvent[] = []
         const subscription = this.#ndk.subscribe(
           { ...filter, limit: batchSize },
-          { closeOnEose: true },
-          undefined,
-          true
+          { closeOnEose: true }
         )
 
-        subscription.on('event', (event: NDKEvent) => {
-          batchEvents.push(event)
-        })
+        subscription.on('event', (event: NDKEvent) => batchEvents.push(event))
         subscription.on('eose', () => {
           subscription.stop()
           resolve(batchEvents)
         })
       })
 
+    const fetchAllEvents = async (): Promise<NDKEvent[]> => {
+      const events: NDKEvent[] = []
+      let remainingLimit = limit
+
+      while (events.length < limit) {
+        const batchSize = Math.min(remainingLimit, 100)
+        const batchEvents = await batchFetchEvents(batchSize)
+
+        events.push(...batchEvents)
+        console.log('events', { events })
+
+        if (batchEvents.length < batchSize) break
+        remainingLimit -= batchEvents.length
+      }
+
+      const uniqueEvents = Array.from(
+        new Map(events.map((event) => [event.id, event])).values()
+      )
+
+      return uniqueEvents.slice(0, limit)
+    }
+
     return ResultAsync.fromPromise(
-      (async () => {
-        const events: NDKEvent[] = []
-        let currentLimit = limit
-
-        while (events.length < limit) {
-          const batchSize = Math.min(currentLimit, 100)
-          const batchEvents = await fetchBatch(batchSize)
-
-          events.push(...batchEvents)
-
-          if (batchEvents.length < batchSize) break
-          currentLimit -= batchEvents.length
-        }
-
-        return events.slice(0, limit)
-      })(),
+      fetchAllEvents(),
       (error) => new Error(`Failed to fetch events: ${error}`)
     )
   }
@@ -478,10 +529,6 @@ export class NostrClient {
       this.#ndk.getUserFromNip05(nip05Id),
       (error) => new Error(`Failed to get user from NIP-05: ${error}`)
     )
-  }
-
-  private static async delay(ms: number) {
-    await new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   getUserWithProfile(npub: string): ResultAsync<NDKUser, Error> {
@@ -554,20 +601,6 @@ export class NostrClient {
     }
 
     return err(new Error('Failed to extract amount from bolt11 invoice'))
-  }
-
-  private validateZapReceipt(
-    zapEvent: NDKEvent,
-    lnurlProviderPubkey: string
-  ): boolean {
-    // Implement zap receipt validation as per Appendix F
-    if (zapEvent.pubkey !== lnurlProviderPubkey) {
-      return false
-    }
-
-    // Add more validation steps here...
-
-    return true
   }
 
   sendZapRequest(

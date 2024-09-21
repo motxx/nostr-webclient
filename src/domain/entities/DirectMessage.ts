@@ -101,7 +101,7 @@ export class DirectMessage implements DirectMessageType {
         return ok(
           new Participant(
             new User({ npub: npubResult.value, pubkey: tag[1] }),
-            tag[2] || ''
+            /* tag[2] ||*/ 'wss://relay.hakua.xyz' // TODO: リレーURLを修正
           )
         )
       })
@@ -163,7 +163,6 @@ export class DirectMessage implements DirectMessageType {
       content: this.content,
       // unsignedKind14
       // https://github.com/nostr-protocol/nips/blob/744bce8fcae0aca07b936b6662db635c8b4253dd/17.md#encrypting
-      sig: '',
     }
   }
 }

@@ -3,12 +3,16 @@ import { IoMdSend } from 'react-icons/io'
 import { FiArrowLeft } from 'react-icons/fi'
 import Button from '@/components/ui-elements/Button'
 import Input from '@/components/ui-elements/Input'
+import { Conversation } from '@/domain/entities/Conversation'
+import { useAtom } from 'jotai'
+import { loggedInUserAtom } from '@/state/atoms'
 
 const MessageConversation: React.FC<{
-  conversation: any
+  conversation: Conversation
   onSendMessage: (content: string) => void
   onBack: () => void
 }> = ({ conversation, onSendMessage, onBack }) => {
+  const [loggedInUser] = useAtom(loggedInUserAtom)
   const [newMessage, setNewMessage] = useState('')
 
   const handleSend = () => {
@@ -24,35 +28,33 @@ const MessageConversation: React.FC<{
         <Button onClick={onBack} className="sm:hidden mr-4">
           <FiArrowLeft className="text-2xl" />
         </Button>
-        <img
-          src={conversation.avatar}
-          alt={conversation.name}
-          className="w-8 h-8 rounded-full mr-2"
-        />
         <div>
-          <div className="font-bold">{conversation.name}</div>
-          {conversation.members.length > 2 && (
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {conversation.members.join(', ')}
-            </div>
-          )}
+          <div className="font-bold">
+            {conversation.subject || 'Conversation'}
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {Array.from(conversation.participants)
+              .map((p) => p.user.npub)
+              .join(', ')}
+          </div>
         </div>
       </div>
       <div className="ml-2 mr-2 flex-1 mb-10 sm:mb-0">
-        {conversation.messages.map((message: any, index: number) => (
+        {conversation.messages.map((message, index) => (
           <div
             key={index}
-            className={`flex ${message.sender === 'You' ? 'justify-end' : 'justify-start'} p-2`}
+            className={`flex ${
+              message.sender.npub === loggedInUser?.npub
+                ? 'justify-end'
+                : 'justify-start'
+            } p-2`}
           >
-            {message.sender !== 'You' && (
-              <img
-                src={message.avatar}
-                alt={message.sender}
-                className="w-8 h-8 mt-2 rounded-full mr-2"
-              />
-            )}
             <div
-              className={`max-w-xs px-4 py-2 rounded-[3rem] ${message.sender === 'You' ? 'bg-blue-500 text-white rounded-br-md' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-bl-md'}`}
+              className={`max-w-xs px-4 py-2 rounded-[3rem] ${
+                message.sender.npub === loggedInUser?.npub
+                  ? 'bg-blue-500 text-white rounded-br-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-bl-md'
+              }`}
             >
               {message.content}
             </div>

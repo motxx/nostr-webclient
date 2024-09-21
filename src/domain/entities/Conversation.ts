@@ -33,23 +33,20 @@ export class Conversation implements ConversationType {
     return this.data.updatedAt
   }
 
-  static create(
-    participants: Set<Participant>,
-    subject?: string
-  ): Conversation {
-    const generateRoomId = () => {
-      // ChatRoomsの識別方法のみ定義されているので、
-      // ここでは、ユーザーのpubkeyをソートして結合している
-      const participantsArray = Array.from(participants)
-      const sortedParticipants = participantsArray.sort((a, b) =>
-        a.user.pubkey.localeCompare(b.user.pubkey)
-      )
-      return sortedParticipants
-        .map((participant) => participant.user.pubkey)
-        .join('-')
-    }
+  static generateId(participantPubkeys: string[], subject: string): string {
+    return (
+      participantPubkeys.sort((a, b) => a.localeCompare(b)).join('-') +
+      ':' +
+      subject
+    )
+  }
+
+  static create(participants: Set<Participant>, subject: string): Conversation {
+    const participantPubkeys = Array.from(participants).map(
+      (participant) => participant.user.pubkey
+    )
     return new Conversation({
-      id: generateRoomId(),
+      id: Conversation.generateId(participantPubkeys, subject),
       participants,
       messages: [],
       subject,
@@ -60,7 +57,9 @@ export class Conversation implements ConversationType {
   addMessage(message: DirectMessage): Conversation {
     return new Conversation({
       ...this.data,
-      messages: [...this.data.messages, message],
+      messages: [...this.data.messages, message].sort((a, b) => {
+        return a.createdAt.getTime() - b.createdAt.getTime()
+      }),
       updatedAt: new Date(),
     })
   }

@@ -1,10 +1,19 @@
-import { DirectMessageRepository } from '@/domain/repositories/DirectMessageRepository'
+import {
+  DirectMessageRepository,
+  SubscribeDirectMessagesOptions,
+} from '@/domain/repositories/DirectMessageRepository'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '../nostr/nostrClient'
-import { ResultAsync } from 'neverthrow'
+import { err, ok, okAsync, Result, ResultAsync } from 'neverthrow'
 import { NDKFilter } from '@nostr-dev-kit/ndk'
-import { NDKKind_GiftWrap } from '../nostr/kindExtensions'
+import {
+  NDKKind_DirectMessage,
+  NDKKind_GiftWrap,
+} from '../nostr/kindExtensions'
+import { Conversation } from '@/domain/entities/Conversation'
+import { Participant } from '@/domain/entities/Participant'
+import { bech32ToHex, hexToBech32 } from '@/utils/addressConverter'
 
 export class DirectMessageService implements DirectMessageRepository {
   constructor(private nostrClient: NostrClient) {}
@@ -17,7 +26,7 @@ export class DirectMessageService implements DirectMessageRepository {
             message.toNostrEvent(),
             receiver.user.pubkey
           )
-          .andThen((giftWrap) => this.nostrClient.postEvent(giftWrap))
+          .andThen((giftWrap) => this.nostrClient.postSignedEvent(giftWrap))
       )
     ).map(() => void 0)
   }
@@ -31,13 +40,11 @@ export class DirectMessageService implements DirectMessageRepository {
       .andThen((decryptedEvent) => DirectMessage.fromNostrEvent(decryptedEvent))
   }
 
-  fetchConversation(participants: User[]): ResultAsync<DirectMessage[], Error> {
-    const pubkeys = participants.map((user) => user.pubkey)
+  fetchUserConversations(user: User): ResultAsync<Conversation[], Error> {
     const filter: NDKFilter = {
       kinds: [NDKKind_GiftWrap as any],
-      authors: pubkeys,
-      '#p': pubkeys,
-      limit: 100,
+      '#p': [user.pubkey],
+      limit: 1000,
     }
 
     return this.nostrClient
@@ -47,12 +54,112 @@ export class DirectMessageService implements DirectMessageRepository {
           events.map((event) =>
             this.nostrClient
               .decryptGiftWrapNostrEvent(event.rawEvent())
+              .orElse((error) => {
+                console.error('Failed to decrypt gift wrap event', error)
+                return ResultAsync.fromSafePromise(
+                  Promise.resolve({
+                    kind: NDKKind_DirectMessage,
+                    content: 'Error decrypting gift wrap event',
+                    tags: [],
+                    pubkey:
+                      '58f4c2db955531458a1077d97d98216a7443cd440c8df07391d18f721d3e15ca',
+                    created_at: 0,
+                  })
+                )
+              })
               .andThen(DirectMessage.fromNostrEvent)
           )
         )
       )
-      .map((messages) =>
-        messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      .map((messages) => {
+        const groupMessagesByConversation = (
+          messages: DirectMessage[]
+        ): Map<string, Conversation> => {
+          return messages.reduce((conversationMap, message) => {
+            const participantPubkeys = Array.from(
+              new Set([
+                message.sender.pubkey,
+                ...message.receivers.map((r) => r.user.pubkey),
+              ])
+            )
+
+            const participants = new Set(
+              participantPubkeys.map((pubkey) => {
+                return new Participant(
+                  new User({
+                    pubkey,
+                    npub: hexToBech32(pubkey).unwrapOr(''),
+                  }),
+                  'wss://relay.hakua.xyz'
+                )
+              })
+            )
+
+            const id = Conversation.generateId(
+              participantPubkeys,
+              message.subject ?? ''
+            )
+
+            const conversation =
+              conversationMap.get(id) ||
+              Conversation.create(participants, message.subject ?? '')
+
+            return conversationMap.set(id, conversation.addMessage(message))
+          }, new Map<string, Conversation>())
+        }
+
+        return Array.from(groupMessagesByConversation(messages).values())
+      })
+  }
+
+  subscribeDirectMessages(
+    onConversation: (conversation: Conversation) => void,
+    options?: SubscribeDirectMessagesOptions
+  ): Result<{ unsubscribe: () => void }, Error> {
+    return this.nostrClient.getLoggedInUser().andThen((user) =>
+      this.nostrClient.subscribeEvents(
+        {
+          kinds: [NDKKind_GiftWrap as any],
+          '#p': [user.pubkey],
+          limit: 1000,
+        },
+        (event) => {
+          return this.nostrClient
+            .decryptGiftWrapNostrEvent(event.rawEvent())
+            .andThen((decryptedEvent) =>
+              DirectMessage.fromNostrEvent(decryptedEvent)
+            )
+            .map((message) => {
+              const participantPubkeys = Array.from(
+                new Set([
+                  message.sender.pubkey,
+                  ...message.receivers.map((r) => r.user.pubkey),
+                ])
+              )
+              const participants = new Set(
+                participantPubkeys.map((pubkey) => {
+                  const npubResult = hexToBech32(pubkey)
+                  if (npubResult.isErr()) {
+                    throw new Error('Failed to convert pubkey to npub')
+                  }
+                  const npub = npubResult.value
+                  return new Participant(
+                    new User({ pubkey, npub }),
+                    'wss://relay.hakua.xyz'
+                  )
+                })
+              )
+              onConversation(
+                Conversation.create(
+                  participants,
+                  message.subject ?? ''
+                ).addMessage(message)
+              )
+              return Promise.resolve()
+            })
+        },
+        options?.isForever
       )
+    )
   }
 }

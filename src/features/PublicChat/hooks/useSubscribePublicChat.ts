@@ -10,7 +10,7 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribePublicChat = () => {
-  const { nostrClient, refreshClient } = useNostrClient()
+  const { nostrClient } = useNostrClient()
 
   const subscribe = useCallback(
     async (
@@ -71,8 +71,7 @@ export const useSubscribePublicChat = () => {
       }
     })
     subscriptions.length = 0
-    refreshClient()
-  }, [refreshClient])
+  }, [])
 
   useEffect(() => {
     return () => {
