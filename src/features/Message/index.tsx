@@ -46,6 +46,7 @@ const MessagePage: React.FC = () => {
                   : conv
               )
             }
+            console.log('conversation', conversation)
             return [...conversations, conversation]
           })
         },
@@ -109,9 +110,7 @@ const MessagePage: React.FC = () => {
 
     fetchUsers
       .map((users) => {
-        const participants = new Set(
-          users.map((user) => new Participant(user, 'wss://relay.hakua.xyz'))
-        )
+        const participants = new Set(users.map((user) => new Participant(user)))
         return Conversation.create(participants, chatName)
       })
       .andThen((newConversation) => {
