@@ -89,8 +89,7 @@ export class DirectMessageService implements DirectMessageRepository {
                   new User({
                     pubkey,
                     npub: hexToBech32(pubkey).unwrapOr(''),
-                  }),
-                  'wss://relay.hakua.xyz'
+                  })
                 )
               })
             )
@@ -143,10 +142,7 @@ export class DirectMessageService implements DirectMessageRepository {
                     throw new Error('Failed to convert pubkey to npub')
                   }
                   const npub = npubResult.value
-                  return new Participant(
-                    new User({ pubkey, npub }),
-                    'wss://relay.hakua.xyz'
-                  )
+                  return new Participant(new User({ pubkey, npub }))
                 })
               )
               onConversation(
