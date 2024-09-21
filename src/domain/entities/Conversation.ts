@@ -55,6 +55,9 @@ export class Conversation implements ConversationType {
   }
 
   addMessage(message: DirectMessage): Conversation {
+    if (this.messages.find((m) => m.id === message.id)) {
+      return this
+    }
     return new Conversation({
       ...this.data,
       messages: [...this.data.messages, message].sort((a, b) => {
