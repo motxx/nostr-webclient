@@ -33,21 +33,20 @@ export class Conversation implements ConversationType {
     return this.data.updatedAt
   }
 
-  static generateId(participantPubkeys: string[]): string {
-    // ChatRoomsの識別方法のみ定義されているので、
-    // ここでは、ユーザーのpubkeyをソートして結合している
-    return participantPubkeys.sort((a, b) => a.localeCompare(b)).join('-')
+  static generateId(participantPubkeys: string[], subject: string): string {
+    return (
+      participantPubkeys.sort((a, b) => a.localeCompare(b)).join('-') +
+      ':' +
+      subject
+    )
   }
 
-  static create(
-    participants: Set<Participant>,
-    subject?: string
-  ): Conversation {
+  static create(participants: Set<Participant>, subject: string): Conversation {
     const participantPubkeys = Array.from(participants).map(
       (participant) => participant.user.pubkey
     )
     return new Conversation({
-      id: Conversation.generateId(participantPubkeys),
+      id: Conversation.generateId(participantPubkeys, subject),
       participants,
       messages: [],
       subject,

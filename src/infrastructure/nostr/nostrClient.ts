@@ -83,6 +83,7 @@ export class NostrClient {
     'wss://relay.hakua.xyz',
     //'wss://relay.damus.io',
     //'wss://relay.nostr.band',
+    //'wss://r.kojira.io',
     //...CommonRelays.Iris,
     //...CommonRelays.JapaneseRelays,
   ].filter((relay, index, self) => self.indexOf(relay) === index)
@@ -415,7 +416,7 @@ export class NostrClient {
 
   subscribeEvents(
     filters: NDKFilter,
-    onEvent: (event: NDKEvent) => ResultAsync<void, never>,
+    onEvent: (event: NDKEvent) => ResultAsync<void, never | Error>,
     isForever: boolean = true
   ): Result<{ unsubscribe: () => void }, Error> {
     return Result.fromThrowable(

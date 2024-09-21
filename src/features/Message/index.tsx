@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import MessageConversation from './components/MessageConversation'
 import MessageCreateChatModal from './components/MessageCreateChatModal'
 import MessageChatSidebar from './components/MessageChatSidebar'
 import { Conversation } from '@/domain/entities/Conversation'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
-import { FetchUserConversations } from '@/domain/use_cases/FetchUserConversations'
 import { SendDirectMessage } from '@/domain/use_cases/SendDirectMessage'
 import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
 import { useNostrClient } from '@/hooks/useNostrClient'
@@ -15,49 +14,56 @@ import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { hexToBech32 } from '@/utils/addressConverter'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { Participant } from '@/domain/entities/Participant'
+import { useSubscribeMessages } from './hooks/useSubscribeMessages'
 
 const MessagePage: React.FC = () => {
   const { nostrClient } = useNostrClient()
+  const { subscribe, anySubscriptionsExist } = useSubscribeMessages()
   const [loggedInUser] = useAtom(loggedInUserSelector)
-  const [selectedConversation, setSelectedConversation] =
-    useState<Conversation | null>(null)
+  const [selectedConversationIndex, setSelectedConversationIndex] = useState<
+    number | null
+  >(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const fetchData = useCallback(async () => {
-    if (!nostrClient || !loggedInUser) {
-      return
-    }
-
-    const directMessageService = new DirectMessageService(nostrClient)
-    new FetchUserConversations(directMessageService)
-      .execute(loggedInUser)
-      .andThen((conversations) => {
-        setConversations(conversations)
-        return ok(undefined)
-      })
-      .mapErr((error) => {
-        console.error('Failed to fetch conversations:', error)
-      })
-  }, [loggedInUser, nostrClient])
-
   useEffect(() => {
-    fetchData()
-  }, [fetchData, loggedInUser, nostrClient])
+    if (!anySubscriptionsExist()) {
+      subscribe(
+        (conversation) => {
+          setConversations((conversations) => {
+            if (conversation.messages.length !== 1) {
+              throw new Error('Conversation does not have exactly one message.')
+            }
+            const existingConversation = conversations.find(
+              (conv) => conv.id === conversation.id
+            )
+            if (existingConversation) {
+              // TODO: Implement Conversations.merge()
+              return conversations.map((conv) =>
+                conv.id === conversation.id
+                  ? conv.addMessage(conversation.messages[0])
+                  : conv
+              )
+            }
+            return [...conversations, conversation]
+          })
+        },
+        { isForever: true }
+      )
+    }
+  }, [loggedInUser, nostrClient, anySubscriptionsExist, subscribe])
 
-  const handleSelectConversation = (
-    conversationId: string,
-    subject?: string
-  ) => {
-    const conversation = conversations.find(
-      (conv) => conv.id === conversationId && conv.subject === subject
-    )
-    setSelectedConversation(conversation ?? null)
+  const handleSelectConversation = (conversationId: string) => {
+    const index = conversations.findIndex((conv) => conv.id === conversationId)
+    setSelectedConversationIndex(index !== -1 ? index : null)
   }
 
   const handleSendMessage = (content: string) => {
-    if (!selectedConversation || !loggedInUser || !nostrClient) return
+    if (selectedConversationIndex === null || !loggedInUser || !nostrClient)
+      return
+
+    const selectedConversation = conversations[selectedConversationIndex]
 
     const newMessage = DirectMessage.create(
       loggedInUser,
@@ -70,7 +76,6 @@ const MessagePage: React.FC = () => {
     new SendDirectMessage(directMessageService)
       .execute(newMessage)
       .andThen(() => {
-        fetchData()
         return ok(undefined)
       })
       .mapErr((error) => {
@@ -84,7 +89,10 @@ const MessagePage: React.FC = () => {
   ) => {
     if (!loggedInUser || !nostrClient) return
 
-    const conversationId = Conversation.generateId(participantsPubkeys)
+    const conversationId = Conversation.generateId(
+      [loggedInUser.pubkey, ...participantsPubkeys],
+      chatName
+    )
     const conversationExists = conversations.some(
       (conv) => conv.id === conversationId
     )
@@ -116,18 +124,26 @@ const MessagePage: React.FC = () => {
       .mapErr((error) => console.error('Failed to create chat:', error))
   }
 
-  const filteredConversations = conversations.filter(
-    (conversation) =>
-      conversation.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conversation.messages.some((message) =>
-        message.content.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+  const filteredConversations = useMemo(
+    () =>
+      conversations.filter(
+        (conversation) =>
+          conversation.subject
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          conversation.messages.some((message) =>
+            message.content.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+      ),
+    [conversations, searchTerm]
   )
 
   return (
     <div className="flex h-full">
       <MessageChatSidebar
-        className={selectedConversation ? 'hidden sm:block' : 'block'}
+        className={
+          selectedConversationIndex !== null ? 'hidden sm:block' : 'block'
+        }
         conversations={conversations}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -136,11 +152,11 @@ const MessagePage: React.FC = () => {
         setIsModalOpen={setIsModalOpen}
       />
       <div className="flex-1">
-        {selectedConversation ? (
+        {selectedConversationIndex !== null ? (
           <MessageConversation
-            conversation={selectedConversation}
+            conversation={conversations[selectedConversationIndex]}
             onSendMessage={handleSendMessage}
-            onBack={() => setSelectedConversation(null)}
+            onBack={() => setSelectedConversationIndex(null)}
           />
         ) : (
           <></>

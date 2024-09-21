@@ -1,8 +1,11 @@
-import { DirectMessageRepository } from '@/domain/repositories/DirectMessageRepository'
+import {
+  DirectMessageRepository,
+  SubscribeDirectMessagesOptions,
+} from '@/domain/repositories/DirectMessageRepository'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '../nostr/nostrClient'
-import { ResultAsync } from 'neverthrow'
+import { err, ok, okAsync, Result, ResultAsync } from 'neverthrow'
 import { NDKFilter } from '@nostr-dev-kit/ndk'
 import {
   NDKKind_DirectMessage,
@@ -10,7 +13,7 @@ import {
 } from '../nostr/kindExtensions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { Participant } from '@/domain/entities/Participant'
-import { bech32ToHex } from '@/utils/addressConverter'
+import { bech32ToHex, hexToBech32 } from '@/utils/addressConverter'
 
 export class DirectMessageService implements DirectMessageRepository {
   constructor(private nostrClient: NostrClient) {}
@@ -73,28 +76,33 @@ export class DirectMessageService implements DirectMessageRepository {
           messages: DirectMessage[]
         ): Map<string, Conversation> => {
           return messages.reduce((conversationMap, message) => {
-            const participantsNpubs = new Set([
-              message.sender.npub,
-              ...message.receivers.map((r) => r.user.npub),
-            ])
-
-            const id =
-              Array.from(participantsNpubs).sort().join('-') +
-              ':' +
-              message.subject
+            const participantPubkeys = Array.from(
+              new Set([
+                message.sender.pubkey,
+                ...message.receivers.map((r) => r.user.pubkey),
+              ])
+            )
 
             const participants = new Set(
-              Array.from(participantsNpubs).map((npub) => {
+              participantPubkeys.map((pubkey) => {
                 return new Participant(
-                  new User({ npub, pubkey: bech32ToHex(npub).unwrapOr('') }),
+                  new User({
+                    pubkey,
+                    npub: hexToBech32(pubkey).unwrapOr(''),
+                  }),
                   'wss://relay.hakua.xyz'
                 )
               })
             )
 
+            const id = Conversation.generateId(
+              participantPubkeys,
+              message.subject ?? ''
+            )
+
             const conversation =
               conversationMap.get(id) ||
-              Conversation.create(participants, message.subject)
+              Conversation.create(participants, message.subject ?? '')
 
             return conversationMap.set(id, conversation.addMessage(message))
           }, new Map<string, Conversation>())
@@ -102,5 +110,56 @@ export class DirectMessageService implements DirectMessageRepository {
 
         return Array.from(groupMessagesByConversation(messages).values())
       })
+  }
+
+  subscribeDirectMessages(
+    onConversation: (conversation: Conversation) => void,
+    options?: SubscribeDirectMessagesOptions
+  ): Result<{ unsubscribe: () => void }, Error> {
+    return this.nostrClient.getLoggedInUser().andThen((user) =>
+      this.nostrClient.subscribeEvents(
+        {
+          kinds: [NDKKind_GiftWrap as any],
+          '#p': [user.pubkey],
+          limit: 1000,
+        },
+        (event) => {
+          return this.nostrClient
+            .decryptGiftWrapNostrEvent(event.rawEvent())
+            .andThen((decryptedEvent) =>
+              DirectMessage.fromNostrEvent(decryptedEvent)
+            )
+            .map((message) => {
+              const participantPubkeys = Array.from(
+                new Set([
+                  message.sender.pubkey,
+                  ...message.receivers.map((r) => r.user.pubkey),
+                ])
+              )
+              const participants = new Set(
+                participantPubkeys.map((pubkey) => {
+                  const npubResult = hexToBech32(pubkey)
+                  if (npubResult.isErr()) {
+                    throw new Error('Failed to convert pubkey to npub')
+                  }
+                  const npub = npubResult.value
+                  return new Participant(
+                    new User({ pubkey, npub }),
+                    'wss://relay.hakua.xyz'
+                  )
+                })
+              )
+              onConversation(
+                Conversation.create(
+                  participants,
+                  message.subject ?? ''
+                ).addMessage(message)
+              )
+              return Promise.resolve()
+            })
+        },
+        options?.isForever
+      )
+    )
   }
 }

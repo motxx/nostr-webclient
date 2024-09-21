@@ -10,7 +10,7 @@ interface MessageChatSidebarProps {
   searchTerm: string
   setSearchTerm: (term: string) => void
   filteredConversations: Conversation[]
-  handleSelectConversation: (conversationId: string, subject?: string) => void
+  handleSelectConversation: (conversationId: string) => void
   setIsModalOpen: (isOpen: boolean) => void
   className?: string
 }
@@ -52,9 +52,7 @@ const MessageChatSidebar = forwardRef<HTMLDivElement, MessageChatSidebarProps>(
           <li
             key={conversation.id}
             className="px-4 sm:px-6 py-2 flex items-center hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-300 ease-in-out cursor-pointer"
-            onClick={() =>
-              handleSelectConversation(conversation.id, conversation.subject)
-            }
+            onClick={() => handleSelectConversation(conversation.id)}
           >
             <div className="flex flex-col">
               <span>{conversation.subject || 'Conversation'}</span>
