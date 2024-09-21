@@ -498,7 +498,6 @@ export class NostrClient {
         const batchEvents = await batchFetchEvents(batchSize)
 
         events.push(...batchEvents)
-        console.log('events', { events })
 
         if (batchEvents.length < batchSize) break
         remainingLimit -= batchEvents.length
