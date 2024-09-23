@@ -1,6 +1,6 @@
-# Zapstr - Nostr Client
+# Nostr Web Client
 
-Zapstr is a Nostr client developed using React and TypeScript.
+Nostr web client developed using React and TypeScript.
 
 ## Installation
 
