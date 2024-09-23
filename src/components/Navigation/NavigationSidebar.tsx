@@ -33,7 +33,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           to="/"
         >
           <div className="text-2xl font-bold text-black hidden lg:block dark:text-white">
-            Zapstr
+            Brone
           </div>
         </Link>
         {navigationItems.map((item: NavigationItem, index: number) => (
