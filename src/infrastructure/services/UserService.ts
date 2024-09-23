@@ -1,10 +1,11 @@
-import { err, ok, Result, ResultAsync } from 'neverthrow'
+import { err, errAsync, ok, Result, ResultAsync } from 'neverthrow'
 import { User } from '@/domain/entities/User'
 import { UserRepository } from '@/domain/repositories/UserRepository'
 import { UserStore } from '@/infrastructure/storage/UserStore'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { NDKUser } from '@nostr-dev-kit/ndk'
 import { UserNotLoggedInError } from '../errors/serviceErrors'
+import { eventBus } from '@/utils/eventBus'
 
 export interface SendZapRequestResponse {
   pr: string
@@ -23,21 +24,30 @@ export class UserService implements UserRepository {
     this.#nostrClient = nostrClient
   }
 
-  private createUserFromNDKUser(user: NDKUser): User {
-    const userName = user.profile?.displayName || user.profile?.name
-    return new User({
-      npub: user.npub,
-      pubkey: user.pubkey,
-      profile: { name: userName, image: user.profile?.image },
+  private createUserFromNDKUser(ndkUser: NDKUser): ResultAsync<User, Error> {
+    return this.#nostrClient.getUserWithProfile(ndkUser.npub).andThen((_) => {
+      const userName = ndkUser.profile?.displayName || ndkUser.profile?.name
+      return ok(
+        new User({
+          npub: ndkUser.npub,
+          pubkey: ndkUser.pubkey,
+          profile: { name: userName, image: ndkUser.profile?.image },
+        })
+      )
     })
   }
 
-  login(): Result<User, Error> {
-    return this.#nostrClient.getLoggedInUser().map((ndkUser) => {
+  login(): ResultAsync<User, Error> {
+    const ndkUserResult = this.#nostrClient.getLoggedInUser()
+    if (ndkUserResult.isErr()) {
+      return errAsync(ndkUserResult.error)
+    }
+    const ndkUser = ndkUserResult.value
+    return this.createUserFromNDKUser(ndkUser).andThen((user) => {
       this.#userStore = new UserStore(ndkUser.npub)
-      const user = this.createUserFromNDKUser(ndkUser)
       this.#userStore.set('loggedInUser', JSON.stringify(user))
-      return user
+      eventBus.emit('login', { user })
+      return ok(user)
     })
   }
 
