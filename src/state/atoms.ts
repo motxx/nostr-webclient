@@ -1,12 +1,8 @@
 import { atom } from 'jotai'
 import { atomFamily } from 'jotai/utils'
-import { User } from '@/domain/entities/User'
 import { UserProfile } from '@/domain/entities/UserProfile'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { PublicChatMessage } from '@/domain/entities/PublicChat'
-
-export const isLoggedInAtom = atom<boolean>(false)
-export const loggedInUserAtom = atom<User | null>(null)
 
 export const publicChatScrollPositionAtom = atom<{
   [channelId: string]: number

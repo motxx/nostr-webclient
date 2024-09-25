@@ -1,5 +1,4 @@
 import { User } from '@/domain/entities/User'
-import { NDKUser } from '@nostr-dev-kit/ndk'
 
 type EventMap = {
   [event: string]: any

@@ -6,20 +6,17 @@ import { Conversation } from '@/domain/entities/Conversation'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { SendDirectMessage } from '@/domain/use_cases/SendDirectMessage'
 import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
-import { useNostrClient } from '@/hooks/useNostrClient'
-import { useAtom } from 'jotai'
-import { loggedInUserSelector } from '@/state/selectors'
 import { ok, ResultAsync } from 'neverthrow'
 import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { hexToBech32 } from '@/utils/addressConverter'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { Participant } from '@/domain/entities/Participant'
 import { useSubscribeMessages } from './hooks/useSubscribeMessages'
+import { useAuth } from '@/hooks/useAuth'
 
 const MessagePage: React.FC = () => {
-  const { nostrClient } = useNostrClient()
+  const { nostrClient, loggedInUser } = useAuth()
   const { subscribe, anySubscriptionsExist } = useSubscribeMessages()
-  const [loggedInUser] = useAtom(loggedInUserSelector)
   const [selectedConversationIndex, setSelectedConversationIndex] = useState<
     number | null
   >(null)

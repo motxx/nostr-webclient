@@ -3,8 +3,7 @@ import { PiNotePencil } from 'react-icons/pi'
 import NavigationBottomTabItem from './NavigationBottomTabItem'
 import { NavigationItem, NavigationItemId } from './Navigation'
 import { useNavigate } from 'react-router-dom'
-import { useAtom } from 'jotai'
-import { loggedInUserSelector } from '@/state/selectors'
+import { useAuth } from '@/hooks/useAuth'
 
 interface NavigationBottomTabProps {
   navigationItems: NavigationItem[]
@@ -22,7 +21,7 @@ const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
   onPostNote,
 }) => {
   const navigate = useNavigate()
-  const [loggedInUser] = useAtom(loggedInUserSelector)
+  const { loggedInUser } = useAuth()
   return (
     <>
       {shouldShowPostButton && (

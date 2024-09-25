@@ -4,7 +4,7 @@ import { SubscribeNotes } from '@/domain/use_cases/SubscribeNotes'
 import { Note } from '@/domain/entities/Note'
 import { SubscribeNotesOptions } from '@/domain/repositories/NoteRepository'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { useNostrClient } from '@/hooks/useNostrClient'
+import { useAuth } from '@/hooks/useAuth'
 
 const subscriptions: Array<{
   isForever?: boolean
@@ -12,7 +12,7 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribeNotes = () => {
-  const { nostrClient } = useNostrClient()
+  const { nostrClient } = useAuth()
 
   const subscribe = useCallback(
     async (onNote: (note: Note) => void, options?: SubscribeNotesOptions) => {

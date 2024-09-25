@@ -9,18 +9,16 @@ import {
   FiUsers,
   FiSettings,
 } from 'react-icons/fi'
-import { PiNotePencil } from 'react-icons/pi'
 import { TbDeviceDesktopAnalytics } from 'react-icons/tb'
-import NavigationBottomTab from './NavigationBottomTab'
-import NavigationSidebar from './NavigationSidebar'
+import { PiNotePencil } from 'react-icons/pi'
+import NavigationBottomTab from '@/components/Navigation/NavigationBottomTab'
+import NavigationSidebar from '@/components/Navigation/NavigationSidebar'
+import PostNoteModal from '@/components/NoteItem/PostNoteModal'
+import { Note } from '@/domain/entities/Note'
 import { PostNote } from '@/domain/use_cases/PostNote'
+import { useAuth } from '@/hooks/useAuth'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { NoteService } from '@/infrastructure/services/NoteService'
-import { useNostrClient } from '@/hooks/useNostrClient'
-import { Note } from '@/domain/entities/Note'
-import PostNoteModal from '../NoteItem/PostNoteModal'
-import { loggedInUserSelector } from '@/state/selectors'
-import { useAtom } from 'jotai'
 
 export type NavigationItemId =
   | 'home'
@@ -77,8 +75,7 @@ const Navigation: React.FC<NavigationProps> = ({
   shouldFocusBottomTab,
   focusBottomTab,
 }) => {
-  const [loggedInUser] = useAtom(loggedInUserSelector)
-  const { nostrClient } = useNostrClient()
+  const { nostrClient, loggedInUser } = useAuth()
   const [isPostModalOpen, setIsPostModalOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const navigate = useNavigate()

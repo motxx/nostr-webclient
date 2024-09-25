@@ -32,7 +32,6 @@ import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
 import { finalizeEvent, nip44 } from 'nostr-tools'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
-import { eventBus } from '@/utils/eventBus'
 import { randomBytes } from 'crypto'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
@@ -119,6 +118,13 @@ export class NostrClient {
   static #nostrClient?: NostrClient
   static #mutex = new Mutex()
 
+  static getNostrClient(): Result<NostrClient, Error> {
+    if (!NostrClient.#nostrClient) {
+      return err(new Error('NostrClient is not connected'))
+    }
+    return ok(NostrClient.#nostrClient)
+  }
+
   static connect(): ResultAsync<NostrClient, Error> {
     return ResultAsync.fromPromise(
       NostrClient.#mutex.runExclusive(async () => {
@@ -143,7 +149,6 @@ export class NostrClient {
         ndk.assertSigner()
 
         await ndk.connect(NDKConnectTimeoutMSec)
-        eventBus.emit('login')
 
         const user = await ndk!.signer!.user()
         const profile = await user.fetchProfile()
@@ -752,6 +757,14 @@ export class NostrClient {
   }
 }
 
-export const getNostrClient = (): ResultAsync<NostrClient, Error> => {
+export const connectNostrClient = (): ResultAsync<NostrClient, Error> => {
   return NostrClient.connect()
+}
+
+export const isNostrClientInitialized = (): boolean => {
+  return NostrClient.getNostrClient().isOk()
+}
+
+export const getNostrClient = (): Result<NostrClient, Error> => {
+  return NostrClient.getNostrClient()
 }

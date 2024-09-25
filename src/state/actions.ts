@@ -1,22 +1,6 @@
-import { atom, getDefaultStore } from 'jotai'
-import {
-  isLoggedInAtom,
-  npubFromNostrAddressFamily,
-  loggedInUserAtom,
-  userProfileFamily,
-} from './atoms'
-import { User } from '@/domain/entities/User'
+import { getDefaultStore } from 'jotai'
+import { npubFromNostrAddressFamily, userProfileFamily } from './atoms'
 import { UserProfile } from '@/domain/entities/UserProfile'
-
-export const loginAction = atom(null, (get, set, user: User) => {
-  set(loggedInUserAtom, user)
-  set(isLoggedInAtom, true)
-})
-
-export const logoutAction = atom(null, (get, set) => {
-  set(loggedInUserAtom, null)
-  set(isLoggedInAtom, false)
-})
 
 const store = getDefaultStore()
 

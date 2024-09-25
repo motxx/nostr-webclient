@@ -4,15 +4,14 @@ import { FiArrowLeft } from 'react-icons/fi'
 import Button from '@/components/ui-elements/Button'
 import Input from '@/components/ui-elements/Input'
 import { Conversation } from '@/domain/entities/Conversation'
-import { useAtom } from 'jotai'
-import { loggedInUserAtom } from '@/state/atoms'
+import { useAuth } from '@/hooks/useAuth'
 
 const MessageConversation: React.FC<{
   conversation: Conversation
   onSendMessage: (content: string) => void
   onBack: () => void
 }> = ({ conversation, onSendMessage, onBack }) => {
-  const [loggedInUser] = useAtom(loggedInUserAtom)
+  const { loggedInUser } = useAuth()
   const [newMessage, setNewMessage] = useState('')
 
   const handleSend = () => {

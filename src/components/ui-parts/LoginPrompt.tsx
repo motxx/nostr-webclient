@@ -1,42 +1,25 @@
 import React from 'react'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
-import { isLoggedInAtom, loggedInUserAtom } from '@/state/atoms'
-import { useAtom } from 'jotai'
 import { init } from 'nostr-login'
-import { useNostrClient } from '@/hooks/useNostrClient'
-import {
-  getNostrClient,
-  isNostrClientInitialized,
-} from '@/infrastructure/nostr/nostrClient'
-import { UserService } from '@/infrastructure/services/UserService'
-import { ErrorWithDetails } from '@/infrastructure/errors/ErrorWithDetails'
+import { useAuth } from '@/hooks/useAuth'
 
 const LoginPrompt: React.FC = () => {
-  const { refreshClient } = useNostrClient()
-  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom)
-  const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom)
+  const { refreshAuth, isLoggedIn } = useAuth()
 
   const openLoginModal = async () => {
-    refreshClient()
+    if (!refreshAuth) {
+      console.error('refreshAuth is not defined')
+      return
+    }
+
     await init({
       onAuth: () => {
-        setIsLoggedIn(true)
-        if (!isNostrClientInitialized()) {
-          throw new Error('Nostr client is not initialized')
-        }
-        getNostrClient()
-          .asyncAndThen((client) => {
-            const userService = new UserService(client)
-            return userService.login()
-          })
-          .match(
-            (user) => {
-              setLoggedInUser(user)
-            },
-            (error) => {
-              throw new ErrorWithDetails('Failed to login', error)
-            }
-          )
+        refreshAuth().match(
+          (_) => {},
+          (error) => {
+            console.error(error)
+          }
+        )
       },
     })
   }

@@ -4,11 +4,11 @@ import UserHeader from './components/UserHeader'
 import UserDescription from './components/UserDescription'
 import UserContents from './components/UserContents'
 import { User } from '@/domain/entities/User'
-import { useNostrClient } from '@/hooks/useNostrClient'
 import { FetchNpubFromNostrAddress } from '@/domain/use_cases/FetchNpubFromNostrAddress'
 import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { ok, ResultAsync } from 'neverthrow'
+import { useAuth } from '@/hooks/useAuth'
 
 interface UserPageProps {
   isFollowing: boolean
@@ -16,7 +16,7 @@ interface UserPageProps {
 }
 
 const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
-  const { nostrClient } = useNostrClient()
+  const { nostrClient } = useAuth()
   const [user, setUser] = useState<User | null>(null)
   const location = useLocation()
 

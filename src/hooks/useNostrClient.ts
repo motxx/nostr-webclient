@@ -1,95 +1,36 @@
 import { useAtom } from 'jotai'
-import {
-  nostrClientAtom,
-  isLoggedInAtom,
-  loggedInUserAtom,
-} from '@/state/atoms'
-import { getNostrClient } from '@/infrastructure/nostr/nostrClient'
-import { useEffect, useState, useCallback } from 'react'
-import { User } from '@/domain/entities/User'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { Mutex } from 'async-mutex'
+import { nostrClientAtom } from '@/state/atoms'
+import { connectNostrClient } from '@/infrastructure/nostr/nostrClient'
+import { useCallback, useMemo } from 'react'
+import { ok } from 'neverthrow'
+//import { Mutex } from 'async-mutex'
 
 export const useNostrClient = () => {
   const [nostrClient, setNostrClient] = useAtom(nostrClientAtom)
-  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom)
-  const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
 
-  const initializeClient = useCallback(async () => {
-    const mutex = new Mutex()
-    await mutex.runExclusive(async () => {
-      setIsLoading(true)
-      setError(null)
-
-      const result = await getNostrClient()
-      if (result.isErr()) {
-        setError(result.error)
-        return
-      }
-
-      const client = result.value
-      setNostrClient(client)
-      const loggedIn = client.isLoggedIn()
-      setIsLoggedIn(loggedIn)
-
-      if (!loggedIn) {
-        setLoggedInUser(null)
-        return
-      }
-
-      const userResult = client.getLoggedInUser()
-      if (userResult.isErr()) {
-        setError(userResult.error)
-        return
-      }
-
-      const ndkUser = userResult.value
-      const profileService = new UserProfileService(client)
-      const profile = await profileService.fetchProfile(ndkUser.npub)
-      const user = new User({
-        npub: ndkUser.npub,
-        pubkey: ndkUser.pubkey,
-        profile: profile.isOk() ? profile.value : undefined,
-      })
-      setLoggedInUser(user)
-    })
-  }, [setIsLoggedIn, setError, setLoggedInUser, setNostrClient])
-
-  useEffect(() => {
-    if (nostrClient || isLoggedIn) return
-
-    initializeClient()
-  }, [initializeClient, nostrClient, isLoggedIn])
-
-  const refreshClient = useCallback(async () => {
+  const refreshClient = useCallback(() => {
     if (nostrClient) {
-      const result = await nostrClient.disconnect()
-      if (result.isOk()) {
+      return nostrClient.disconnect().andThen(() => {
         setNostrClient(null)
-        setIsLoggedIn(false)
-        setLoggedInUser(null)
-        initializeClient()
-      } else {
-        setError(result.error)
-      }
+        return connectNostrClient().andThen((client) => {
+          setNostrClient(client)
+          return ok(client)
+        })
+      })
     }
-  }, [
-    nostrClient,
-    setNostrClient,
-    setIsLoggedIn,
-    setLoggedInUser,
-    initializeClient,
-  ])
+    return connectNostrClient().andThen((client) => {
+      setNostrClient(client)
+      return ok(client)
+    })
+  }, [nostrClient, setNostrClient])
+
+  const isLoggedIn = useMemo(() => {
+    return nostrClient?.isLoggedIn() ?? false
+  }, [nostrClient])
 
   return {
     nostrClient,
-    isLoggedIn,
-    loggedInUser,
-    isLoading,
-    error,
-    initializeClient,
     refreshClient,
+    isLoggedIn,
   }
 }
