@@ -4,7 +4,7 @@ import { init } from 'nostr-login'
 import { useAuth } from '@/hooks/useAuth'
 
 const LoginPrompt: React.FC = () => {
-  const { refreshAuth, isLoggedIn } = useAuth()
+  const { refreshAuth, isUserLoggedIn } = useAuth()
 
   const openLoginModal = async () => {
     if (!refreshAuth) {
@@ -24,7 +24,7 @@ const LoginPrompt: React.FC = () => {
     })
   }
 
-  if (isLoggedIn) {
+  if (isUserLoggedIn()) {
     return null
   }
 

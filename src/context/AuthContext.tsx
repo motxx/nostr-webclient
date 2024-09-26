@@ -8,25 +8,31 @@ import {
 } from 'react'
 import { User } from '@/domain/entities/User'
 import { LoginMyUser } from '@/domain/use_cases/LoginMyUser'
-import { useNostrClient } from '@/hooks/useNostrClient'
-import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { UserService } from '@/infrastructure/services/UserService'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { ok, ResultAsync } from 'neverthrow'
 import { eventBus } from '@/utils/eventBus'
+import { NostrClient } from '@/infrastructure/nostr/nostrClient'
+import { useNostrClient } from '@/hooks/useNostrClient'
 
 interface AuthContextProps {
   loggedInUser: User | null
-  isLoggedIn: boolean
+  isUserLoggedIn: () => boolean
   nostrClient: NostrClient | null
-  refreshAuth: (() => ResultAsync<User, Error>) | null
+  refreshAuth: () => ResultAsync<NostrClient, Error>
 }
 
 export const AuthContext = createContext<AuthContextProps>({
   loggedInUser: null,
-  isLoggedIn: false,
+  isUserLoggedIn: () => {
+    throw new Error('Not implemented')
+  },
   nostrClient: null,
-  refreshAuth: null,
+  refreshAuth: () =>
+    ResultAsync.fromPromise(
+      Promise.reject(new Error('Not implemented')),
+      (error) => error as Error
+    ),
 })
 
 interface AuthProviderProps {
@@ -34,50 +40,53 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const { nostrClient, refreshClient, isLoggedIn } = useNostrClient()
   const [isInitialized, setIsInitialized] = useState(false)
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null)
+  const { refreshClient, isUserLoggedIn, nostrClient } = useNostrClient()
 
-  const refreshAuth = useCallback(() => {
-    return refreshClient().andThen((client) => {
-      return new LoginMyUser(
-        new UserService(client),
-        new UserProfileService(client)
+  const refreshAuth = useCallback(() => refreshClient(), [refreshClient])
+
+  const initializeAuth = useCallback(() => {
+    if (!isInitialized) {
+      setIsInitialized(true)
+      refreshAuth().match(
+        () => {},
+        (error) => console.error(error)
+      )
+    }
+  }, [isInitialized, refreshAuth])
+
+  const handleLogin = useCallback(() => {
+    if (nostrClient && isUserLoggedIn()) {
+      new LoginMyUser(
+        new UserService(nostrClient),
+        new UserProfileService(nostrClient)
       )
         .execute()
         .andThen((user) => {
-          if (isLoggedIn) {
-            setLoggedInUser(user)
-          }
+          setLoggedInUser(user)
           eventBus.emit('login', { user })
           return ok(user)
         })
-    })
-  }, [refreshClient, isLoggedIn])
+    }
+  }, [nostrClient, isUserLoggedIn])
 
   useEffect(() => {
-    if (isInitialized) {
-      return
-    }
-    setIsInitialized(true)
-    console.log('initialize auth')
+    initializeAuth()
+  }, [initializeAuth])
 
-    refreshAuth().match(
-      (_) => {},
-      (error) => {
-        console.error(error)
-      }
-    )
-  }, [isInitialized, refreshAuth])
+  useEffect(() => {
+    handleLogin()
+  }, [handleLogin])
 
-  const contextValue = useMemo(
+  const contextValue: AuthContextProps = useMemo(
     () => ({
       loggedInUser,
-      isLoggedIn,
+      isUserLoggedIn,
       nostrClient,
       refreshAuth,
     }),
-    [loggedInUser, isLoggedIn, nostrClient, refreshAuth]
+    [loggedInUser, isUserLoggedIn, nostrClient, refreshAuth]
   )
 
   return (

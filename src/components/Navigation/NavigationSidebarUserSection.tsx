@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 const NavigationSidebarUserSection: React.FC = () => {
   const { loggedInUser } = useAuth()
   const navigate = useNavigate()
+
   return (
     loggedInUser && (
       <div
