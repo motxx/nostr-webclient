@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react'
 import { PublicChatService } from '@/infrastructure/services/PublicChatService'
 import { PublicChatMessage } from '@/domain/entities/PublicChat'
-import { useNostrClient } from '@/hooks/useNostrClient'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
+import { useAuth } from '@/hooks/useAuth'
 
 const subscriptions: Array<{
   isForever?: boolean
@@ -10,7 +10,7 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribePublicChat = () => {
-  const { nostrClient } = useNostrClient()
+  const { nostrClient } = useAuth()
 
   const subscribe = useCallback(
     async (

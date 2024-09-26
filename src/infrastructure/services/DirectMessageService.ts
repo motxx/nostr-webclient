@@ -5,7 +5,7 @@ import {
 import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '../nostr/nostrClient'
-import { err, ok, okAsync, Result, ResultAsync } from 'neverthrow'
+import { Result, ResultAsync } from 'neverthrow'
 import { NDKFilter } from '@nostr-dev-kit/ndk'
 import {
   NDKKind_DirectMessage,
@@ -13,7 +13,7 @@ import {
 } from '../nostr/kindExtensions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { Participant } from '@/domain/entities/Participant'
-import { bech32ToHex, hexToBech32 } from '@/utils/addressConverter'
+import { hexToBech32 } from '@/utils/addressConverter'
 
 export class DirectMessageService implements DirectMessageRepository {
   constructor(private nostrClient: NostrClient) {}
@@ -89,8 +89,7 @@ export class DirectMessageService implements DirectMessageRepository {
                   new User({
                     pubkey,
                     npub: hexToBech32(pubkey).unwrapOr(''),
-                  }),
-                  'wss://relay.hakua.xyz'
+                  })
                 )
               })
             )
@@ -143,10 +142,7 @@ export class DirectMessageService implements DirectMessageRepository {
                     throw new Error('Failed to convert pubkey to npub')
                   }
                   const npub = npubResult.value
-                  return new Participant(
-                    new User({ pubkey, npub }),
-                    'wss://relay.hakua.xyz'
-                  )
+                  return new Participant(new User({ pubkey, npub }))
                 })
               )
               onConversation(

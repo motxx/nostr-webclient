@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from 'react'
-import { useNostrClient } from '@/hooks/useNostrClient'
 import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
 import { SubscribeDirectMessages } from '@/domain/use_cases/SubscribeDirectMessages'
 import { Conversation } from '@/domain/entities/Conversation'
 import { SubscribeDirectMessagesOptions } from '@/domain/repositories/DirectMessageRepository'
+import { useAuth } from '@/hooks/useAuth'
 
 const subscriptions: Array<{
   isForever: boolean
@@ -11,7 +11,7 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribeMessages = () => {
-  const { nostrClient } = useNostrClient()
+  const { nostrClient } = useAuth()
 
   const subscribe = useCallback(
     (

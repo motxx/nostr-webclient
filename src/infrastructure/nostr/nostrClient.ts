@@ -32,7 +32,6 @@ import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
 import { finalizeEvent, nip44 } from 'nostr-tools'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
-import { eventBus } from '@/utils/eventBus'
 import { randomBytes } from 'crypto'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
@@ -64,25 +63,25 @@ type WindowNostr = {
 export class NostrClient {
   readonly #ndk: NDK
   readonly #user: NDKUser
-  readonly #isLoggedIn: boolean
+  readonly #isUserLoggedIn: boolean
   readonly #nostrLoginWindowNostr: WindowNostr
 
   private constructor(
     ndk: NDK,
     user: NDKUser,
     nostrLoginWindowNostr: WindowNostr,
-    isLoggedIn: boolean
+    isUserLoggedIn: boolean
   ) {
     this.#ndk = ndk
     this.#user = user
     this.#nostrLoginWindowNostr = nostrLoginWindowNostr
-    this.#isLoggedIn = isLoggedIn
+    this.#isUserLoggedIn = isUserLoggedIn
   }
 
   static readonly Relays = [
-    'wss://relay.hakua.xyz',
-    //'wss://relay.damus.io',
-    //'wss://relay.nostr.band',
+    //'wss://relay.hakua.xyz',
+    'wss://relay.damus.io',
+    'wss://relay.nostr.band',
     //'wss://r.kojira.io',
     //...CommonRelays.Iris,
     //...CommonRelays.JapaneseRelays,
@@ -126,10 +125,10 @@ export class NostrClient {
           return NostrClient.#nostrClient
         }
 
-        let isLoggedIn = true
+        let isUserLoggedIn = true
         if (!window.nostr) {
           ;(window.nostr as any) = NostrClient.DefaultWindowNostr
-          isLoggedIn = false
+          isUserLoggedIn = false
         }
 
         const signer = new NDKNip07Signer(NIP07TimeoutMSec)
@@ -143,7 +142,6 @@ export class NostrClient {
         ndk.assertSigner()
 
         await ndk.connect(NDKConnectTimeoutMSec)
-        eventBus.emit('login')
 
         const user = await ndk!.signer!.user()
         const profile = await user.fetchProfile()
@@ -155,7 +153,7 @@ export class NostrClient {
           ndk,
           user,
           window.nostr as any,
-          isLoggedIn
+          isUserLoggedIn
         )
         return NostrClient.#nostrClient
       }),
@@ -172,8 +170,8 @@ export class NostrClient {
     )
   }
 
-  isLoggedIn(): boolean {
-    return this.#isLoggedIn
+  isUserLoggedIn(): boolean {
+    return this.#isUserLoggedIn
   }
 
   private async checkRelayConnection(): Promise<string[]> {
@@ -194,7 +192,7 @@ export class NostrClient {
   ): ResultAsync<void, Error> {
     return ResultAsync.fromPromise(
       (async () => {
-        if (!this.#isLoggedIn) {
+        if (!this.#isUserLoggedIn) {
           throw new NostrReadOnlyError()
         }
 
@@ -370,7 +368,7 @@ export class NostrClient {
       kind: NDKKind_GiftWrap,
       pubkey: randomKeyPair.publicKeyHex,
       created_at: this.randomTimeUpTo2DaysInThePast(),
-      tags: [['p', receiverPubkey, 'wss://relay.hakua.xyz']], // TODO: リレーURLを修正
+      tags: [['p', receiverPubkey]],
       content: giftWrappedContent,
       id: '',
       sig: '',
@@ -498,7 +496,6 @@ export class NostrClient {
         const batchEvents = await batchFetchEvents(batchSize)
 
         events.push(...batchEvents)
-        console.log('events', { events })
 
         if (batchEvents.length < batchSize) break
         remainingLimit -= batchEvents.length
@@ -753,6 +750,6 @@ export class NostrClient {
   }
 }
 
-export const getNostrClient = (): ResultAsync<NostrClient, Error> => {
+export const connectNostrClient = (): ResultAsync<NostrClient, Error> => {
   return NostrClient.connect()
 }

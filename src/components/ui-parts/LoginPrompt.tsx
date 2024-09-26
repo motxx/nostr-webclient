@@ -1,24 +1,30 @@
 import React from 'react'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
-import { isLoggedInAtom } from '@/state/atoms'
-import { useAtom } from 'jotai'
 import { init } from 'nostr-login'
-import { useNostrClient } from '@/hooks/useNostrClient'
+import { useAuth } from '@/hooks/useAuth'
 
 const LoginPrompt: React.FC = () => {
-  const { refreshClient } = useNostrClient()
-  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom)
+  const { refreshAuth, isUserLoggedIn } = useAuth()
 
   const openLoginModal = async () => {
+    if (!refreshAuth) {
+      console.error('refreshAuth is not defined')
+      return
+    }
+
     await init({
       onAuth: () => {
-        setIsLoggedIn(true)
-        refreshClient()
+        refreshAuth().match(
+          (_) => {},
+          (error) => {
+            console.error(error)
+          }
+        )
       },
     })
   }
 
-  if (isLoggedIn) {
+  if (isUserLoggedIn()) {
     return null
   }
 

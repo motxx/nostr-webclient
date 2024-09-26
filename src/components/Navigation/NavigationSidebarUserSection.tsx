@@ -1,12 +1,12 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userIdForDisplay } from '@/utils/addressConverter'
-import { useAtom } from 'jotai'
-import { loggedInUserSelector } from '@/state/selectors'
+import { useAuth } from '@/hooks/useAuth'
 
 const NavigationSidebarUserSection: React.FC = () => {
-  const [loggedInUser] = useAtom(loggedInUserSelector)
+  const { loggedInUser } = useAuth()
   const navigate = useNavigate()
+
   return (
     loggedInUser && (
       <div

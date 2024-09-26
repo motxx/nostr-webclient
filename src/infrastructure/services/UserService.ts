@@ -1,10 +1,8 @@
-import { err, ok, Result, ResultAsync } from 'neverthrow'
+import { errAsync, ok, ResultAsync } from 'neverthrow'
 import { User } from '@/domain/entities/User'
 import { UserRepository } from '@/domain/repositories/UserRepository'
-import { UserStore } from '@/infrastructure/storage/UserStore'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { NDKUser } from '@nostr-dev-kit/ndk'
-import { UserNotLoggedInError } from '../errors/serviceErrors'
 
 export interface SendZapRequestResponse {
   pr: string
@@ -17,54 +15,43 @@ export interface SendZapRequestResponse {
 
 export class UserService implements UserRepository {
   #nostrClient: NostrClient
-  #userStore?: UserStore
 
   constructor(nostrClient: NostrClient) {
     this.#nostrClient = nostrClient
   }
 
-  private createUserFromNDKUser(user: NDKUser): User {
-    const userName = user.profile?.displayName || user.profile?.name
-    return new User({
-      npub: user.npub,
-      pubkey: user.pubkey,
-      profile: { name: userName, image: user.profile?.image },
+  private createUserFromNDKUser(ndkUser: NDKUser): ResultAsync<User, Error> {
+    return this.#nostrClient.getUserWithProfile(ndkUser.npub).andThen((_) => {
+      const userName = ndkUser.profile?.displayName || ndkUser.profile?.name
+      return ok(
+        new User({
+          npub: ndkUser.npub,
+          pubkey: ndkUser.pubkey,
+          profile: {
+            name: userName,
+            image: ndkUser.profile?.image,
+            nostrAddress: ndkUser.profile?.nip05,
+          },
+        })
+      )
     })
   }
 
-  login(): Result<User, Error> {
-    return this.#nostrClient.getLoggedInUser().map((ndkUser) => {
-      this.#userStore = new UserStore(ndkUser.npub)
-      const user = this.createUserFromNDKUser(ndkUser)
-      this.#userStore.set('loggedInUser', JSON.stringify(user))
-      return user
-    })
-  }
-
-  fetchLoggedInUser(): Result<User, Error> {
-    if (this.#isLoggedIn()) {
-      const userJson = this.#userStore!.get('loggedInUser')
-      if (userJson) {
-        const user = JSON.parse(userJson) as User
-        return ok(user)
-      }
+  login(): ResultAsync<User, Error> {
+    const ndkUserResult = this.#nostrClient.getLoggedInUser()
+    if (ndkUserResult.isErr()) {
+      return errAsync(ndkUserResult.error)
     }
-    return err(new UserNotLoggedInError())
+    const ndkUser = ndkUserResult.value
+    return this.createUserFromNDKUser(ndkUser)
   }
 
   sendZapRequest(
     nip05Id: string,
     sats: number
   ): ResultAsync<SendZapRequestResponse, Error> {
-    return this.login().asyncAndThen(() =>
+    return this.login().andThen(() =>
       this.#nostrClient.sendZapRequest(nip05Id, sats)
-    )
-  }
-
-  #isLoggedIn() {
-    return (
-      this.#userStore !== undefined &&
-      this.#userStore.get('loggedInUser') !== undefined
     )
   }
 }

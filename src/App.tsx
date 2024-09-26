@@ -1,21 +1,9 @@
 import React, { useState } from 'react'
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from 'react-router-dom'
-import Navigation from './components/Navigation/Navigation'
-import HomePage from '@/features/Home'
-import HashtagPage from '@/features/Hashtag'
-import ExplorePage from '@/features/Explore'
-import NotificationPage from '@/features/Notification'
-import PublicChatPage from '@/features/PublicChat'
-import MessagePage from '@/features/Message'
-import SettingsPage from '@/features/Settings'
-import DashboardPage from '@/features/Dashboard'
 import toast, { Toaster } from 'react-hot-toast'
-import UserPage from '@/features/Users'
+import { BrowserRouter as Router } from 'react-router-dom'
+import Navigation from '@/components/Navigation/Navigation'
+import { AuthProvider } from '@/context/AuthContext'
+import { AppRoutes } from '@/routes/AppRoutes'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
@@ -46,64 +34,22 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="bg-white dark:bg-black min-h-screen flex">
-        <Navigation
-          shouldFocusBottomTab={shouldFocusBottomTab}
-          focusBottomTab={focusBottomTab}
-        />
-        <main className="w-full pl-0 sm:pl-20 lg:pl-60">
-          <Routes>
-            <Route path="/" element={<Navigate to="/home" />} />
-            <Route
-              path="/home"
-              element={
-                <HomePage
-                  focusBottomTab={focusBottomTab}
-                  unfocusBottomTab={unfocusBottomTab}
-                  toggleFollow={toggleFollow}
-                />
-              }
+      <AuthProvider>
+        <div className="bg-white dark:bg-black min-h-screen flex">
+          <Navigation
+            shouldFocusBottomTab={shouldFocusBottomTab}
+            focusBottomTab={focusBottomTab}
+          />
+          <main className="w-full pl-0 sm:pl-20 lg:pl-60">
+            <AppRoutes
+              focusBottomTab={focusBottomTab}
+              unfocusBottomTab={unfocusBottomTab}
+              toggleFollow={toggleFollow}
             />
-            <Route
-              path="/hashtag/:hashtag"
-              element={
-                <HashtagPage
-                  focusBottomTab={focusBottomTab}
-                  unfocusBottomTab={unfocusBottomTab}
-                  toggleFollow={toggleFollow}
-                />
-              }
-            />
-            <Route path="/explore" element={<ExplorePage />} />
-            <Route path="/notification" element={<NotificationPage />} />
-            <Route path="/public-chat" element={<PublicChatPage />} />
-            <Route
-              path="/public-chat/:channelId"
-              element={<PublicChatPage />}
-            />
-            <Route path="/message" element={<MessagePage />} />
-            <Route
-              path="/post"
-              element={
-                <HomePage
-                  focusBottomTab={focusBottomTab}
-                  unfocusBottomTab={unfocusBottomTab}
-                  toggleFollow={toggleFollow}
-                />
-              }
-            />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/settings/*" element={<SettingsPage />} />
-            <Route
-              path="/user/:userId"
-              element={
-                <UserPage isFollowing={following} toggleFollow={toggleFollow} />
-              }
-            />
-          </Routes>
-          <Toaster />
-        </main>
-      </div>
+            <Toaster />
+          </main>
+        </div>
+      </AuthProvider>
     </Router>
   )
 }

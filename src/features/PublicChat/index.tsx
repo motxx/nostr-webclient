@@ -5,8 +5,8 @@ import PublicChatMessageWindow from './components/PublicChatMessageWindow'
 import { PublicChannel } from '@/domain/entities/PublicChat'
 import { FetchChannels } from '@/domain/use_cases/FetchChannels'
 import { PublicChatService } from '@/infrastructure/services/PublicChatService'
-import { useNostrClient } from '@/hooks/useNostrClient'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
+import { useAuth } from '@/hooks/useAuth'
 
 const PublicChatPage: React.FC = () => {
   const { channelId } = useParams()
@@ -15,7 +15,7 @@ const PublicChatPage: React.FC = () => {
     null
   )
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const { nostrClient } = useNostrClient()
+  const { nostrClient } = useAuth()
 
   useEffect(() => {
     if (nostrClient) {
