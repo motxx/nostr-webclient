@@ -3,7 +3,6 @@ import { nostrClientAtom } from '@/state/atoms'
 import { connectNostrClient } from '@/infrastructure/nostr/nostrClient'
 import { useCallback, useMemo } from 'react'
 import { ok } from 'neverthrow'
-//import { Mutex } from 'async-mutex'
 
 export const useNostrClient = () => {
   const [nostrClient, setNostrClient] = useAtom(nostrClientAtom)
