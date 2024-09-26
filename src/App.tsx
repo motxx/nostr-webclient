@@ -12,11 +12,11 @@ const App: React.FC = () => {
   const focusBottomTab = () => setShouldFocusBottomTab(false)
   const unfocusBottomTab = () => setShouldFocusBottomTab(true)
 
-  // const [following, setFollowing] = useState<boolean>(false)
+  const [following, setFollowing] = useState<boolean>(false)
 
   const toggleFollow = (userName: string) => {
-    const newFollowing = true //!following
-    //    setFollowing(newFollowing)
+    const newFollowing = !following
+    setFollowing(newFollowing)
     toast(
       `${userName}さん${newFollowing ? 'をフォローしました' : 'のフォローを解除しました'}`,
       {
