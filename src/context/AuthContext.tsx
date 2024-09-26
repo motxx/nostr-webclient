@@ -13,6 +13,7 @@ import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { UserService } from '@/infrastructure/services/UserService'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { ok, ResultAsync } from 'neverthrow'
+import { eventBus } from '@/utils/eventBus'
 
 interface AuthContextProps {
   loggedInUser: User | null
@@ -48,6 +49,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (isLoggedIn) {
             setLoggedInUser(user)
           }
+          eventBus.emit('login', { user })
           return ok(user)
         })
     })

@@ -3,7 +3,6 @@ import { User } from '@/domain/entities/User'
 import { UserRepository } from '@/domain/repositories/UserRepository'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { NDKUser } from '@nostr-dev-kit/ndk'
-import { eventBus } from '@/utils/eventBus'
 
 export interface SendZapRequestResponse {
   pr: string
@@ -44,10 +43,7 @@ export class UserService implements UserRepository {
       return errAsync(ndkUserResult.error)
     }
     const ndkUser = ndkUserResult.value
-    return this.createUserFromNDKUser(ndkUser).andThen((user) => {
-      eventBus.emit('login', { user })
-      return ok(user)
-    })
+    return this.createUserFromNDKUser(ndkUser)
   }
 
   sendZapRequest(
