@@ -63,11 +63,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         new UserProfileService(nostrClient)
       )
         .execute()
-        .andThen((user) => {
-          setLoggedInUser(user)
-          eventBus.emit('login', { user })
-          return ok(user)
-        })
+        .match(
+          (user) => {
+            setLoggedInUser(user)
+            eventBus.emit('login', { user })
+          },
+          (error) => {
+            console.error(error)
+          }
+        )
     }
   }, [nostrClient, isUserLoggedIn])
 
