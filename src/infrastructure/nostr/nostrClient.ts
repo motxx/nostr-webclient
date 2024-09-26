@@ -79,9 +79,9 @@ export class NostrClient {
   }
 
   static readonly Relays = [
-    //'wss://relay.hakua.xyz',
+    'wss://relay.hakua.xyz',
     'wss://relay.damus.io',
-    //'wss://relay.nostr.band',
+    'wss://relay.nostr.band',
     //'wss://r.kojira.io',
     //...CommonRelays.Iris,
     //...CommonRelays.JapaneseRelays,
