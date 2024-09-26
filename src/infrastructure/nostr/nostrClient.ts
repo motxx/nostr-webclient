@@ -118,13 +118,6 @@ export class NostrClient {
   static #nostrClient?: NostrClient
   static #mutex = new Mutex()
 
-  static getNostrClient(): Result<NostrClient, Error> {
-    if (!NostrClient.#nostrClient) {
-      return err(new Error('NostrClient is not connected'))
-    }
-    return ok(NostrClient.#nostrClient)
-  }
-
   static connect(): ResultAsync<NostrClient, Error> {
     return ResultAsync.fromPromise(
       NostrClient.#mutex.runExclusive(async () => {
@@ -759,12 +752,4 @@ export class NostrClient {
 
 export const connectNostrClient = (): ResultAsync<NostrClient, Error> => {
   return NostrClient.connect()
-}
-
-export const isNostrClientInitialized = (): boolean => {
-  return NostrClient.getNostrClient().isOk()
-}
-
-export const getNostrClient = (): Result<NostrClient, Error> => {
-  return NostrClient.getNostrClient()
 }
