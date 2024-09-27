@@ -1,5 +1,5 @@
-import { Result, ResultAsync, ok } from 'neverthrow'
-import { NDKEvent, NDKKind } from '@nostr-dev-kit/ndk'
+import { Result, ResultAsync, ok, okAsync } from 'neverthrow'
+import { NDKEvent, NDKKind, NDKUser } from '@nostr-dev-kit/ndk'
 import { isEmoji, Media, Note } from '@/domain/entities/Note'
 import {
   NoteRepository,
@@ -41,21 +41,30 @@ export class NoteService implements NoteRepository {
     onNote: (note: Note) => void,
     options?: SubscribeNotesOptions
   ): ResultAsync<{ unsubscribe: () => void }, Error> {
-    const getAuthors: ResultAsync<undefined | string[], Error> = options?.global
-      ? ResultAsync.fromSafePromise(Promise.resolve(undefined))
-      : options?.authorPubkeys
-        ? ResultAsync.fromSafePromise(Promise.resolve(options.authorPubkeys))
-        : this.#nostrClient
-            .getLoggedInUser()
-            .asyncAndThen((user) =>
-              ResultAsync.fromSafePromise(user.follows()).map((follows) => ({
-                user: user.pubkey,
-                follows: Array.from(follows).map((a) => a.pubkey),
-              }))
-            )
-            .map(({ user, follows }) => [user, ...follows])
+    type Authors = string[] | undefined
+    const getAuthors = (): ResultAsync<Authors, Error> => {
+      // グローバルタイムライン
+      if (options?.global) return okAsync(undefined)
 
-    return getAuthors
+      // 指定されたタイムライン
+      if (options?.authorPubkeys) return okAsync(options.authorPubkeys)
+
+      // フォロー中のタイムライン（ログインユーザを含む）
+      return this.#nostrClient.getLoggedInUser().asyncAndThen((user) =>
+        ResultAsync.fromPromise(
+          user
+            .follows()
+            .then((follows) => [
+              user.pubkey,
+              ...Array.from(follows).map((f) => f.pubkey),
+            ]),
+          (error) =>
+            new ErrorWithDetails('Failed to get authors', error as Error)
+        )
+      )
+    }
+
+    return getAuthors()
       .map((authors) => ({
         kinds: [NDKKind.Text],
         authors,
@@ -67,26 +76,20 @@ export class NoteService implements NoteRepository {
           : undefined,
         '#t': options?.hashtag ? [options.hashtag] : undefined,
       }))
-      .andThen(
-        (
-          filterOptions
-        ): Result<{ unsubscribe: () => void }, ErrorWithDetails> => {
-          const onEvent = (event: NDKEvent) =>
-            this.createNoteFromEvent(event)
-              .map((note) => onNote(note))
-              .orElse((e) => {
-                console.error({
-                  error: e,
-                  event: event,
-                })
-                return ok(undefined)
-              })
-
-          return this.#nostrClient
-            .subscribeEvents(filterOptions, onEvent, options?.isForever)
-            .mapErr((e) => new ErrorWithDetails('subscribeNotes', e))
-        }
-      )
+      .andThen((filter) => {
+        return this.#nostrClient
+          .subscribeEvents(
+            filter,
+            (event: NDKEvent) =>
+              this.createNoteFromEvent(event).match(
+                (note) => onNote(note),
+                (error) =>
+                  console.error('subscribeNotes: onEvent', { error, event })
+              ),
+            options?.isForever
+          )
+          .mapErr((e) => new ErrorWithDetails('subscribeNotes', e))
+      })
   }
 
   subscribeZaps(

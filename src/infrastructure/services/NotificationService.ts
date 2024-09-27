@@ -41,21 +41,29 @@ export class NotificationService implements NotificationRepository {
             limit: options?.limit,
           }
 
-          const onEvent = (event: NDKEvent) =>
-            event.pubkey === user.pubkey // 自己言及のリプライを除外
-              ? ResultAsync.fromSafePromise(Promise.resolve(undefined))
-              : this.createNotificationFromEvent(event)
-                  .map((notification) => onNotification(notification))
-                  .orElse((e) => {
-                    console.error({ error: e, event })
-                    return ok(undefined)
+          return this.nostrClient
+            .subscribeEvents(filter, (event: NDKEvent) => {
+              if (event.pubkey === user.pubkey) {
+                // 自己言及のリプライを除外
+                return
+              }
+              this.createNotificationFromEvent(event).match(
+                (notification) => onNotification(notification),
+                (e) => {
+                  console.error('subscribeNotifications: onEvent', {
+                    error: e,
+                    event,
                   })
-
-          return this.nostrClient.subscribeEvents(filter, onEvent).match(
-            (value) => Promise.resolve(value),
-            (error) =>
-              Promise.reject(new Error('Subscription failed: ' + error.message))
-          )
+                }
+              )
+            })
+            .match(
+              (value) => Promise.resolve(value),
+              (error) =>
+                Promise.reject(
+                  new ErrorWithDetails('subscribeNotifications', error)
+                )
+            )
         },
         (error) =>
           Promise.reject(

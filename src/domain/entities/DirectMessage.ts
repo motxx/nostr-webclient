@@ -165,4 +165,15 @@ export class DirectMessage implements DirectMessageType {
       // https://github.com/nostr-protocol/nips/blob/744bce8fcae0aca07b936b6662db635c8b4253dd/17.md#encrypting
     }
   }
+
+  createParticipants(): Result<Set<Participant>, Error> {
+    return Result.combine(
+      [...new Set([this.sender, ...this.receivers.map((r) => r.user)])].map(
+        (user) =>
+          hexToBech32(user.pubkey).map(
+            (npub) => new Participant(new User({ ...user, npub }))
+          )
+      )
+    ).map((participants) => new Set(participants))
+  }
 }

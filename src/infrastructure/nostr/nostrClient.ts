@@ -414,7 +414,7 @@ export class NostrClient {
 
   subscribeEvents(
     filters: NDKFilter,
-    onEvent: (event: NDKEvent) => ResultAsync<void, never | Error>,
+    onEvent: (event: NDKEvent) => void,
     isForever: boolean = true
   ): Result<{ unsubscribe: () => void }, Error> {
     return Result.fromThrowable(
@@ -432,12 +432,7 @@ export class NostrClient {
             relaySet,
             true
           )
-          .on('event', (event: NDKEvent) => {
-            onEvent(event).match(
-              () => {},
-              (error) => console.error('never passed here', error)
-            )
-          })
+          .on('event', (event: NDKEvent) => onEvent(event))
 
         return {
           unsubscribe: () => {

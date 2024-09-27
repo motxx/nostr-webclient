@@ -123,36 +123,34 @@ export class DirectMessageService implements DirectMessageRepository {
           limit: 1000,
         },
         (event) => {
-          return this.nostrClient
+          this.nostrClient
             .decryptGiftWrapNostrEvent(event.rawEvent())
             .andThen((decryptedEvent) =>
               DirectMessage.fromNostrEvent(decryptedEvent)
             )
-            .map((message) => {
-              const participantPubkeys = Array.from(
-                new Set([
-                  message.sender.pubkey,
-                  ...message.receivers.map((r) => r.user.pubkey),
-                ])
-              )
-              const participants = new Set(
-                participantPubkeys.map((pubkey) => {
-                  const npubResult = hexToBech32(pubkey)
-                  if (npubResult.isErr()) {
-                    throw new Error('Failed to convert pubkey to npub')
+            .match(
+              (message) => {
+                message.createParticipants().match(
+                  (participants) => {
+                    onConversation(
+                      Conversation.create(
+                        participants,
+                        message.subject ?? ''
+                      ).addMessage(message)
+                    )
+                  },
+                  (error) => {
+                    console.error(
+                      'subscribeDirectMessages: onEvent: createParticipants:',
+                      error
+                    )
                   }
-                  const npub = npubResult.value
-                  return new Participant(new User({ pubkey, npub }))
-                })
-              )
-              onConversation(
-                Conversation.create(
-                  participants,
-                  message.subject ?? ''
-                ).addMessage(message)
-              )
-              return Promise.resolve()
-            })
+                )
+              },
+              (error) => {
+                console.error('subscribeDirectMessages: onEvent', error)
+              }
+            )
         },
         options?.isForever
       )
