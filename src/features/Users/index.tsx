@@ -52,13 +52,14 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
 
       getNpub()
         .andThen((npub) => new FetchUser(userProfileService).execute(npub))
-        .andThen((user) => {
-          setUser(user)
-          return ok(undefined)
-        })
-        .mapErr((error) => {
-          console.error('Failed to fetch user data:', error)
-        })
+        .match(
+          (user) => {
+            setUser(user)
+          },
+          (error) => {
+            console.error('Failed to fetch user data:', error)
+          }
+        )
     }
 
     fetchUserData()

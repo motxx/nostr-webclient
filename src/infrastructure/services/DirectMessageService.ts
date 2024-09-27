@@ -76,6 +76,7 @@ export class DirectMessageService implements DirectMessageRepository {
           messages: DirectMessage[]
         ): Map<string, Conversation> => {
           return messages.reduce((conversationMap, message) => {
+            // TODO: Use message.createParticipants()
             const participantPubkeys = Array.from(
               new Set([
                 message.sender.pubkey,

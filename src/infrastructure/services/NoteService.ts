@@ -171,20 +171,11 @@ export class NoteService implements NoteRepository {
     return this.#userProfileRepository
       .fetchProfile(event.author.npub)
       .andThen((userProfile) => {
-        if (userProfile) {
-          return ok(
-            new User({
-              npub: event.author.npub,
-              pubkey: event.author.pubkey,
-              profile: userProfile,
-            })
-          )
-        }
         return ok(
           new User({
             npub: event.author.npub,
             pubkey: event.author.pubkey,
-            profile: undefined,
+            profile: userProfile || undefined,
           })
         )
       })
