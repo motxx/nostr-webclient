@@ -110,10 +110,9 @@ export class PublicChatService implements PublicChatRepository {
     return this.nostrClient.subscribeEvents(
       filter,
       (event) => {
-        this.userProfileRepository
-          .fetchProfile(event.author.npub)
-          .map((profile) => {
-            return onMessage(
+        this.userProfileRepository.fetchProfile(event.author.npub).match(
+          (profile) => {
+            onMessage(
               new PublicChatMessage({
                 id: event.id,
                 channel_id: channelId,
@@ -126,8 +125,14 @@ export class PublicChatService implements PublicChatRepository {
                 created_at: new Date((event.created_at || 0) * 1000),
               })
             )
-          })
-        return ResultAsync.fromSafePromise(Promise.resolve())
+          },
+          (error) => {
+            console.error('subscribeToChannelMessages: onEvent', {
+              error,
+              event,
+            })
+          }
+        )
       },
       options?.isForever
     )
