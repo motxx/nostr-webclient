@@ -71,14 +71,12 @@ const MessagePage: React.FC = () => {
     )
 
     const directMessageService = new DirectMessageService(nostrClient)
-    new SendDirectMessage(directMessageService)
-      .execute(newMessage)
-      .andThen(() => {
-        return ok(undefined)
-      })
-      .mapErr((error) => {
+    new SendDirectMessage(directMessageService).execute(newMessage).match(
+      () => {},
+      (error) => {
         console.error('Failed to send message:', error)
-      })
+      }
+    )
   }
 
   const handleCreateChat = (
@@ -110,14 +108,17 @@ const MessagePage: React.FC = () => {
         const participants = new Set(users.map((user) => new Participant(user)))
         return Conversation.create(participants, chatName)
       })
-      .andThen((newConversation) => {
-        setConversations((prevConversations) => [
-          ...prevConversations,
-          newConversation,
-        ])
-        return ok(undefined)
-      })
-      .mapErr((error) => console.error('Failed to create chat:', error))
+      .match(
+        (newConversation) => {
+          setConversations((prevConversations) => [
+            ...prevConversations,
+            newConversation,
+          ])
+        },
+        (error) => {
+          console.error('Failed to create chat:', error)
+        }
+      )
   }
 
   const filteredConversations = useMemo(
