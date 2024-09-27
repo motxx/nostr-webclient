@@ -1,5 +1,3 @@
-import { User } from '@/domain/entities/User'
-
 type EventMap = {
   [event: string]: any
 }

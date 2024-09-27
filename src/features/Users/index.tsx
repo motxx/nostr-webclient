@@ -7,7 +7,7 @@ import { User } from '@/domain/entities/User'
 import { FetchNpubFromNostrAddress } from '@/domain/use_cases/FetchNpubFromNostrAddress'
 import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { ok, ResultAsync } from 'neverthrow'
+import { ResultAsync } from 'neverthrow'
 import { useAuth } from '@/hooks/useAuth'
 
 interface UserPageProps {
