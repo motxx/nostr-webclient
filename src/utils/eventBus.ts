@@ -63,5 +63,5 @@ class EventBus<Events extends EventMap = EventMap> {
 export const eventBus = new EventBus<{
   mention: { from: string; message: string }
   dm: { from: string; message: string }
-  login: { user: User }
+  refreshNoteSubscription: {}
 }>()

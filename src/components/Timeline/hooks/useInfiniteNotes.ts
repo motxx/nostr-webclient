@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from 'react'
 import { useSubscribeNotes } from './useSubscribeNotes'
 import { Note } from '@/domain/entities/Note'
 import { eventBus } from '@/utils/eventBus'
+import { timelineNotesAtom } from '@/state/atoms'
+import { useAtom } from 'jotai'
 
 interface UseInfiniteNotesOptions {
   global?: boolean
@@ -17,18 +19,22 @@ export const useInfiniteNotes = ({
   hashtag,
 }: UseInfiniteNotesOptions) => {
   const { subscribe, unsubscribeAll } = useSubscribeNotes()
-  const [notes, setNotes] = useState<Note[]>([])
+  const [notes, setNotes] = useAtom(timelineNotesAtom)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const isLoading = notes.length === 0
 
-  const handleNote = useCallback((note: Note) => {
-    setNotes((prevNotes) => {
-      if (prevNotes.some((n) => n.id === note.id)) return prevNotes
-      return [...prevNotes, note].sort(
-        (a, b) => b.created_at.getTime() - a.created_at.getTime()
-      )
-    })
-  }, [])
+  const handleNote = useCallback(
+    (note: Note) => {
+      setNotes((prevNotes) => {
+        if (prevNotes.some((n) => n.id === note.id)) return prevNotes
+        return [...prevNotes, note].sort(
+          (a, b) => b.created_at.getTime() - a.created_at.getTime()
+        )
+      })
+    },
+    [setNotes]
+  )
 
   const loadMoreNotes = useCallback(() => {
     if (isLoadingMore || notes.length === 0) return
@@ -57,21 +63,22 @@ export const useInfiniteNotes = ({
   ])
 
   useEffect(() => {
+    if (isInitialized) return
+    setIsInitialized(true)
+
     const cleanupWhenLoggedIn = () => {
+      console.log('cleanupWhenLoggedIn')
       unsubscribeAll()
       setIsLoadingMore(false)
       setNotes([])
     }
 
-    eventBus.on('login', cleanupWhenLoggedIn)
-
-    return () => {
-      eventBus.off('login', cleanupWhenLoggedIn)
-    }
-  }, [isLoading, loadMoreNotes, unsubscribeAll])
+    eventBus.on('refreshNoteSubscription', cleanupWhenLoggedIn)
+  }, [isInitialized, setNotes, unsubscribeAll])
 
   useEffect(() => {
     if (!isLoading) return
+    console.log('subscribe')
 
     subscribe((note) => handleNote(note), {
       global,

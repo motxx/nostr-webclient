@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .match(
           (user) => {
             setLoggedInUser(user)
-            eventBus.emit('login', { user })
+            eventBus.emit('refreshNoteSubscription', {})
           },
           (error) => {
             console.error(error)

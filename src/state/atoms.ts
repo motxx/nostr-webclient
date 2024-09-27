@@ -3,6 +3,7 @@ import { atomFamily } from 'jotai/utils'
 import { UserProfile } from '@/domain/entities/UserProfile'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { PublicChatMessage } from '@/domain/entities/PublicChat'
+import { Note } from '@/domain/entities/Note'
 
 export const publicChatScrollPositionAtom = atom<{
   [channelId: string]: number
@@ -21,3 +22,5 @@ export const nostrClientAtom = atom<NostrClient | null>(null)
 export const publicChatMessagesFamily = atomFamily((channelId: string) =>
   atom<PublicChatMessage[]>([])
 )
+
+export const timelineNotesAtom = atom<Note[]>([])
