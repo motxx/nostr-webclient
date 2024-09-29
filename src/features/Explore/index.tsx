@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useMemo, useCallback } from 'react'
 import HashSearchBar from '@/components/ui-parts/HashSearchBar'
 import Widgets from '@/components/Widgets/Widgets'
 import ExploreFilters from './components/ExploreFilters'
@@ -10,7 +10,6 @@ import { useFetchNotes } from '@/components/Timeline/hooks/useFetchNotes'
 
 const ExplorePage: React.FC = () => {
   const { notes, isLoading } = useInfiniteNotes({
-    // authorPubkeys is undefined if accountFilter === 'global'
     // TODO: Implement authorPubkeys when accountFilter === 'network'
   })
 
@@ -26,7 +25,6 @@ const ExplorePage: React.FC = () => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
 
-  /*
   const { isFetchingPastNotes, fetchNotes } = useFetchNotes({ limit: 20 })
 
   const handleFinalSearch = (term: string, hashtags: string[]) => {
@@ -141,7 +139,7 @@ const ExplorePage: React.FC = () => {
       }
     }
   }, [isLoading, isFetchingPastNotes, fetchNotes])
-*/
+
   return (
     <div
       ref={wrapperRef}
@@ -149,12 +147,12 @@ const ExplorePage: React.FC = () => {
     >
       <div
         ref={timelineRef}
-        onScroll={/*handleScroll*/ () => {}}
+        onScroll={handleScroll}
         className="flex-1 overflow-y-auto hide-scrollbar max-h-screen"
       >
         <div className="sticky top-0 z-10 bg-white dark:bg-black p-4 sm:pb-4">
           <div className="mb-2">
-            <HashSearchBar onSearch={/*handleFinalSearch*/ () => {}} />
+            <HashSearchBar onSearch={handleFinalSearch} />
           </div>
           <ExploreFilters
             accountFilter={accountFilter}
@@ -176,15 +174,16 @@ const ExplorePage: React.FC = () => {
         <div className="flex items-center justify-center">
           <ExploreOutput
             outputFormat={outputFormat}
-            sortedNotes={/*sortedNotes*/ notes}
+            sortedNotes={sortedNotes}
             metric={metric}
           />
         </div>
-        {isLoading /* || isFetchingPastNotes*/ && (
-          <div className="flex justify-center items-center h-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
-          </div>
-        )}
+        {isLoading ||
+          (isFetchingPastNotes && (
+            <div className="flex justify-center items-center h-16">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
+            </div>
+          ))}
       </div>
       <div className="hidden lg:block w-1/3 min-w-[280px] max-w-[500px] py-4 overflow-y-auto hide-scrollbar max-h-screen">
         <Widgets />
