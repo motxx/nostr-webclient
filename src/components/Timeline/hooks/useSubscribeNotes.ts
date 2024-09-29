@@ -1,65 +1,88 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useContext } from 'react'
 import { NoteService } from '@/infrastructure/services/NoteService'
 import { SubscribeNotes } from '@/domain/use_cases/SubscribeNotes'
 import { Note } from '@/domain/entities/Note'
 import { SubscribeNotesOptions } from '@/domain/repositories/NoteRepository'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { useAuth } from '@/hooks/useAuth'
-
-const subscriptions: Array<{
-  isForever?: boolean
-  unsubscribe: () => void
-}> = []
+import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import {
+  OperationType as SubscriptionOperationType,
+  SubscriptionContext,
+  SubscriptionStatus,
+} from '@/context/SubscriptionContext'
+import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
 
 export const useSubscribeNotes = () => {
-  const { nostrClient } = useAuth()
+  const { nostrClient, status } = useContext(AuthContext)
+  const {
+    dispatch: subscriptionDispatch,
+    notes,
+    subscription,
+    status: subscriptionStatus,
+  } = useContext(SubscriptionContext)
 
   const subscribe = useCallback(
-    async (onNote: (note: Note) => void, options?: SubscribeNotesOptions) => {
-      if (!nostrClient) {
+    (options: SubscribeNotesOptions, callbackWhenFinished?: () => void) => {
+      if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
         return
       }
+      if (!nostrClient) throw new Error('NostrClient is not ready')
+
+      if (subscriptionStatus !== SubscriptionStatus.Idle) {
+        return
+      }
+
       const userProfileService = new UserProfileService(nostrClient)
       const noteService = new NoteService(nostrClient, userProfileService)
-      const subscribeTimeline = new SubscribeNotes(noteService)
 
-      const subscription = await subscribeTimeline.execute(onNote, options)
-      subscriptions.push({
-        isForever: options?.isForever,
-        unsubscribe: subscription.unsubscribe,
+      subscriptionDispatch({
+        type: SubscriptionOperationType.FetchPastNotesStart,
       })
-      return subscription
-    },
-    [nostrClient]
-  )
 
-  const unsubscribe = useCallback(
-    (subscription: { unsubscribe: () => void }) => {
-      const index = subscriptions.findIndex(
-        (s) => s.unsubscribe === subscription.unsubscribe
+      new FetchPastNotes(noteService).execute({ ...options, limit: 20 }).match(
+        (notes) => {
+          subscriptionDispatch({
+            type: SubscriptionOperationType.FetchPastNotesEnd,
+            notes,
+          })
+        },
+        (error) => {
+          console.error('Failed to fetch past notes', error)
+        }
       )
-      if (index > -1) {
-        subscription.unsubscribe()
-        subscriptions.splice(index, 1)
-      }
+
+      new SubscribeNotes(noteService)
+        .execute((note: Note) => {
+          subscriptionDispatch({
+            type: SubscriptionOperationType.AddNewNote,
+            note,
+          })
+        }, options)
+        .match(
+          (subscription) => {
+            console.log('options', options)
+            subscriptionDispatch({
+              type: SubscriptionOperationType.SubscribeNotes,
+              subscription: {
+                unsubscribe: subscription.unsubscribe,
+              },
+            })
+          },
+          (error) => {
+            console.error('Failed to subscribe notes', error)
+          }
+        )
     },
-    []
+    [nostrClient, subscriptionDispatch, status, subscriptionStatus]
   )
 
-  const unsubscribeAll = useCallback(() => {
-    subscriptions.forEach((subscription) => {
-      if (!subscription.isForever) {
-        subscription.unsubscribe()
-      }
+  const unsubscribe = useCallback(() => {
+    if (!subscription) return
+    subscription.unsubscribe()
+    subscriptionDispatch({
+      type: SubscriptionOperationType.UnsubscribeNotes,
     })
-    subscriptions.length = 0
-  }, [])
+  }, [subscription, subscriptionDispatch])
 
-  useEffect(() => {
-    return () => {
-      unsubscribeAll()
-    }
-  }, [unsubscribeAll])
-
-  return { subscribe, unsubscribe, unsubscribeAll }
+  return { subscribe, unsubscribe, notes }
 }

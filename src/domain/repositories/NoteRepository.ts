@@ -1,4 +1,4 @@
-import { ResultAsync } from 'neverthrow'
+import { Result, ResultAsync } from 'neverthrow'
 import { Note } from '@/domain/entities/Note'
 
 export type SubscribeNotesOptions = {
@@ -12,15 +12,14 @@ export type SubscribeNotesOptions = {
   youtube?: boolean
   hashtag?: string
   authorPubkeys?: string[]
-  global?: boolean
-  isForever?: boolean
 }
 
 export interface NoteRepository {
+  fetchPastNotes(options?: SubscribeNotesOptions): ResultAsync<Note[], Error>
   postNote(note: Note): ResultAsync<void, Error>
 
   subscribeNotes(
     onNote: (note: Note) => void,
     options?: SubscribeNotesOptions
-  ): ResultAsync<{ unsubscribe: () => void }, Error>
+  ): Result<{ unsubscribe: () => void }, Error>
 }

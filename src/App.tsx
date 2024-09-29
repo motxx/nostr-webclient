@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import Navigation from '@/components/Navigation/Navigation'
 import { AuthProvider } from '@/context/AuthContext'
 import { AppRoutes } from '@/routes/AppRoutes'
+import { SubscriptionProvider } from './context/SubscriptionContext'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =

@@ -8,6 +8,7 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
+  NDKSubscription,
 } from '@nostr-dev-kit/ndk'
 import {
   NostrCallZapEndpointError,
@@ -63,25 +64,25 @@ type WindowNostr = {
 export class NostrClient {
   readonly #ndk: NDK
   readonly #user: NDKUser
-  readonly #isUserLoggedIn: boolean
+  readonly #readOnlyMode: boolean
   readonly #nostrLoginWindowNostr: WindowNostr
 
   private constructor(
     ndk: NDK,
     user: NDKUser,
     nostrLoginWindowNostr: WindowNostr,
-    isUserLoggedIn: boolean
+    readOnlyMode: boolean
   ) {
     this.#ndk = ndk
     this.#user = user
     this.#nostrLoginWindowNostr = nostrLoginWindowNostr
-    this.#isUserLoggedIn = isUserLoggedIn
+    this.#readOnlyMode = readOnlyMode
   }
 
   static readonly Relays = [
-    //'wss://relay.hakua.xyz',
-    'wss://relay.damus.io',
-    'wss://relay.nostr.band',
+    'wss://relay.hakua.xyz',
+    //'wss://relay.damus.io',
+    //'wss://relay.nostr.band',
     //'wss://r.kojira.io',
     //...CommonRelays.Iris,
     //...CommonRelays.JapaneseRelays,
@@ -125,10 +126,10 @@ export class NostrClient {
           return NostrClient.#nostrClient
         }
 
-        let isUserLoggedIn = true
+        let readOnlyMode = false
         if (!window.nostr) {
           ;(window.nostr as any) = NostrClient.DefaultWindowNostr
-          isUserLoggedIn = false
+          readOnlyMode = true
         }
 
         const signer = new NDKNip07Signer(NIP07TimeoutMSec)
@@ -153,7 +154,7 @@ export class NostrClient {
           ndk,
           user,
           window.nostr as any,
-          isUserLoggedIn
+          readOnlyMode
         )
         return NostrClient.#nostrClient
       }),
@@ -170,8 +171,8 @@ export class NostrClient {
     )
   }
 
-  isUserLoggedIn(): boolean {
-    return this.#isUserLoggedIn
+  readOnlyMode(): boolean {
+    return this.#readOnlyMode
   }
 
   private async checkRelayConnection(): Promise<string[]> {
@@ -192,7 +193,7 @@ export class NostrClient {
   ): ResultAsync<void, Error> {
     return ResultAsync.fromPromise(
       (async () => {
-        if (!this.#isUserLoggedIn) {
+        if (!this.#readOnlyMode) {
           throw new NostrReadOnlyError()
         }
 
@@ -414,9 +415,11 @@ export class NostrClient {
 
   subscribeEvents(
     filters: NDKFilter,
-    onEvent: (event: NDKEvent) => void,
-    isForever: boolean = true
-  ): Result<{ unsubscribe: () => void }, Error> {
+    onEvent: (event: NDKEvent) => void
+  ): Result<
+    { _subscription: NDKSubscription; unsubscribe: () => void },
+    Error
+  > {
     return Result.fromThrowable(
       () => {
         const relaySet = NDKRelaySet.fromRelayUrls(
@@ -424,17 +427,11 @@ export class NostrClient {
           this.#ndk
         )
         const subscription = this.#ndk
-          .subscribe(
-            filters,
-            {
-              closeOnEose: !isForever,
-            },
-            relaySet,
-            true
-          )
+          .subscribe(filters, { closeOnEose: false }, relaySet, true)
           .on('event', (event: NDKEvent) => onEvent(event))
 
         return {
+          _subscription: subscription,
           unsubscribe: () => {
             subscription.stop()
           },
@@ -541,6 +538,16 @@ export class NostrClient {
 
   getLoggedInUser(): Result<NDKUser, Error> {
     return ok(this.#user)
+  }
+
+  fetchLoggedInUserFollows(): ResultAsync<NDKUser[], Error> {
+    return ResultAsync.fromPromise(
+      (async () => {
+        const follows = await this.#user.follows()
+        return Array.from(follows)
+      })(),
+      (error) => new Error(`Failed to get logged in user follows: ${error}`)
+    )
   }
 
   decryptEvent(event: NDKEvent): ResultAsync<NDKEvent, Error> {

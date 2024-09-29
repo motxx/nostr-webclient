@@ -1,15 +1,15 @@
-import { FormEvent } from 'react'
+import { FormEvent, useContext } from 'react'
 import { PublicChatService } from '@/infrastructure/services/PublicChatService'
 import { PostChannelMessage } from '@/domain/use_cases/PostChannelMessage'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { useAuth } from '@/hooks/useAuth'
+import { AuthContext } from '@/context/AuthContext'
 
 export const useMessageSubmission = (
   channelId: string,
   newMessage: string,
   setNewMessage: (value: string) => void
 ) => {
-  const { nostrClient } = useAuth()
+  const { nostrClient } = useContext(AuthContext)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

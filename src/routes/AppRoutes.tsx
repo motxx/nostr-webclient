@@ -21,50 +21,52 @@ export const AppRoutes = ({
   toggleFollow,
 }: AppRoutesProps) => {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/home" />} />
-      <Route
-        path="/home"
-        element={
-          <HomePage
-            focusBottomTab={focusBottomTab}
-            unfocusBottomTab={unfocusBottomTab}
-            toggleFollow={toggleFollow}
-          />
-        }
-      />
-      <Route
-        path="/hashtag/:hashtag"
-        element={
-          <HashtagPage
-            focusBottomTab={focusBottomTab}
-            unfocusBottomTab={unfocusBottomTab}
-            toggleFollow={toggleFollow}
-          />
-        }
-      />
-      <Route path="/explore" element={<ExplorePage />} />
-      <Route path="/notification" element={<NotificationPage />} />
-      <Route path="/public-chat" element={<PublicChatPage />} />
-      <Route path="/public-chat/:channelId" element={<PublicChatPage />} />
-      <Route path="/message" element={<MessagePage />} />
-      <Route
-        path="/post"
-        element={
-          <HomePage
-            focusBottomTab={focusBottomTab}
-            unfocusBottomTab={unfocusBottomTab}
-            toggleFollow={toggleFollow}
-          />
-        }
-      />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/settings/*" element={<SettingsPage />} />
-      <Route
-        path="/user/:userId"
-        // TODO: フォロー状態の取得
-        element={<UserPage isFollowing={false} toggleFollow={toggleFollow} />}
-      />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route
+          path="/home"
+          element={
+            <HomePage
+              focusBottomTab={focusBottomTab}
+              unfocusBottomTab={unfocusBottomTab}
+              toggleFollow={toggleFollow}
+            />
+          }
+        />
+        <Route
+          path="/hashtag/:hashtag"
+          element={
+            <HashtagPage
+              focusBottomTab={focusBottomTab}
+              unfocusBottomTab={unfocusBottomTab}
+              toggleFollow={toggleFollow}
+            />
+          }
+        />
+        <Route path="/explore" element={<ExplorePage />} />
+        <Route path="/notification" element={<NotificationPage />} />
+        <Route path="/public-chat" element={<PublicChatPage />} />
+        <Route path="/public-chat/:channelId" element={<PublicChatPage />} />
+        <Route path="/message" element={<MessagePage />} />
+        <Route
+          path="/post"
+          element={
+            <HomePage
+              focusBottomTab={focusBottomTab}
+              unfocusBottomTab={unfocusBottomTab}
+              toggleFollow={toggleFollow}
+            />
+          }
+        />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/settings/*" element={<SettingsPage />} />
+        <Route
+          path="/user/:userId"
+          // TODO: フォロー状態の取得
+          element={<UserPage isFollowing={false} toggleFollow={toggleFollow} />}
+        />
+      </Routes>
+    </>
   )
 }

@@ -15,7 +15,12 @@ export class LoginMyUser {
         .fetchProfile(user.npub)
         .andThen((profile) => {
           user.profile = profile
-          return ok(user)
+          return this.userRepository
+            .fetchLoggedInUserFollows()
+            .andThen((follows) => {
+              user.followingUsers = follows
+              return ok(user)
+            })
         })
     })
   }

@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userIdForDisplay } from '@/utils/addressConverter'
-import { useAuth } from '@/hooks/useAuth'
+import { AuthContext } from '@/context/AuthContext'
 
 const NavigationSidebarUserSection: React.FC = () => {
-  const { loggedInUser } = useAuth()
+  const { loggedInUser } = useContext(AuthContext)
   const navigate = useNavigate()
 
   return (

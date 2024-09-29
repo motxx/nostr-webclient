@@ -152,8 +152,7 @@ export class DirectMessageService implements DirectMessageRepository {
                 console.error('subscribeDirectMessages: onEvent', error)
               }
             )
-        },
-        options?.isForever
+        }
       )
     )
   }

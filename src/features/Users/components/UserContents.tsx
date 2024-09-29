@@ -4,6 +4,7 @@ import ImageCarousel from '@/components/ui-parts/ImageCarousel'
 import { mockImages, mockMerchants, mockPaidContents } from '../types'
 import { User } from '@/domain/entities/User'
 import { useInfiniteNotes } from '@/components/Timeline/hooks/useInfiniteNotes'
+import { useFetchNotes } from '@/components/Timeline/hooks/useFetchNotes'
 
 interface UserContentsProps {
   user: User
@@ -11,9 +12,10 @@ interface UserContentsProps {
 }
 
 const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
-  const { notes, isLoading, isLoadingMore, loadMoreNotes } = useInfiniteNotes({
+  const { notes, isLoading } = useInfiniteNotes({
     authorPubkeys: [user.pubkey],
   })
+  const { isFetchingPastNotes, fetchNotes } = useFetchNotes({ limit: 20 })
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleScroll = useCallback(() => {
@@ -21,10 +23,10 @@ const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
     if (scrollElement) {
       const { scrollTop, scrollHeight, clientHeight } = scrollElement
       if (scrollHeight - scrollTop <= clientHeight * 1.5) {
-        loadMoreNotes()
+        fetchNotes()
       }
     }
-  }, [loadMoreNotes])
+  }, [fetchNotes])
 
   return (
     <div
@@ -55,7 +57,7 @@ const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
           <h2 className="text-lg font-bold mb-8 ml-2">ノート</h2>
           <TimelineStandard notes={notes} onToggleFollow={toggleFollow} />
         </div>
-        {(isLoading || isLoadingMore) && (
+        {(isLoading || isFetchingPastNotes) && (
           <div className="flex justify-center items-center h-16">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
           </div>

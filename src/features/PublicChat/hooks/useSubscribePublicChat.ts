@@ -1,8 +1,8 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useContext } from 'react'
 import { PublicChatService } from '@/infrastructure/services/PublicChatService'
 import { PublicChatMessage } from '@/domain/entities/PublicChat'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { useAuth } from '@/hooks/useAuth'
+import { AuthContext, AuthStatus } from '@/context/AuthContext'
 
 const subscriptions: Array<{
   isForever?: boolean
@@ -10,7 +10,7 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribePublicChat = () => {
-  const { nostrClient } = useAuth()
+  const { nostrClient, status } = useContext(AuthContext)
 
   const subscribe = useCallback(
     async (
@@ -22,9 +22,13 @@ export const useSubscribePublicChat = () => {
         isForever?: boolean
       }
     ) => {
-      if (!nostrClient) {
+      if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
         return
       }
+      if (!nostrClient) {
+        throw new Error('NostrClient is not ready')
+      }
+
       const userProfileRepository = new UserProfileService(nostrClient)
       const publicChatService = new PublicChatService(
         nostrClient,
