@@ -427,7 +427,7 @@ export class NostrClient {
           this.#ndk
         )
         const subscription = this.#ndk
-          .subscribe(filters, { closeOnEose: true }, relaySet, true)
+          .subscribe(filters, { closeOnEose: false }, relaySet, true)
           .on('event', (event: NDKEvent) => onEvent(event))
 
         return {
