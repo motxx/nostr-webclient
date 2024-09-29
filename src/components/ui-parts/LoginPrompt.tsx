@@ -31,7 +31,6 @@ const LoginPrompt: React.FC = () => {
           const userService = new UserService(client)
 
           if (client.readOnlyMode()) {
-            console.log('readOnlyMode ---')
             new FetchDefaultUser(userService).execute().match(
               (user) => {
                 authDispatch({
