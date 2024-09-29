@@ -36,22 +36,20 @@ const App: React.FC = () => {
   return (
     <Router>
       <AuthProvider>
-        <SubscriptionProvider>
-          <div className="bg-white dark:bg-black min-h-screen flex">
-            <Navigation
-              shouldFocusBottomTab={shouldFocusBottomTab}
+        <div className="bg-white dark:bg-black min-h-screen flex">
+          <Navigation
+            shouldFocusBottomTab={shouldFocusBottomTab}
+            focusBottomTab={focusBottomTab}
+          />
+          <main className="w-full pl-0 sm:pl-20 lg:pl-60">
+            <AppRoutes
               focusBottomTab={focusBottomTab}
+              unfocusBottomTab={unfocusBottomTab}
+              toggleFollow={toggleFollow}
             />
-            <main className="w-full pl-0 sm:pl-20 lg:pl-60">
-              <AppRoutes
-                focusBottomTab={focusBottomTab}
-                unfocusBottomTab={unfocusBottomTab}
-                toggleFollow={toggleFollow}
-              />
-              <Toaster />
-            </main>
-          </div>
-        </SubscriptionProvider>
+            <Toaster />
+          </main>
+        </div>
       </AuthProvider>
     </Router>
   )

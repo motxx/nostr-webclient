@@ -38,6 +38,7 @@ export const useSubscribeNotes = () => {
         }, options)
         .match(
           (subscription) => {
+            console.log('options', options)
             subscriptionDispatch({
               type: SubscriptionOperationType.SubscribeNotes,
               subscription: {

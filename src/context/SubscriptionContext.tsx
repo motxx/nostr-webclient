@@ -73,6 +73,7 @@ export const subscriptionReducer = (
         status: SubscriptionStatus.Idle,
         notes: [],
         subscription: null,
+        fetchingPastNotes: false,
       }
     case OperationType.FetchPastNotesStart:
       return {
