@@ -8,7 +8,9 @@ import { AuthContext, AuthStatus } from '@/context/AuthContext'
 import {
   OperationType as SubscriptionOperationType,
   SubscriptionContext,
+  SubscriptionStatus,
 } from '@/context/SubscriptionContext'
+import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
 
 export const useSubscribeNotes = () => {
   const { nostrClient, status } = useContext(AuthContext)
@@ -16,6 +18,7 @@ export const useSubscribeNotes = () => {
     dispatch: subscriptionDispatch,
     notes,
     subscription,
+    status: subscriptionStatus,
   } = useContext(SubscriptionContext)
 
   const subscribe = useCallback(
@@ -25,11 +28,30 @@ export const useSubscribeNotes = () => {
       }
       if (!nostrClient) throw new Error('NostrClient is not ready')
 
+      if (subscriptionStatus !== SubscriptionStatus.Idle) {
+        return
+      }
+
       const userProfileService = new UserProfileService(nostrClient)
       const noteService = new NoteService(nostrClient, userProfileService)
-      const subscribeTimeline = new SubscribeNotes(noteService)
 
-      subscribeTimeline
+      subscriptionDispatch({
+        type: SubscriptionOperationType.FetchPastNotesStart,
+      })
+
+      new FetchPastNotes(noteService).execute({ ...options, limit: 20 }).match(
+        (notes) => {
+          subscriptionDispatch({
+            type: SubscriptionOperationType.FetchPastNotesEnd,
+            notes,
+          })
+        },
+        (error) => {
+          console.error('Failed to fetch past notes', error)
+        }
+      )
+
+      new SubscribeNotes(noteService)
         .execute((note: Note) => {
           subscriptionDispatch({
             type: SubscriptionOperationType.AddNewNote,
@@ -51,7 +73,7 @@ export const useSubscribeNotes = () => {
           }
         )
     },
-    [nostrClient, subscriptionDispatch, status]
+    [nostrClient, subscriptionDispatch, status, subscriptionStatus]
   )
 
   const unsubscribe = useCallback(() => {
