@@ -13,6 +13,7 @@ export enum AuthStatus {
 interface AuthState {
   status: AuthStatus
   loggedInUser: User | null
+  readOnlyUser: User | null
   nostrClient: NostrClient | null
   error: Error | null
   dispatch: Dispatch<AuthAction>
@@ -28,7 +29,11 @@ export enum OperationType {
 
 type AuthAction =
   | { type: OperationType.InitializeStart }
-  | { type: OperationType.InitializeSuccess; nostrClient: NostrClient }
+  | {
+      type: OperationType.InitializeSuccess
+      nostrClient: NostrClient
+      readOnlyUser?: User
+    }
   | { type: OperationType.InitializeFailure; error: Error }
   | { type: OperationType.LoginSuccess; user: User }
   | { type: OperationType.LoginFailure; error: Error }
@@ -37,6 +42,7 @@ type AuthAction =
 export const initialState: AuthState = {
   status: AuthStatus.Idle,
   loggedInUser: null,
+  readOnlyUser: null,
   nostrClient: null,
   error: null,
   dispatch: () => {},
@@ -55,6 +61,7 @@ export const authReducer = (
         ...state,
         status: AuthStatus.ClientReady,
         nostrClient: action.nostrClient,
+        readOnlyUser: action.readOnlyUser ?? null,
       }
     case OperationType.InitializeFailure:
       return { ...state, status: AuthStatus.Error, error: action.error }
@@ -72,6 +79,7 @@ export const authReducer = (
 interface AuthContextProps {
   nostrClient: NostrClient | null
   loggedInUser: User | null
+  readOnlyUser: User | null
   error: Error | null
   status: AuthStatus
   dispatch: Dispatch<AuthAction>
@@ -83,6 +91,7 @@ interface AuthProviderProps {
 
 export const AuthContext = createContext<AuthContextProps>({
   loggedInUser: null,
+  readOnlyUser: null,
   nostrClient: null,
   error: null,
   status: AuthStatus.Idle,
@@ -94,6 +103,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const contextValue: AuthContextProps = {
     loggedInUser: state.loggedInUser,
+    readOnlyUser: state.readOnlyUser,
     nostrClient: state.nostrClient,
     error: state.error,
     status: state.status,

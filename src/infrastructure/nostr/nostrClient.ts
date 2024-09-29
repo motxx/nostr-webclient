@@ -540,13 +540,16 @@ export class NostrClient {
     return ok(this.#user)
   }
 
-  fetchLoggedInUserFollows(): ResultAsync<NDKUser[], Error> {
+  fetchFollowingUsers(npub: string): ResultAsync<NDKUser[], Error> {
     return ResultAsync.fromPromise(
       (async () => {
-        const follows = await this.#user.follows()
+        const follows = await this.#ndk.getUser({ npub }).follows()
         return Array.from(follows)
       })(),
-      (error) => new Error(`Failed to get logged in user follows: ${error}`)
+      (error) =>
+        new Error(
+          `Failed to get following users. npub: ${npub} error: ${error}`
+        )
     )
   }
 

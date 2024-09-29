@@ -31,7 +31,7 @@ const Timeline: React.FC<TimelineProps> = ({
   hashtag,
   showTabs = true,
 }) => {
-  const { loggedInUser } = useContext(AuthContext)
+  const { loggedInUser, readOnlyUser } = useContext(AuthContext)
   const tabRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
@@ -41,8 +41,11 @@ const Timeline: React.FC<TimelineProps> = ({
   const [showSpinner, setShowSpinner] = useState(true)
 
   const authorPubkeys = useMemo(
-    () => loggedInUser?.followingUsers?.map((user) => user.pubkey) ?? [],
-    [loggedInUser]
+    () =>
+      loggedInUser
+        ? loggedInUser.followingUsers?.map((user) => user.pubkey)
+        : readOnlyUser?.followingUsers?.map((user) => user.pubkey) ?? [],
+    [loggedInUser, readOnlyUser]
   )
 
   const { notes, isLoading } = useInfiniteNotes({ hashtag, authorPubkeys })

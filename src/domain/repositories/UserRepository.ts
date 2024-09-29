@@ -3,5 +3,6 @@ import { ResultAsync } from 'neverthrow'
 
 export interface UserRepository {
   login(): ResultAsync<User, Error>
+  fetchDefaultUser(): ResultAsync<User, Error>
   fetchLoggedInUserFollows(): ResultAsync<User[], Error>
 }
