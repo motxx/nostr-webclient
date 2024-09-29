@@ -11,7 +11,6 @@ import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { unixtimeOf } from '../nostr/utils'
 import { NoteReactions } from '@/domain/entities/NoteReactions'
 import { bech32ToHex } from '@/utils/addressConverter'
-import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
@@ -37,37 +36,11 @@ export class NoteService implements NoteRepository {
     return this.#nostrClient.postEvent(note.toUnsignedNostrEvent())
   }
 
-  subscribeNotes(
-    onNote: (note: Note) => void,
-    options?: SubscribeNotesOptions
-  ): ResultAsync<{ unsubscribe: () => void }, Error> {
-    type Authors = string[] | undefined
-    const getAuthors = (): ResultAsync<Authors, Error> => {
-      // グローバルタイムライン
-      if (options?.global) return okAsync(undefined)
-
-      // 指定されたタイムライン
-      if (options?.authorPubkeys) return okAsync(options.authorPubkeys)
-
-      // フォロー中のタイムライン（ログインユーザを含む）
-      return this.#nostrClient.getLoggedInUser().asyncAndThen((user) =>
-        ResultAsync.fromPromise(
-          user
-            .follows()
-            .then((follows) => [
-              user.pubkey,
-              ...Array.from(follows).map((f) => f.pubkey),
-            ]),
-          (error) =>
-            new ErrorWithDetails('Failed to get authors', error as Error)
-        )
-      )
-    }
-
-    return getAuthors()
-      .map((authors) => ({
+  fetchPastNotes(options?: SubscribeNotesOptions): ResultAsync<Note[], Error> {
+    return this.#nostrClient
+      .fetchEvents({
         kinds: [NDKKind.Text],
-        authors,
+        authors: options?.authorPubkeys,
         since: options?.since && unixtimeOf(options.since),
         until: options?.until && unixtimeOf(options.until),
         limit: options?.limit ?? 20,
@@ -75,21 +48,36 @@ export class NoteService implements NoteRepository {
           ? `http.+(${imageExtensions.join('|')})`
           : undefined,
         '#t': options?.hashtag ? [options.hashtag] : undefined,
-      }))
-      .andThen((filter) => {
-        return this.#nostrClient
-          .subscribeEvents(
-            filter,
-            (event: NDKEvent) =>
-              this.createNoteFromEvent(event).match(
-                (note) => onNote(note),
-                (error) =>
-                  console.error('subscribeNotes: onEvent', { error, event })
-              ),
-            options?.isForever
-          )
-          .mapErr((e) => new ErrorWithDetails('subscribeNotes', e))
       })
+      .andThen((events) =>
+        ResultAsync.combine(
+          events.map((event) => this.createNoteFromEvent(event))
+        )
+      )
+  }
+
+  subscribeNotes(
+    onNote: (note: Note) => void,
+    options?: SubscribeNotesOptions
+  ): Result<{ unsubscribe: () => void }, Error> {
+    return this.#nostrClient.subscribeEvents(
+      {
+        kinds: [NDKKind.Text],
+        authors: options?.authorPubkeys,
+        since: options?.since && unixtimeOf(options.since),
+        until: options?.until && unixtimeOf(options.until),
+        limit: options?.limit ?? 20,
+        search: options?.image
+          ? `http.+(${imageExtensions.join('|')})`
+          : undefined,
+        '#t': options?.hashtag ? [options.hashtag] : undefined,
+      },
+      (event: NDKEvent) =>
+        this.createNoteFromEvent(event).match(
+          (note) => onNote(note),
+          (error) => console.error('subscribeNotes: onEvent', { error, event })
+        )
+    )
   }
 
   subscribeZaps(

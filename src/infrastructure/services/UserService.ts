@@ -46,6 +46,16 @@ export class UserService implements UserRepository {
     return this.createUserFromNDKUser(ndkUser)
   }
 
+  fetchLoggedInUserFollows(): ResultAsync<User[], Error> {
+    return this.login()
+      .andThen(() => this.#nostrClient.fetchLoggedInUserFollows())
+      .andThen((users) =>
+        ResultAsync.combine(
+          users.map((user) => this.createUserFromNDKUser(user))
+        )
+      )
+  }
+
   sendZapRequest(
     nip05Id: string,
     sats: number

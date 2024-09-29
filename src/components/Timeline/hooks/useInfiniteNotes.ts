@@ -1,102 +1,46 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
 import { useSubscribeNotes } from './useSubscribeNotes'
-import { Note } from '@/domain/entities/Note'
-import { eventBus } from '@/utils/eventBus'
-import { timelineNotesAtom } from '@/state/atoms'
-import { useAtom } from 'jotai'
+import {
+  SubscriptionContext,
+  SubscriptionStatus,
+} from '@/context/SubscriptionContext'
+import { AuthContext, AuthStatus } from '@/context/AuthContext'
 
 interface UseInfiniteNotesOptions {
-  global?: boolean
   authorPubkeys?: string[]
   limit?: number
   hashtag?: string // TODO: implement hashtag filtering
 }
 
 export const useInfiniteNotes = ({
-  global,
   authorPubkeys,
   limit = 20,
   hashtag,
 }: UseInfiniteNotesOptions) => {
-  const { subscribe, unsubscribeAll } = useSubscribeNotes()
-  const [notes, setNotes] = useAtom(timelineNotesAtom)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [isInitialized, setIsInitialized] = useState(false)
-  const isLoading = notes.length === 0
+  const { status: authStatus } = useContext(AuthContext)
+  const { status: subscriptionStatus } = useContext(SubscriptionContext)
+  const { subscribe, unsubscribe, notes } = useSubscribeNotes()
+  const isLoading =
+    subscriptionStatus !== SubscriptionStatus.Subscribing || notes.length === 0
 
-  const handleNote = useCallback(
-    (note: Note) => {
-      setNotes((prevNotes) => {
-        if (prevNotes.some((n) => n.id === note.id)) return prevNotes
-        return [...prevNotes, note].sort(
-          (a, b) => b.created_at.getTime() - a.created_at.getTime()
-        )
-      })
-    },
-    [setNotes]
-  )
-
-  const loadMoreNotes = useCallback(() => {
-    if (isLoadingMore || notes.length === 0) return
-
-    setIsLoadingMore(true)
-    const oldestNote = notes[notes.length - 1]
-    subscribe((note) => handleNote(note), {
-      global,
-      authorPubkeys,
-      until: oldestNote.created_at,
-      limit,
-      hashtag,
-      isForever: false,
-    }).then(() => {
-      setIsLoadingMore(false)
-    })
-  }, [
-    isLoadingMore,
-    notes,
-    subscribe,
-    handleNote,
-    authorPubkeys,
-    limit,
-    hashtag,
-    global,
-  ])
-
-  useEffect(() => {
-    if (isInitialized) return
-    setIsInitialized(true)
-
-    const cleanupWhenLoggedIn = () => {
-      console.log('cleanupWhenLoggedIn')
-      unsubscribeAll()
-      setIsLoadingMore(false)
-      setNotes([])
+  const handleSubscription = useCallback(() => {
+    if (
+      (authStatus !== AuthStatus.ClientReady &&
+        authStatus !== AuthStatus.LoggedIn) ||
+      subscriptionStatus !== SubscriptionStatus.Idle
+    ) {
+      return
     }
 
-    eventBus.on('refreshNoteSubscription', cleanupWhenLoggedIn)
-  }, [isInitialized, setNotes, unsubscribeAll])
+    subscribe({ authorPubkeys, limit, hashtag })
+  }, [authorPubkeys, authStatus, subscriptionStatus, subscribe, limit, hashtag])
 
   useEffect(() => {
-    if (!isLoading) return
-    console.log('subscribe')
+    handleSubscription()
+    return () => {
+      unsubscribe()
+    }
+  }, [handleSubscription, unsubscribe])
 
-    subscribe((note) => handleNote(note), {
-      global,
-      authorPubkeys,
-      limit,
-      hashtag,
-      isForever: true,
-    })
-  }, [
-    notes,
-    isLoading,
-    subscribe,
-    handleNote,
-    authorPubkeys,
-    limit,
-    hashtag,
-    global,
-  ])
-
-  return { notes, isLoading, isLoadingMore, loadMoreNotes }
+  return { notes, isLoading }
 }

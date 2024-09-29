@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react'
+import React, { useState, useRef } from 'react'
 import HashSearchBar from '@/components/ui-parts/HashSearchBar'
 import Widgets from '@/components/Widgets/Widgets'
 import ExploreFilters from './components/ExploreFilters'
@@ -6,8 +6,14 @@ import ExploreOutput from './components/ExploreOutput'
 import { AccountFilter, ExploreMetricWithNull } from './types'
 import { useInfiniteNotes } from '@/components/Timeline/hooks/useInfiniteNotes'
 import { NoteType } from '@/domain/entities/Note'
+import { useFetchNotes } from '@/components/Timeline/hooks/useFetchNotes'
 
 const ExplorePage: React.FC = () => {
+  const { notes, isLoading } = useInfiniteNotes({
+    // authorPubkeys is undefined if accountFilter === 'global'
+    // TODO: Implement authorPubkeys when accountFilter === 'network'
+  })
+
   const [accountFilter, setAccountFilter] = useState<AccountFilter>('global')
   const [metric, setMetric] = useState<ExploreMetricWithNull>(null)
   const [timeframe, setTimeframe] = useState('all')
@@ -20,11 +26,8 @@ const ExplorePage: React.FC = () => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
 
-  const { notes, isLoading, isLoadingMore, loadMoreNotes } = useInfiniteNotes({
-    global: accountFilter === 'global',
-    // TODO: Implement authorPubkeys when accountFilter === 'network'
-    limit: 20,
-  })
+  /*
+  const { isFetchingPastNotes, fetchNotes } = useFetchNotes({ limit: 20 })
 
   const handleFinalSearch = (term: string, hashtags: string[]) => {
     // TODO: Implement hashtags search
@@ -131,14 +134,14 @@ const ExplorePage: React.FC = () => {
 
       if (
         !isLoading &&
-        !isLoadingMore &&
+        !isFetchingPastNotes &&
         scrollHeight - currentScrollTop <= clientHeight * 1.5
       ) {
-        loadMoreNotes()
+        fetchNotes()
       }
     }
-  }, [isLoading, isLoadingMore, loadMoreNotes])
-
+  }, [isLoading, isFetchingPastNotes, fetchNotes])
+*/
   return (
     <div
       ref={wrapperRef}
@@ -146,12 +149,12 @@ const ExplorePage: React.FC = () => {
     >
       <div
         ref={timelineRef}
-        onScroll={handleScroll}
+        onScroll={/*handleScroll*/ () => {}}
         className="flex-1 overflow-y-auto hide-scrollbar max-h-screen"
       >
         <div className="sticky top-0 z-10 bg-white dark:bg-black p-4 sm:pb-4">
           <div className="mb-2">
-            <HashSearchBar onSearch={handleFinalSearch} />
+            <HashSearchBar onSearch={/*handleFinalSearch*/ () => {}} />
           </div>
           <ExploreFilters
             accountFilter={accountFilter}
@@ -173,11 +176,11 @@ const ExplorePage: React.FC = () => {
         <div className="flex items-center justify-center">
           <ExploreOutput
             outputFormat={outputFormat}
-            sortedNotes={sortedNotes}
+            sortedNotes={/*sortedNotes*/ notes}
             metric={metric}
           />
         </div>
-        {(isLoading || isLoadingMore) && (
+        {isLoading /* || isFetchingPastNotes*/ && (
           <div className="flex justify-center items-center h-16">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
           </div>

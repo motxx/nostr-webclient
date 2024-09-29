@@ -8,8 +8,6 @@ import MessagePage from '@/features/Message'
 import SettingsPage from '@/features/Settings'
 import DashboardPage from '@/features/Dashboard'
 import UserPage from '@/features/Users'
-import RouteChangeHandler from './RouteChangeHandler'
-import { eventBus } from '@/utils/eventBus'
 
 interface AppRoutesProps {
   focusBottomTab: () => void
@@ -22,14 +20,8 @@ export const AppRoutes = ({
   unfocusBottomTab,
   toggleFollow,
 }: AppRoutesProps) => {
-  const handleRouteChange = () => {
-    console.log('route changed')
-    eventBus.emit('refreshNoteSubscription', {})
-  }
-
   return (
     <>
-      <RouteChangeHandler onRouteChange={handleRouteChange} />
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} />
         <Route

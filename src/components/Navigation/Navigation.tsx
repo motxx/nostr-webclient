@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { IconType } from 'react-icons'
 import {
@@ -16,9 +16,9 @@ import NavigationSidebar from '@/components/Navigation/NavigationSidebar'
 import PostNoteModal from '@/components/NoteItem/PostNoteModal'
 import { Note } from '@/domain/entities/Note'
 import { PostNote } from '@/domain/use_cases/PostNote'
-import { useAuth } from '@/hooks/useAuth'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { NoteService } from '@/infrastructure/services/NoteService'
+import { AuthContext, AuthStatus } from '@/context/AuthContext'
 
 export type NavigationItemId =
   | 'home'
@@ -75,7 +75,7 @@ const Navigation: React.FC<NavigationProps> = ({
   shouldFocusBottomTab,
   focusBottomTab,
 }) => {
-  const { nostrClient, loggedInUser } = useAuth()
+  const { nostrClient, loggedInUser, status } = useContext(AuthContext)
   const [isPostModalOpen, setIsPostModalOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const navigate = useNavigate()
@@ -130,7 +130,11 @@ const Navigation: React.FC<NavigationProps> = ({
   }
 
   const handlePostSubmit = async (text: string, media?: File) => {
-    if (!nostrClient || !loggedInUser) return
+    if (status !== AuthStatus.LoggedIn) return
+    if (!nostrClient || !loggedInUser) {
+      throw new Error('Not logged in')
+    }
+
     const userProfileService = new UserProfileService(nostrClient)
     const noteService = new NoteService(nostrClient, userProfileService)
     await new PostNote(noteService).execute(

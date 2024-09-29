@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 import UserHeader from './components/UserHeader'
 import UserDescription from './components/UserDescription'
@@ -8,7 +8,7 @@ import { FetchNpubFromNostrAddress } from '@/domain/use_cases/FetchNpubFromNostr
 import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { ResultAsync } from 'neverthrow'
-import { useAuth } from '@/hooks/useAuth'
+import { AuthContext, AuthStatus } from '@/context/AuthContext'
 
 interface UserPageProps {
   isFollowing: boolean
@@ -16,12 +16,17 @@ interface UserPageProps {
 }
 
 const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
-  const { nostrClient } = useAuth()
+  const { nostrClient, loggedInUser, status } = useContext(AuthContext)
   const [user, setUser] = useState<User | null>(null)
   const location = useLocation()
 
   useEffect(() => {
-    if (!nostrClient) return
+    if (status !== AuthStatus.LoggedIn) {
+      return
+    }
+    if (!nostrClient || !loggedInUser) {
+      throw new Error('NostrClient or loggedInUser is not ready')
+    }
 
     const fetchUserData = () => {
       const userProfileService = new UserProfileService(nostrClient)
@@ -63,7 +68,7 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
     }
 
     fetchUserData()
-  }, [nostrClient, location.pathname])
+  }, [nostrClient, loggedInUser, status, location.pathname])
 
   if (!user) return <div>Loading...</div>
 

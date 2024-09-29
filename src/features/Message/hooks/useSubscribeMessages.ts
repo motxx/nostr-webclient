@@ -1,9 +1,9 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useContext } from 'react'
 import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
 import { SubscribeDirectMessages } from '@/domain/use_cases/SubscribeDirectMessages'
 import { Conversation } from '@/domain/entities/Conversation'
 import { SubscribeDirectMessagesOptions } from '@/domain/repositories/DirectMessageRepository'
-import { useAuth } from '@/hooks/useAuth'
+import { AuthContext, AuthStatus } from '@/context/AuthContext'
 
 const subscriptions: Array<{
   isForever: boolean
@@ -11,16 +11,20 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribeMessages = () => {
-  const { nostrClient } = useAuth()
+  const { nostrClient, status } = useContext(AuthContext)
 
   const subscribe = useCallback(
     (
       onConversation: (conversation: Conversation) => void,
       options?: SubscribeDirectMessagesOptions
     ) => {
-      if (!nostrClient) {
+      if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
         return
       }
+      if (!nostrClient) {
+        throw new Error('NostrClient is not ready')
+      }
+
       const subscription = new SubscribeDirectMessages(
         new DirectMessageService(nostrClient)
       ).execute(onConversation, {

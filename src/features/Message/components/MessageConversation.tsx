@@ -1,17 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { IoMdSend } from 'react-icons/io'
 import { FiArrowLeft } from 'react-icons/fi'
 import Button from '@/components/ui-elements/Button'
 import Input from '@/components/ui-elements/Input'
 import { Conversation } from '@/domain/entities/Conversation'
-import { useAuth } from '@/hooks/useAuth'
+import { AuthContext } from '@/context/AuthContext'
 
 const MessageConversation: React.FC<{
   conversation: Conversation
   onSendMessage: (content: string) => void
   onBack: () => void
 }> = ({ conversation, onSendMessage, onBack }) => {
-  const { loggedInUser } = useAuth()
+  const { loggedInUser } = useContext(AuthContext)
   const [newMessage, setNewMessage] = useState('')
 
   const handleSend = () => {

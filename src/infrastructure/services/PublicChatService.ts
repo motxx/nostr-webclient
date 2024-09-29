@@ -107,34 +107,30 @@ export class PublicChatService implements PublicChatRepository {
       filter.limit = options.limit
     }
 
-    return this.nostrClient.subscribeEvents(
-      filter,
-      (event) => {
-        this.userProfileRepository.fetchProfile(event.author.npub).match(
-          (profile) => {
-            onMessage(
-              new PublicChatMessage({
-                id: event.id,
-                channel_id: channelId,
-                author: new User({
-                  npub: event.pubkey,
-                  pubkey: event.pubkey,
-                  profile,
-                }),
-                content: event.content,
-                created_at: new Date((event.created_at || 0) * 1000),
-              })
-            )
-          },
-          (error) => {
-            console.error('subscribeToChannelMessages: onEvent', {
-              error,
-              event,
+    return this.nostrClient.subscribeEvents(filter, (event) => {
+      this.userProfileRepository.fetchProfile(event.author.npub).match(
+        (profile) => {
+          onMessage(
+            new PublicChatMessage({
+              id: event.id,
+              channel_id: channelId,
+              author: new User({
+                npub: event.pubkey,
+                pubkey: event.pubkey,
+                profile,
+              }),
+              content: event.content,
+              created_at: new Date((event.created_at || 0) * 1000),
             })
-          }
-        )
-      },
-      options?.isForever
-    )
+          )
+        },
+        (error) => {
+          console.error('subscribeToChannelMessages: onEvent', {
+            error,
+            event,
+          })
+        }
+      )
+    })
   }
 }

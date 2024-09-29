@@ -6,6 +6,7 @@ export interface UserType {
   pubkey: string
   profile?: UserProfileType
   settings?: UserSettingsType
+  followingUsers?: UserType[]
 }
 
 export class User implements UserType {
@@ -13,6 +14,7 @@ export class User implements UserType {
   pubkey: string = ''
   profile?: UserProfileType
   settings?: UserSettingsType
+  followingUsers?: UserType[]
 
   constructor(data: UserType) {
     Object.assign(this, data)

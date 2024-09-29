@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import PublicChatList from './components/PublicChatList'
 import PublicChatMessageWindow from './components/PublicChatMessageWindow'
@@ -6,7 +6,7 @@ import { PublicChannel } from '@/domain/entities/PublicChat'
 import { FetchChannels } from '@/domain/use_cases/FetchChannels'
 import { PublicChatService } from '@/infrastructure/services/PublicChatService'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { useAuth } from '@/hooks/useAuth'
+import { AuthContext } from '@/context/AuthContext'
 
 const PublicChatPage: React.FC = () => {
   const { channelId } = useParams()
@@ -15,7 +15,7 @@ const PublicChatPage: React.FC = () => {
     null
   )
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const { nostrClient } = useAuth()
+  const { nostrClient } = useContext(AuthContext)
 
   useEffect(() => {
     if (nostrClient) {

@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import Navigation from '@/components/Navigation/Navigation'
 import { AuthProvider } from '@/context/AuthContext'
 import { AppRoutes } from '@/routes/AppRoutes'
+import { SubscriptionProvider } from './context/SubscriptionContext'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
@@ -35,20 +36,22 @@ const App: React.FC = () => {
   return (
     <Router>
       <AuthProvider>
-        <div className="bg-white dark:bg-black min-h-screen flex">
-          <Navigation
-            shouldFocusBottomTab={shouldFocusBottomTab}
-            focusBottomTab={focusBottomTab}
-          />
-          <main className="w-full pl-0 sm:pl-20 lg:pl-60">
-            <AppRoutes
+        <SubscriptionProvider>
+          <div className="bg-white dark:bg-black min-h-screen flex">
+            <Navigation
+              shouldFocusBottomTab={shouldFocusBottomTab}
               focusBottomTab={focusBottomTab}
-              unfocusBottomTab={unfocusBottomTab}
-              toggleFollow={toggleFollow}
             />
-            <Toaster />
-          </main>
-        </div>
+            <main className="w-full pl-0 sm:pl-20 lg:pl-60">
+              <AppRoutes
+                focusBottomTab={focusBottomTab}
+                unfocusBottomTab={unfocusBottomTab}
+                toggleFollow={toggleFollow}
+              />
+              <Toaster />
+            </main>
+          </div>
+        </SubscriptionProvider>
       </AuthProvider>
     </Router>
   )

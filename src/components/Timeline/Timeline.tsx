@@ -1,4 +1,11 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react'
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useContext,
+} from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
 import TimelineImageGrid from './TimelineImageGrid'
@@ -6,6 +13,8 @@ import TimelineVideoSwipe from './TimelineVideoSwipe'
 import { useInfiniteNotes } from './hooks/useInfiniteNotes'
 import { HomeTimelineTabs, TimelineTabId } from './types'
 import Spinner from '../ui-elements/Spinner'
+import { useFetchNotes } from './hooks/useFetchNotes'
+import { AuthContext } from '@/context/AuthContext'
 
 interface TimelineProps {
   onScrollUp: () => void
@@ -22,6 +31,7 @@ const Timeline: React.FC<TimelineProps> = ({
   hashtag,
   showTabs = true,
 }) => {
+  const { loggedInUser } = useContext(AuthContext)
   const tabRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
@@ -30,30 +40,37 @@ const Timeline: React.FC<TimelineProps> = ({
   const [lastScrollTop, setLastScrollTop] = useState(0)
   const [showSpinner, setShowSpinner] = useState(true)
 
-  const { notes, isLoading, isLoadingMore, loadMoreNotes } = useInfiniteNotes({
+  const authorPubkeys = useMemo(
+    () => loggedInUser?.followingUsers?.map((user) => user.pubkey) ?? [],
+    [loggedInUser]
+  )
+
+  const { notes, isLoading } = useInfiniteNotes({ hashtag, authorPubkeys })
+  const { fetchNotes, isFetchingPastNotes } = useFetchNotes({
     limit: 20,
     hashtag,
+    authorPubkeys,
   })
 
   useEffect(() => {
     let timer: NodeJS.Timeout
-    if (!isLoading && !isLoadingMore) {
+    if (!isLoading && !isFetchingPastNotes) {
       timer = setTimeout(() => setShowSpinner(false), 300)
     } else {
       setShowSpinner(true)
     }
     return () => clearTimeout(timer)
-  }, [isLoading, isLoadingMore])
+  }, [isLoading, isFetchingPastNotes])
 
   const checkAndLoadMore = useCallback(() => {
     if (contentRef.current && wrapperRef.current) {
       const contentHeight = contentRef.current.offsetHeight
       const wrapperHeight = wrapperRef.current.offsetHeight
-      if (contentHeight < wrapperHeight && !isLoading && !isLoadingMore) {
-        loadMoreNotes()
+      if (contentHeight < wrapperHeight && !isLoading && !isFetchingPastNotes) {
+        fetchNotes()
       }
     }
-  }, [isLoading, isLoadingMore, loadMoreNotes])
+  }, [isLoading, isFetchingPastNotes, fetchNotes])
 
   useEffect(() => {
     checkAndLoadMore()
@@ -77,21 +94,21 @@ const Timeline: React.FC<TimelineProps> = ({
 
       if (
         !isLoading &&
-        !isLoadingMore &&
+        !isFetchingPastNotes &&
         scrollHeight - currentScrollTop <= clientHeight * 1.5
       ) {
-        loadMoreNotes()
+        fetchNotes()
       }
 
       setLastScrollTop(currentScrollTop)
     }
   }, [
     isLoading,
-    isLoadingMore,
+    isFetchingPastNotes,
     lastScrollTop,
     onScrollDown,
     onScrollUp,
-    loadMoreNotes,
+    fetchNotes,
   ])
 
   const handleTabClick = (tabId: TimelineTabId) => {

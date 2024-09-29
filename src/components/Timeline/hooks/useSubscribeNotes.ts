@@ -1,65 +1,65 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useContext } from 'react'
 import { NoteService } from '@/infrastructure/services/NoteService'
 import { SubscribeNotes } from '@/domain/use_cases/SubscribeNotes'
 import { Note } from '@/domain/entities/Note'
 import { SubscribeNotesOptions } from '@/domain/repositories/NoteRepository'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { useAuth } from '@/hooks/useAuth'
-
-const subscriptions: Array<{
-  isForever?: boolean
-  unsubscribe: () => void
-}> = []
+import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import {
+  OperationType as SubscriptionOperationType,
+  SubscriptionContext,
+} from '@/context/SubscriptionContext'
 
 export const useSubscribeNotes = () => {
-  const { nostrClient } = useAuth()
+  const { nostrClient, status } = useContext(AuthContext)
+  const {
+    dispatch: subscriptionDispatch,
+    notes,
+    subscription,
+  } = useContext(SubscriptionContext)
 
   const subscribe = useCallback(
-    async (onNote: (note: Note) => void, options?: SubscribeNotesOptions) => {
-      if (!nostrClient) {
+    (options: SubscribeNotesOptions, callbackWhenFinished?: () => void) => {
+      if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
         return
       }
+      if (!nostrClient) throw new Error('NostrClient is not ready')
+
       const userProfileService = new UserProfileService(nostrClient)
       const noteService = new NoteService(nostrClient, userProfileService)
       const subscribeTimeline = new SubscribeNotes(noteService)
 
-      const subscription = await subscribeTimeline.execute(onNote, options)
-      subscriptions.push({
-        isForever: options?.isForever,
-        unsubscribe: subscription.unsubscribe,
-      })
-      return subscription
+      subscribeTimeline
+        .execute((note: Note) => {
+          subscriptionDispatch({
+            type: SubscriptionOperationType.AddNewNote,
+            note,
+          })
+        }, options)
+        .match(
+          (subscription) => {
+            subscriptionDispatch({
+              type: SubscriptionOperationType.SubscribeNotes,
+              subscription: {
+                unsubscribe: subscription.unsubscribe,
+              },
+            })
+          },
+          (error) => {
+            console.error('Failed to subscribe notes', error)
+          }
+        )
     },
-    [nostrClient]
+    [nostrClient, subscriptionDispatch, status]
   )
 
-  const unsubscribe = useCallback(
-    (subscription: { unsubscribe: () => void }) => {
-      const index = subscriptions.findIndex(
-        (s) => s.unsubscribe === subscription.unsubscribe
-      )
-      if (index > -1) {
-        subscription.unsubscribe()
-        subscriptions.splice(index, 1)
-      }
-    },
-    []
-  )
-
-  const unsubscribeAll = useCallback(() => {
-    subscriptions.forEach((subscription) => {
-      if (!subscription.isForever) {
-        subscription.unsubscribe()
-      }
+  const unsubscribe = useCallback(() => {
+    if (!subscription) return
+    subscription.unsubscribe()
+    subscriptionDispatch({
+      type: SubscriptionOperationType.UnsubscribeNotes,
     })
-    subscriptions.length = 0
-  }, [])
+  }, [subscription, subscriptionDispatch])
 
-  useEffect(() => {
-    return () => {
-      unsubscribeAll()
-    }
-  }, [unsubscribeAll])
-
-  return { subscribe, unsubscribe, unsubscribeAll }
+  return { subscribe, unsubscribe, notes }
 }
