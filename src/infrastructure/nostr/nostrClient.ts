@@ -147,7 +147,7 @@ export class NostrClient {
         const user = await ndk!.signer!.user()
         const profile = await user.fetchProfile()
         if (!profile) {
-          throw new Error('Failed to fetch profile')
+          // throw new Error('Failed to fetch profile')
         }
 
         NostrClient.#nostrClient = new NostrClient(
@@ -162,7 +162,7 @@ export class NostrClient {
     )
   }
 
-  disconnect() {
+  static disconnect() {
     return ResultAsync.fromPromise(
       NostrClient.#mutex.runExclusive(async () => {
         NostrClient.#nostrClient = undefined
@@ -540,13 +540,16 @@ export class NostrClient {
     return ok(this.#user)
   }
 
-  fetchLoggedInUserFollows(): ResultAsync<NDKUser[], Error> {
+  fetchFollowingUsers(npub: string): ResultAsync<NDKUser[], Error> {
     return ResultAsync.fromPromise(
       (async () => {
-        const follows = await this.#user.follows()
+        const follows = await this.#ndk.getUser({ npub }).follows()
         return Array.from(follows)
       })(),
-      (error) => new Error(`Failed to get logged in user follows: ${error}`)
+      (error) =>
+        new Error(
+          `Failed to get following users. npub: ${npub} error: ${error}`
+        )
     )
   }
 
@@ -754,4 +757,8 @@ export class NostrClient {
 
 export const connectNostrClient = (): ResultAsync<NostrClient, Error> => {
   return NostrClient.connect()
+}
+
+export const disconnectNostrClient = (): ResultAsync<void, Error> => {
+  return NostrClient.disconnect()
 }

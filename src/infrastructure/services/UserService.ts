@@ -3,6 +3,7 @@ import { User } from '@/domain/entities/User'
 import { UserRepository } from '@/domain/repositories/UserRepository'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { NDKUser } from '@nostr-dev-kit/ndk'
+import { hexToBech32 } from '@/utils/addressConverter'
 
 export interface SendZapRequestResponse {
   pr: string
@@ -48,12 +49,39 @@ export class UserService implements UserRepository {
 
   fetchLoggedInUserFollows(): ResultAsync<User[], Error> {
     return this.login()
-      .andThen(() => this.#nostrClient.fetchLoggedInUserFollows())
+      .andThen((user) => this.#nostrClient.fetchFollowingUsers(user.npub))
       .andThen((users) =>
         ResultAsync.combine(
           users.map((user) => this.createUserFromNDKUser(user))
         )
       )
+  }
+
+  fetchDefaultUser(): ResultAsync<User, Error> {
+    return hexToBech32(NostrClient.JapaneseUserBot, 'npub').asyncAndThen(
+      (npub) => {
+        return this.#nostrClient
+          .getUserWithProfile(npub)
+          .andThen((ndkUser) => {
+            return this.createUserFromNDKUser(ndkUser)
+          })
+          .andThen((user) => {
+            return this.#nostrClient
+              .fetchFollowingUsers(user.npub)
+              .andThen((followingNDKUsers) => {
+                return ResultAsync.combine(
+                  followingNDKUsers.map((ndkUser) =>
+                    this.createUserFromNDKUser(ndkUser)
+                  )
+                )
+              })
+              .andThen((users) => {
+                user.followingUsers = users
+                return ok(user)
+              })
+          })
+      }
+    )
   }
 
   sendZapRequest(
