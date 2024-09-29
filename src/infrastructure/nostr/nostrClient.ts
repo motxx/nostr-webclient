@@ -147,7 +147,7 @@ export class NostrClient {
         const user = await ndk!.signer!.user()
         const profile = await user.fetchProfile()
         if (!profile) {
-          throw new Error('Failed to fetch profile')
+          // throw new Error('Failed to fetch profile')
         }
 
         NostrClient.#nostrClient = new NostrClient(
