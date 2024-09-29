@@ -7,12 +7,14 @@ import {
   OperationType as AuthOperationType,
 } from '@/context/AuthContext'
 import { OperationType as SubscriptionOperationType } from '@/context/SubscriptionContext'
-import { connectNostrClient } from '@/infrastructure/nostr/nostrClient'
+import {
+  connectNostrClient,
+  disconnectNostrClient,
+} from '@/infrastructure/nostr/nostrClient'
 import { LoginMyUser } from '@/domain/use_cases/LoginMyUser'
 import { UserService } from '@/infrastructure/services/UserService'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { SubscriptionContext } from '@/context/SubscriptionContext'
-import { User } from '@/domain/entities/User'
 import { FetchDefaultUser } from '@/domain/use_cases/FetchDefaultUser'
 
 const LoginPrompt: React.FC = () => {
@@ -22,50 +24,56 @@ const LoginPrompt: React.FC = () => {
   const handleLogin = useCallback(() => {
     authDispatch({ type: AuthOperationType.InitializeStart })
 
-    return connectNostrClient().match(
-      (client) => {
-        const userService = new UserService(client)
+    return disconnectNostrClient()
+      .andThen(() => connectNostrClient())
+      .match(
+        (client) => {
+          const userService = new UserService(client)
 
-        if (client.readOnlyMode()) {
-          new FetchDefaultUser(userService).execute().match(
-            (user) => {
-              authDispatch({
-                type: AuthOperationType.InitializeSuccess,
-                nostrClient: client,
-                readOnlyUser: user,
-              })
-            },
-            (error) => {
-              authDispatch({ type: AuthOperationType.InitializeFailure, error })
-            }
-          )
-          subscriptionDispatch({
-            type: SubscriptionOperationType.InitializeStart,
-          })
-        } else {
-          authDispatch({
-            type: AuthOperationType.InitializeSuccess,
-            nostrClient: client,
-          })
-          new LoginMyUser(userService, new UserProfileService(client))
-            .execute()
-            .match(
+          if (client.readOnlyMode()) {
+            console.log('readOnlyMode ---')
+            new FetchDefaultUser(userService).execute().match(
               (user) => {
-                authDispatch({ type: AuthOperationType.LoginSuccess, user })
-                subscriptionDispatch({
-                  type: SubscriptionOperationType.InitializeStart,
+                authDispatch({
+                  type: AuthOperationType.InitializeSuccess,
+                  nostrClient: client,
+                  readOnlyUser: user,
                 })
               },
               (error) => {
-                authDispatch({ type: AuthOperationType.LoginFailure, error })
+                authDispatch({
+                  type: AuthOperationType.InitializeFailure,
+                  error,
+                })
               }
             )
+            subscriptionDispatch({
+              type: SubscriptionOperationType.InitializeStart,
+            })
+          } else {
+            authDispatch({
+              type: AuthOperationType.InitializeSuccess,
+              nostrClient: client,
+            })
+            new LoginMyUser(userService, new UserProfileService(client))
+              .execute()
+              .match(
+                (user) => {
+                  authDispatch({ type: AuthOperationType.LoginSuccess, user })
+                  subscriptionDispatch({
+                    type: SubscriptionOperationType.InitializeStart,
+                  })
+                },
+                (error) => {
+                  authDispatch({ type: AuthOperationType.LoginFailure, error })
+                }
+              )
+          }
+        },
+        (error) => {
+          authDispatch({ type: AuthOperationType.InitializeFailure, error })
         }
-      },
-      (error) => {
-        authDispatch({ type: AuthOperationType.InitializeFailure, error })
-      }
-    )
+      )
   }, [authDispatch, subscriptionDispatch])
 
   const openLoginModal = async () => {

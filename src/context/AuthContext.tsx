@@ -55,7 +55,14 @@ export const authReducer = (
   console.log('authReducer - state', action)
   switch (action.type) {
     case OperationType.InitializeStart:
-      return { ...state, status: AuthStatus.Initializing, error: null }
+      return {
+        ...state,
+        status: AuthStatus.Initializing,
+        nostrClient: null,
+        loggedInUser: null,
+        readOnlyUser: null,
+        error: null,
+      }
     case OperationType.InitializeSuccess:
       return {
         ...state,

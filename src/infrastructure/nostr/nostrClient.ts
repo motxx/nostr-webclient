@@ -162,7 +162,7 @@ export class NostrClient {
     )
   }
 
-  disconnect() {
+  static disconnect() {
     return ResultAsync.fromPromise(
       NostrClient.#mutex.runExclusive(async () => {
         NostrClient.#nostrClient = undefined
@@ -757,4 +757,8 @@ export class NostrClient {
 
 export const connectNostrClient = (): ResultAsync<NostrClient, Error> => {
   return NostrClient.connect()
+}
+
+export const disconnectNostrClient = (): ResultAsync<void, Error> => {
+  return NostrClient.disconnect()
 }
