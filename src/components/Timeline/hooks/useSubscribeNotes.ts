@@ -37,7 +37,7 @@ export const useSubscribeNotes = () => {
           dispatch({ type: OperationType.FetchPastNotesEnd, notes })
         },
         (error) => {
-          console.error('Failed to fetch past notes', error)
+          dispatch({ type: OperationType.FetchPastNotesError, error })
         }
       )
 
@@ -51,7 +51,7 @@ export const useSubscribeNotes = () => {
             dispatch({ type: OperationType.SubscribeNotes, subscription })
           },
           (error) => {
-            console.error('Failed to subscribe notes', error)
+            dispatch({ type: OperationType.SubscriptionError, error })
           }
         )
     },
