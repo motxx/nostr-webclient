@@ -47,7 +47,6 @@ export const useSubscribeNotes = () => {
         }, options)
         .match(
           (subscription) => {
-            console.log('options', options)
             dispatch({ type: OperationType.SubscribeNotes, subscription })
           },
           (error) => {
