@@ -19,7 +19,7 @@ export const useFetchNotes = ({
 }: UseFetchNotesOptions) => {
   const {
     auth: { nostrClient, status },
-    subscription: { notes, fetchingPastNotes },
+    timeline: { notes, fetchingPastNotes },
     dispatch,
   } = useContext(AppContext)
 

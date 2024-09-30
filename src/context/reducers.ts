@@ -1,6 +1,6 @@
 import { AppState } from './types'
 import { AppAction, OperationType } from './actions'
-import { AuthStatus, SubscriptionStatus } from './types'
+import { AuthStatus, TimelineStatus } from './types'
 
 export const initialState: AppState = {
   auth: {
@@ -10,11 +10,11 @@ export const initialState: AppState = {
     nostrClient: null,
     error: null,
   },
-  subscription: {
-    status: SubscriptionStatus.Idle,
+  timeline: {
+    status: TimelineStatus.Idle,
     notes: [],
     error: null,
-    subscription: null,
+    timeline: null,
     fetchingPastNotes: false,
   },
   dispatch: () => {},
@@ -85,45 +85,45 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         },
       }
 
-    // Subscriptions
+    // Timeline
     case OperationType.SubscribeNotes:
       return {
         ...state,
-        subscription: {
-          ...state.subscription,
-          status: SubscriptionStatus.Subscribing,
-          subscription: action.subscription,
+        timeline: {
+          ...state.timeline,
+          status: TimelineStatus.Subscribing,
+          timeline: action.timeline,
         },
       }
     case OperationType.UnsubscribeNotes:
       return {
         ...state,
-        subscription: {
-          ...state.subscription,
-          status: SubscriptionStatus.Idle,
+        timeline: {
+          ...state.timeline,
+          status: TimelineStatus.Idle,
           notes: [],
           error: null,
-          subscription: null,
+          timeline: null,
           fetchingPastNotes: false,
         },
       }
     case OperationType.FetchPastNotesStart:
       return {
         ...state,
-        subscription: {
-          ...state.subscription,
+        timeline: {
+          ...state.timeline,
           fetchingPastNotes: true,
         },
       }
     case OperationType.FetchPastNotesEnd:
       return {
         ...state,
-        subscription: {
-          ...state.subscription,
+        timeline: {
+          ...state.timeline,
           fetchingPastNotes: false,
           notes: [
             ...new Map(
-              [...state.subscription.notes, ...action.notes].map((note) => [
+              [...state.timeline.notes, ...action.notes].map((note) => [
                 note.id,
                 note,
               ])
@@ -134,29 +134,29 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
     case OperationType.AddNewNote:
       return {
         ...state,
-        subscription: {
-          ...state.subscription,
-          notes: state.subscription.notes.some((n) => n.id === action.note.id)
-            ? state.subscription.notes
-            : [...state.subscription.notes, action.note].sort(
+        timeline: {
+          ...state.timeline,
+          notes: state.timeline.notes.some((n) => n.id === action.note.id)
+            ? state.timeline.notes
+            : [...state.timeline.notes, action.note].sort(
                 (a, b) => b.created_at.getTime() - a.created_at.getTime()
               ),
         },
       }
-    case OperationType.SubscriptionError:
+    case OperationType.SubscribeNotesError:
       return {
         ...state,
-        subscription: {
-          ...state.subscription,
-          status: SubscriptionStatus.Error,
+        timeline: {
+          ...state.timeline,
+          status: TimelineStatus.Error,
           error: action.error,
         },
       }
     case OperationType.FetchPastNotesError:
       return {
         ...state,
-        subscription: {
-          ...state.subscription,
+        timeline: {
+          ...state.timeline,
           fetchingPastNotes: false,
           error: action.error,
         },

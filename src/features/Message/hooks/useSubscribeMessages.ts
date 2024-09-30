@@ -48,18 +48,15 @@ export const useSubscribeMessages = () => {
     [nostrClient, status]
   )
 
-  const unsubscribe = useCallback(
-    (subscription: { unsubscribe: () => void }) => {
-      const index = subscriptions.findIndex(
-        (s) => s.unsubscribe === subscription.unsubscribe
-      )
-      if (index > -1) {
-        subscription.unsubscribe()
-        subscriptions.splice(index, 1)
-      }
-    },
-    []
-  )
+  const unsubscribe = useCallback((timeline: { unsubscribe: () => void }) => {
+    const index = subscriptions.findIndex(
+      (s) => s.unsubscribe === subscription.unsubscribe
+    )
+    if (index > -1) {
+      subscription.unsubscribe()
+      subscriptions.splice(index, 1)
+    }
+  }, [])
 
   const unsubscribeAll = useCallback(() => {
     subscriptions.forEach((subscription) => {

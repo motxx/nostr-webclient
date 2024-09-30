@@ -10,9 +10,9 @@ export enum OperationType {
   LoginSuccess = 'LoginSuccess',
   LoginFailure = 'LoginFailure',
   Logout = 'Logout',
-  // Subscription
+  // Timeline
   SubscribeNotes = 'SubscribeNotes',
-  SubscriptionError = 'SubscriptionError',
+  SubscribeNotesError = 'SubscribeNotesError',
   UnsubscribeNotes = 'UnsubscribeNotes',
   FetchPastNotesStart = 'FetchPastNotesStart',
   FetchPastNotesEnd = 'FetchPastNotesEnd',
@@ -32,13 +32,13 @@ export type AuthAction =
   | { type: OperationType.LoginFailure; error: Error }
   | { type: OperationType.Logout }
 
-export type SubscriptionAction =
+export type TimelineAction =
   | {
       type: OperationType.SubscribeNotes
-      subscription: { unsubscribe: () => void }
+      timeline: { unsubscribe: () => void }
     }
   | {
-      type: OperationType.SubscriptionError
+      type: OperationType.SubscribeNotesError
       error: Error
     }
   | {
@@ -60,4 +60,4 @@ export type SubscriptionAction =
       note: Note
     }
 
-export type AppAction = AuthAction | SubscriptionAction
+export type AppAction = AuthAction | TimelineAction

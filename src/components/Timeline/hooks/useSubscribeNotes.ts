@@ -4,26 +4,29 @@ import { SubscribeNotes } from '@/domain/use_cases/SubscribeNotes'
 import { Note } from '@/domain/entities/Note'
 import { SubscribeNotesOptions } from '@/domain/repositories/NoteRepository'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AuthStatus, SubscriptionStatus } from '@/context/types'
+import { AuthStatus, TimelineStatus } from '@/context/types'
 import { AppContext } from '@/context/AppContext'
 import { OperationType } from '@/context/actions'
 import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
 
 export const useSubscribeNotes = () => {
   const {
-    auth: { nostrClient, status },
-    subscription: { notes, subscription, status: subscriptionStatus },
+    auth: { nostrClient, status: authStatus },
+    timeline: { notes, timeline, status: timelineStatus },
     dispatch,
   } = useContext(AppContext)
 
   const subscribe = useCallback(
     (options: SubscribeNotesOptions, callbackWhenFinished?: () => void) => {
-      if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
+      if (
+        authStatus !== AuthStatus.ClientReady &&
+        authStatus !== AuthStatus.LoggedIn
+      ) {
         return
       }
       if (!nostrClient) throw new Error('NostrClient is not ready')
 
-      if (subscriptionStatus !== SubscriptionStatus.Idle) {
+      if (timelineStatus !== TimelineStatus.Idle) {
         return
       }
 
@@ -46,22 +49,22 @@ export const useSubscribeNotes = () => {
           dispatch({ type: OperationType.AddNewNote, note })
         }, options)
         .match(
-          (subscription) => {
-            dispatch({ type: OperationType.SubscribeNotes, subscription })
+          (timeline) => {
+            dispatch({ type: OperationType.SubscribeNotes, timeline })
           },
           (error) => {
-            dispatch({ type: OperationType.SubscriptionError, error })
+            dispatch({ type: OperationType.SubscribeNotesError, error })
           }
         )
     },
-    [nostrClient, dispatch, status, subscriptionStatus]
+    [nostrClient, dispatch, authStatus, timelineStatus]
   )
 
   const unsubscribe = useCallback(() => {
-    if (!subscription) return
-    subscription.unsubscribe()
+    if (!timeline) return
+    timeline.unsubscribe()
     dispatch({ type: OperationType.UnsubscribeNotes })
-  }, [subscription, dispatch])
+  }, [timeline, dispatch])
 
   return { subscribe, unsubscribe, notes }
 }

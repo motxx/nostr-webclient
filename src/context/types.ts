@@ -12,7 +12,7 @@ export enum AuthStatus {
   Error = 'error',
 }
 
-export enum SubscriptionStatus {
+export enum TimelineStatus {
   Idle = 'idle',
   Subscribing = 'subscribing',
   Error = 'error',
@@ -26,16 +26,16 @@ export interface AuthState {
   error: Error | null
 }
 
-interface SubscriptionState {
-  status: SubscriptionStatus
+interface TimelineState {
+  status: TimelineStatus
   notes: Note[]
   error: Error | null
-  subscription: { unsubscribe: () => void } | null
+  timeline: { unsubscribe: () => void } | null
   fetchingPastNotes: boolean // 永続subscribeと独立に動くため、statusと別で管理
 }
 
 export interface AppState {
   auth: AuthState
-  subscription: SubscriptionState
+  timeline: TimelineState
   dispatch: Dispatch<AppAction>
 }
