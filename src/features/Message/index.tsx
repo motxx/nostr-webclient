@@ -12,10 +12,13 @@ import { hexToBech32 } from '@/utils/addressConverter'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { Participant } from '@/domain/entities/Participant'
 import { useSubscribeMessages } from './hooks/useSubscribeMessages'
-import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import { AppContext } from '@/context/AppContext'
+import { AuthStatus } from '@/context/types'
 
 const MessagePage: React.FC = () => {
-  const { nostrClient, loggedInUser, status } = useContext(AuthContext)
+  const {
+    auth: { nostrClient, loggedInUser, status },
+  } = useContext(AppContext)
   const { subscribe, anySubscriptionsExist } = useSubscribeMessages()
   const [selectedConversationIndex, setSelectedConversationIndex] = useState<
     number | null

@@ -1,12 +1,8 @@
 import React, { useCallback, useContext, useEffect } from 'react'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 import { init } from 'nostr-login'
-import {
-  AuthContext,
-  AuthStatus,
-  OperationType as AuthOperationType,
-} from '@/context/AuthContext'
-import { OperationType as SubscriptionOperationType } from '@/context/SubscriptionContext'
+import { AppContext } from '@/context/AppContext'
+import { OperationType } from '@/context/actions'
 import {
   connectNostrClient,
   disconnectNostrClient,
@@ -14,15 +10,17 @@ import {
 import { LoginMyUser } from '@/domain/use_cases/LoginMyUser'
 import { UserService } from '@/infrastructure/services/UserService'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { SubscriptionContext } from '@/context/SubscriptionContext'
 import { FetchDefaultUser } from '@/domain/use_cases/FetchDefaultUser'
+import { AuthStatus } from '@/context/types'
 
 const LoginPrompt: React.FC = () => {
-  const { dispatch: authDispatch, status } = useContext(AuthContext)
-  const { dispatch: subscriptionDispatch } = useContext(SubscriptionContext)
+  const {
+    auth: { status },
+    dispatch,
+  } = useContext(AppContext)
 
   const handleLogin = useCallback(() => {
-    authDispatch({ type: AuthOperationType.InitializeStart })
+    dispatch({ type: OperationType.InitializeStart })
 
     return disconnectNostrClient()
       .andThen(() => connectNostrClient())
@@ -33,47 +31,38 @@ const LoginPrompt: React.FC = () => {
           if (client.readOnlyMode()) {
             new FetchDefaultUser(userService).execute().match(
               (user) => {
-                authDispatch({
-                  type: AuthOperationType.InitializeSuccess,
+                dispatch({
+                  type: OperationType.InitializeSuccess,
                   nostrClient: client,
                   readOnlyUser: user,
                 })
               },
               (error) => {
-                authDispatch({
-                  type: AuthOperationType.InitializeFailure,
-                  error,
-                })
+                dispatch({ type: OperationType.InitializeFailure, error })
               }
             )
-            subscriptionDispatch({
-              type: SubscriptionOperationType.InitializeStart,
-            })
           } else {
-            authDispatch({
-              type: AuthOperationType.InitializeSuccess,
+            dispatch({
+              type: OperationType.InitializeSuccess,
               nostrClient: client,
             })
             new LoginMyUser(userService, new UserProfileService(client))
               .execute()
               .match(
                 (user) => {
-                  authDispatch({ type: AuthOperationType.LoginSuccess, user })
-                  subscriptionDispatch({
-                    type: SubscriptionOperationType.InitializeStart,
-                  })
+                  dispatch({ type: OperationType.LoginSuccess, user })
                 },
                 (error) => {
-                  authDispatch({ type: AuthOperationType.LoginFailure, error })
+                  dispatch({ type: OperationType.LoginFailure, error })
                 }
               )
           }
         },
         (error) => {
-          authDispatch({ type: AuthOperationType.InitializeFailure, error })
+          dispatch({ type: OperationType.InitializeFailure, error })
         }
       )
-  }, [authDispatch, subscriptionDispatch])
+  }, [dispatch])
 
   const openLoginModal = async () => {
     await init({ onAuth: handleLogin })

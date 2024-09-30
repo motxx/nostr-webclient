@@ -1,12 +1,10 @@
-import {
-  OperationType as SubscriptionOperationType,
-  SubscriptionContext,
-} from '@/context/SubscriptionContext'
 import { useCallback, useContext } from 'react'
 import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
 import { NoteService } from '@/infrastructure/services/NoteService'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import { AuthStatus } from '@/context/types'
+import { AppContext } from '@/context/AppContext'
+import { OperationType } from '@/context/actions'
 
 interface UseFetchNotesOptions {
   authorPubkeys?: string[]
@@ -19,12 +17,11 @@ export const useFetchNotes = ({
   limit = 20,
   hashtag,
 }: UseFetchNotesOptions) => {
-  const { nostrClient, status } = useContext(AuthContext)
   const {
-    dispatch: subscriptionDispatch,
-    notes,
-    fetchingPastNotes,
-  } = useContext(SubscriptionContext)
+    auth: { nostrClient, status },
+    subscription: { notes, fetchingPastNotes },
+    dispatch,
+  } = useContext(AppContext)
 
   const fetchNotes = useCallback(() => {
     if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
@@ -34,9 +31,7 @@ export const useFetchNotes = ({
       throw new Error('Nostr client not found')
     }
 
-    subscriptionDispatch({
-      type: SubscriptionOperationType.FetchPastNotesStart,
-    })
+    dispatch({ type: OperationType.FetchPastNotesStart })
 
     const oldestNote = notes[notes.length - 1]
     new FetchPastNotes(
@@ -50,24 +45,13 @@ export const useFetchNotes = ({
       })
       .match(
         (notes) => {
-          subscriptionDispatch({
-            type: SubscriptionOperationType.FetchPastNotesEnd,
-            notes,
-          })
+          dispatch({ type: OperationType.FetchPastNotesEnd, notes })
         },
         (error) => {
           console.error('Failed to fetch past notes', error)
         }
       )
-  }, [
-    status,
-    nostrClient,
-    subscriptionDispatch,
-    notes,
-    authorPubkeys,
-    limit,
-    hashtag,
-  ])
+  }, [status, nostrClient, dispatch, notes, authorPubkeys, limit, hashtag])
 
   return {
     fetchNotes,

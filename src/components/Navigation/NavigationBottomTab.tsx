@@ -3,7 +3,7 @@ import { PiNotePencil } from 'react-icons/pi'
 import NavigationBottomTabItem from './NavigationBottomTabItem'
 import { NavigationItem, NavigationItemId } from './Navigation'
 import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '@/context/AuthContext'
+import { AppContext } from '@/context/AppContext'
 
 interface NavigationBottomTabProps {
   navigationItems: NavigationItem[]
@@ -21,7 +21,9 @@ const NavigationBottomTab: React.FC<NavigationBottomTabProps> = ({
   onPostNote,
 }) => {
   const navigate = useNavigate()
-  const { loggedInUser } = useContext(AuthContext)
+  const {
+    auth: { loggedInUser },
+  } = useContext(AppContext)
   return (
     <>
       {shouldShowPostButton && (

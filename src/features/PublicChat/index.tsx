@@ -6,7 +6,7 @@ import { PublicChannel } from '@/domain/entities/PublicChat'
 import { FetchChannels } from '@/domain/use_cases/FetchChannels'
 import { PublicChatService } from '@/infrastructure/services/PublicChatService'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AuthContext } from '@/context/AuthContext'
+import { AppContext } from '@/context/AppContext'
 
 const PublicChatPage: React.FC = () => {
   const { channelId } = useParams()
@@ -15,7 +15,9 @@ const PublicChatPage: React.FC = () => {
     null
   )
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const { nostrClient } = useContext(AuthContext)
+  const {
+    auth: { nostrClient },
+  } = useContext(AppContext)
 
   useEffect(() => {
     if (nostrClient) {

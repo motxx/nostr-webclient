@@ -2,9 +2,8 @@ import React, { useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { BrowserRouter as Router } from 'react-router-dom'
 import Navigation from '@/components/Navigation/Navigation'
-import { AuthProvider } from '@/context/AuthContext'
 import { AppRoutes } from '@/routes/AppRoutes'
-import { SubscriptionProvider } from './context/SubscriptionContext'
+import { AppProvider } from '@/context/AppContext'
 
 const App: React.FC = () => {
   const [shouldFocusBottomTab, setShouldFocusBottomTab] =
@@ -35,7 +34,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <AuthProvider>
+      <AppProvider>
         <div className="bg-white dark:bg-black min-h-screen flex">
           <Navigation
             shouldFocusBottomTab={shouldFocusBottomTab}
@@ -50,7 +49,7 @@ const App: React.FC = () => {
             <Toaster />
           </main>
         </div>
-      </AuthProvider>
+      </AppProvider>
     </Router>
   )
 }

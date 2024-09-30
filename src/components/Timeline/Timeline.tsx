@@ -14,7 +14,7 @@ import { useInfiniteNotes } from './hooks/useInfiniteNotes'
 import { HomeTimelineTabs, TimelineTabId } from './types'
 import Spinner from '../ui-elements/Spinner'
 import { useFetchNotes } from './hooks/useFetchNotes'
-import { AuthContext } from '@/context/AuthContext'
+import { AppContext } from '@/context/AppContext'
 
 interface TimelineProps {
   onScrollUp: () => void
@@ -31,7 +31,9 @@ const Timeline: React.FC<TimelineProps> = ({
   hashtag,
   showTabs = true,
 }) => {
-  const { loggedInUser, readOnlyUser } = useContext(AuthContext)
+  const {
+    auth: { loggedInUser, readOnlyUser },
+  } = useContext(AppContext)
   const tabRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)

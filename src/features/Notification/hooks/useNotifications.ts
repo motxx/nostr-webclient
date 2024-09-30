@@ -4,10 +4,13 @@ import { NoteService } from '@/infrastructure/services/NoteService'
 import { NotificationService } from '@/infrastructure/services/NotificationService'
 import { SubscribeNotifications } from '@/domain/use_cases/SubscribeNotifications'
 import { Notification } from '@/domain/entities/Notification'
-import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import { AppContext } from '@/context/AppContext'
+import { AuthStatus } from '@/context/types'
 
 export const useNotifications = () => {
-  const { nostrClient, status } = useContext(AuthContext)
+  const {
+    auth: { nostrClient, status },
+  } = useContext(AppContext)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -41,7 +44,7 @@ export const useNotifications = () => {
     return () => {
       unsubscribePromise.then(({ unsubscribe }) => unsubscribe())
     }
-  }, [nostrClient])
+  }, [nostrClient, status])
 
   return { notifications, isLoading }
 }

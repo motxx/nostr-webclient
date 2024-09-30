@@ -2,7 +2,8 @@ import { useCallback, useEffect, useContext } from 'react'
 import { PublicChatService } from '@/infrastructure/services/PublicChatService'
 import { PublicChatMessage } from '@/domain/entities/PublicChat'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import { AppContext } from '@/context/AppContext'
+import { AuthStatus } from '@/context/types'
 
 const subscriptions: Array<{
   isForever?: boolean
@@ -10,7 +11,9 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribePublicChat = () => {
-  const { nostrClient, status } = useContext(AuthContext)
+  const {
+    auth: { nostrClient, status },
+  } = useContext(AppContext)
 
   const subscribe = useCallback(
     async (
@@ -52,7 +55,7 @@ export const useSubscribePublicChat = () => {
         console.error('Failed to subscribe:', subscriptionResult.error)
       }
     },
-    [nostrClient]
+    [nostrClient, status]
   )
 
   const unsubscribe = useCallback(
