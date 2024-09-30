@@ -1,10 +1,7 @@
 import { useCallback, useContext, useEffect } from 'react'
+import { AppContext } from '@/context/AppContext'
 import { useSubscribeNotes } from './useSubscribeNotes'
-import {
-  SubscriptionContext,
-  SubscriptionStatus,
-} from '@/context/SubscriptionContext'
-import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import { AuthStatus, SubscriptionStatus } from '@/context/types'
 
 interface UseInfiniteNotesOptions {
   authorPubkeys?: string[]
@@ -17,9 +14,12 @@ export const useInfiniteNotes = ({
   limit = 20,
   hashtag,
 }: UseInfiniteNotesOptions) => {
-  const { status: authStatus } = useContext(AuthContext)
-  const { status: subscriptionStatus } = useContext(SubscriptionContext)
-  const { subscribe, unsubscribe, notes } = useSubscribeNotes()
+  const {
+    auth: { status: authStatus },
+    subscription: { status: subscriptionStatus, notes },
+  } = useContext(AppContext)
+  const { subscribe, unsubscribe } = useSubscribeNotes()
+
   const isLoading =
     subscriptionStatus !== SubscriptionStatus.Subscribing || notes.length === 0
 

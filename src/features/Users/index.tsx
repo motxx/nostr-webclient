@@ -8,7 +8,8 @@ import { FetchNpubFromNostrAddress } from '@/domain/use_cases/FetchNpubFromNostr
 import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { ResultAsync } from 'neverthrow'
-import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import { AppContext } from '@/context/AppContext'
+import { AuthStatus } from '@/context/types'
 
 interface UserPageProps {
   isFollowing: boolean
@@ -16,7 +17,9 @@ interface UserPageProps {
 }
 
 const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
-  const { nostrClient, loggedInUser, status } = useContext(AuthContext)
+  const {
+    auth: { nostrClient, loggedInUser, status },
+  } = useContext(AppContext)
   const [user, setUser] = useState<User | null>(null)
   const location = useLocation()
 

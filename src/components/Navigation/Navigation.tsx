@@ -18,7 +18,8 @@ import { Note } from '@/domain/entities/Note'
 import { PostNote } from '@/domain/use_cases/PostNote'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { NoteService } from '@/infrastructure/services/NoteService'
-import { AuthContext, AuthStatus } from '@/context/AuthContext'
+import { AuthStatus } from '@/context/types'
+import { AppContext } from '@/context/AppContext'
 
 export type NavigationItemId =
   | 'home'
@@ -75,7 +76,9 @@ const Navigation: React.FC<NavigationProps> = ({
   shouldFocusBottomTab,
   focusBottomTab,
 }) => {
-  const { nostrClient, loggedInUser, status } = useContext(AuthContext)
+  const {
+    auth: { nostrClient, loggedInUser, status },
+  } = useContext(AppContext)
   const [isPostModalOpen, setIsPostModalOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const navigate = useNavigate()

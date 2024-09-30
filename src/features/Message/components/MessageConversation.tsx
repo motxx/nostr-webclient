@@ -4,14 +4,16 @@ import { FiArrowLeft } from 'react-icons/fi'
 import Button from '@/components/ui-elements/Button'
 import Input from '@/components/ui-elements/Input'
 import { Conversation } from '@/domain/entities/Conversation'
-import { AuthContext } from '@/context/AuthContext'
+import { AppContext } from '@/context/AppContext'
 
 const MessageConversation: React.FC<{
   conversation: Conversation
   onSendMessage: (content: string) => void
   onBack: () => void
 }> = ({ conversation, onSendMessage, onBack }) => {
-  const { loggedInUser } = useContext(AuthContext)
+  const {
+    auth: { loggedInUser },
+  } = useContext(AppContext)
   const [newMessage, setNewMessage] = useState('')
 
   const handleSend = () => {

@@ -3,15 +3,17 @@ import { DirectMessageService } from '@/infrastructure/services/DirectMessageSer
 import { SubscribeDirectMessages } from '@/domain/use_cases/SubscribeDirectMessages'
 import { Conversation } from '@/domain/entities/Conversation'
 import { SubscribeDirectMessagesOptions } from '@/domain/repositories/DirectMessageRepository'
-import { AuthContext, AuthStatus } from '@/context/AuthContext'
-
+import { AppContext } from '@/context/AppContext'
+import { AuthStatus } from '@/context/types'
 const subscriptions: Array<{
   isForever: boolean
   unsubscribe: () => void
 }> = []
 
 export const useSubscribeMessages = () => {
-  const { nostrClient, status } = useContext(AuthContext)
+  const {
+    auth: { nostrClient, status },
+  } = useContext(AppContext)
 
   const subscribe = useCallback(
     (
