@@ -45,7 +45,7 @@ export const useSubscribeMessages = () => {
       }
       return subscription
     },
-    [nostrClient]
+    [nostrClient, status]
   )
 
   const unsubscribe = useCallback(
