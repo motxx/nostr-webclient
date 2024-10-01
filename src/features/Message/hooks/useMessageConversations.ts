@@ -28,7 +28,6 @@ export const useMessageConversations = () => {
       authStatus !== AuthStatus.LoggedIn ||
       messagesStatus !== MessagesStatus.Idle
     ) {
-      console.log({ authStatus, messagesStatus })
       return
     }
     console.log('handleSubscription - 2')
