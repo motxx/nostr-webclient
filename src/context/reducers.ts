@@ -1,6 +1,6 @@
 import { AppState } from './types'
 import { AppAction, OperationType } from './actions'
-import { AuthStatus, TimelineStatus } from './types'
+import { AuthStatus, TimelineStatus, MessagesStatus } from './types'
 
 export const initialState: AppState = {
   auth: {
@@ -14,8 +14,15 @@ export const initialState: AppState = {
     status: TimelineStatus.Idle,
     notes: [],
     error: null,
-    timeline: null,
+    subscription: null,
     fetchingPastNotes: false,
+  },
+  messages: {
+    status: MessagesStatus.Idle,
+    subscription: null,
+    conversations: [],
+    temporaryMessages: [],
+    error: null,
   },
   dispatch: () => {},
 }
@@ -92,7 +99,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         timeline: {
           ...state.timeline,
           status: TimelineStatus.Subscribing,
-          timeline: action.timeline,
+          subscription: action.subscription,
         },
       }
     case OperationType.UnsubscribeNotes:
@@ -103,7 +110,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
           status: TimelineStatus.Idle,
           notes: [],
           error: null,
-          timeline: null,
+          subscription: null,
           fetchingPastNotes: false,
         },
       }
@@ -159,6 +166,79 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
           ...state.timeline,
           fetchingPastNotes: false,
           error: action.error,
+        },
+      }
+
+    // Messages
+    case OperationType.SubscribeMessages:
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          status: MessagesStatus.Subscribing,
+          subscription: action.subscription,
+        },
+      }
+    case OperationType.AddNewMessage:
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          conversations: (() => {
+            if (action.conversation.messages.length !== 1) {
+              // TODO: 例外を実装せずに、Messageを受け取ってConversationにいれるという直感的なフローにする
+              throw new Error('Conversation does not have exactly one message.')
+            }
+            const newMessage = action.conversation.messages[0]
+            const existingConversation = state.messages.conversations.find(
+              (conv) => conv.id === action.conversation.id
+            )
+            if (existingConversation) {
+              return state.messages.conversations.map((conv) =>
+                conv.id === action.conversation.id
+                  ? conv.addMessage(newMessage)
+                  : conv
+              )
+            }
+            return [...state.messages.conversations, action.conversation]
+          })(),
+          temporaryMessages: (() => {
+            if (action.conversation.messages.length !== 1) {
+              // TODO: 同上
+              throw new Error('Conversation does not have exactly one message.')
+            }
+            const newMessage = action.conversation.messages[0]
+            return state.messages.temporaryMessages.filter(
+              (msg) => msg.id !== newMessage.id
+            )
+          })(),
+        },
+      }
+    case OperationType.SendMessage:
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          temporaryMessages: [
+            ...state.messages.temporaryMessages,
+            action.message,
+          ],
+        },
+      }
+    case OperationType.SendMessageError:
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          error: action.error,
+        },
+      }
+    case OperationType.CreateNewConversation:
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          conversations: [...state.messages.conversations, action.conversation],
         },
       }
 
