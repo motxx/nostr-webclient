@@ -36,7 +36,7 @@ const MessageChatSidebar = forwardRef<HTMLDivElement, MessageChatSidebarProps>(
     >
       <div className="p-4">
         <div className="flex items-center mb-4">
-          <h1 className="text-lg font-bold">メッセージ</h1>
+          <h1 className="text-lg font-bold">メッセージ (NIP-17)</h1>
           <Button className="ml-auto" onClick={() => setIsModalOpen(true)}>
             <LuMessageSquarePlus className="text-2xl hover:text-blue-500 transition" />
           </Button>
