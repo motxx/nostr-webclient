@@ -32,11 +32,7 @@ import { CommonRelays } from './commonRelays'
 import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
 import { finalizeEvent, nip44 } from 'nostr-tools'
-import {
-  NDKKind_Seal,
-  NDKKind_GiftWrap,
-  NDKKind_DirectMessage,
-} from './kindExtensions'
+import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 import { randomBytes } from 'crypto'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
