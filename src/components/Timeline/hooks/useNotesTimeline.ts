@@ -1,26 +1,26 @@
 import { useCallback, useContext, useEffect } from 'react'
 import { AppContext } from '@/context/AppContext'
-import { useSubscribeNotes } from './useSubscribeNotes'
 import { AuthStatus, TimelineStatus } from '@/context/types'
+import { useNotesSubscription } from './useNotesSubscription'
 
-interface UseInfiniteNotesOptions {
+interface UseNotesTimelineOptions {
   authorPubkeys?: string[]
   limit?: number
   hashtag?: string // TODO: implement hashtag filtering
 }
 
-export const useInfiniteNotes = ({
+export const useNotesTimeline = ({
   authorPubkeys,
   limit = 20,
   hashtag,
-}: UseInfiniteNotesOptions) => {
+}: UseNotesTimelineOptions) => {
   const {
     auth: { status: authStatus },
     timeline: { status: timelineStatus, notes },
   } = useContext(AppContext)
-  const { subscribe, unsubscribe } = useSubscribeNotes()
+  const { subscribe, unsubscribe } = useNotesSubscription()
 
-  const isLoading =
+  const isTimelineLoading =
     timelineStatus !== TimelineStatus.Subscribing || notes.length === 0
 
   const handleSubscription = useCallback(() => {
@@ -42,5 +42,5 @@ export const useInfiniteNotes = ({
     }
   }, [handleSubscription, unsubscribe])
 
-  return { notes, isLoading }
+  return { notes, isTimelineLoading }
 }

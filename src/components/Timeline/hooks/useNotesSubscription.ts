@@ -9,10 +9,10 @@ import { AppContext } from '@/context/AppContext'
 import { OperationType } from '@/context/actions'
 import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
 
-export const useSubscribeNotes = () => {
+export const useNotesSubscription = () => {
   const {
     auth: { nostrClient, status: authStatus },
-    timeline: { notes, timeline, status: timelineStatus },
+    timeline: { notes, subscription, status: timelineStatus },
     dispatch,
   } = useContext(AppContext)
 
@@ -49,8 +49,8 @@ export const useSubscribeNotes = () => {
           dispatch({ type: OperationType.AddNewNote, note })
         }, options)
         .match(
-          (timeline) => {
-            dispatch({ type: OperationType.SubscribeNotes, timeline })
+          (subscription) => {
+            dispatch({ type: OperationType.SubscribeNotes, subscription })
           },
           (error) => {
             dispatch({ type: OperationType.SubscribeNotesError, error })
@@ -61,10 +61,10 @@ export const useSubscribeNotes = () => {
   )
 
   const unsubscribe = useCallback(() => {
-    if (!timeline) return
-    timeline.unsubscribe()
+    if (!subscription) return
+    subscription.unsubscribe()
     dispatch({ type: OperationType.UnsubscribeNotes })
-  }, [timeline, dispatch])
+  }, [subscription, dispatch])
 
   return { subscribe, unsubscribe, notes }
 }

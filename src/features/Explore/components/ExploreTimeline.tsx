@@ -3,7 +3,7 @@ import HashSearchBar from '@/components/ui-parts/HashSearchBar'
 import ExploreFilters from './ExploreFilters'
 import ExploreOutput from './ExploreOutput'
 import { AccountFilter, ExploreMetricWithNull } from '../types'
-import { useInfiniteNotes } from '@/components/Timeline/hooks/useInfiniteNotes'
+import { useNotesTimeline } from '@/components/Timeline/hooks/useNotesTimeline'
 import { NoteType } from '@/domain/entities/Note'
 import { useFetchNotes } from '@/components/Timeline/hooks/useFetchNotes'
 
@@ -12,7 +12,7 @@ interface ExploreTimelineProps {
 }
 
 const ExploreTimeline: React.FC<ExploreTimelineProps> = ({ wrapperRef }) => {
-  const { notes, isLoading } = useInfiniteNotes({
+  const { notes, isTimelineLoading } = useNotesTimeline({
     // TODO: Implement authorPubkeys when accountFilter === 'network'
   })
 
@@ -133,14 +133,14 @@ const ExploreTimeline: React.FC<ExploreTimelineProps> = ({ wrapperRef }) => {
       const clientHeight = wrapperElement.clientHeight
 
       if (
-        !isLoading &&
+        !isTimelineLoading &&
         !isFetchingPastNotes &&
         scrollHeight - currentScrollTop <= clientHeight * 1.5
       ) {
         fetchNotes()
       }
     }
-  }, [wrapperRef, isLoading, isFetchingPastNotes, fetchNotes])
+  }, [wrapperRef, isTimelineLoading, isFetchingPastNotes, fetchNotes])
 
   return (
     <div
@@ -176,7 +176,7 @@ const ExploreTimeline: React.FC<ExploreTimelineProps> = ({ wrapperRef }) => {
           metric={metric}
         />
       </div>
-      {isLoading ||
+      {isTimelineLoading ||
         (isFetchingPastNotes && (
           <div className="flex justify-center items-center h-16">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
