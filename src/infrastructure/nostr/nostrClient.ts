@@ -193,7 +193,7 @@ export class NostrClient {
   ): ResultAsync<void, Error> {
     return ResultAsync.fromPromise(
       (async () => {
-        if (!this.#readOnlyMode) {
+        if (this.#readOnlyMode) {
           throw new NostrReadOnlyError()
         }
 
