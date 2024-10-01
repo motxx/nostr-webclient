@@ -99,6 +99,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         timeline: {
           ...state.timeline,
           status: TimelineStatus.Subscribing,
+          notes: [], // Clear notes to prevent stale data (TODO: Implement a more robust solution)
           subscription: action.subscription,
         },
       }
