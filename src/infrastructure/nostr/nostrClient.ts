@@ -32,7 +32,11 @@ import { CommonRelays } from './commonRelays'
 import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
 import { finalizeEvent, nip44 } from 'nostr-tools'
-import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
+import {
+  NDKKind_Seal,
+  NDKKind_GiftWrap,
+  NDKKind_DirectMessage,
+} from './kindExtensions'
 import { randomBytes } from 'crypto'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
@@ -404,8 +408,19 @@ export class NostrClient {
     return this.decryptSealNostrEvent(giftWrappedContent, event.pubkey).andThen(
       (sealEvent) => {
         if (sealEvent.kind !== NDKKind_Seal) {
+          console.error("Kind of decrypted event is not 'Seal'", {
+            kind: sealEvent.kind,
+            pubkey: sealEvent.pubkey,
+            created_at: sealEvent.created_at,
+          })
           return ResultAsync.fromSafePromise(
-            Promise.reject(new Error('Decrypted content is not a Seal'))
+            Promise.resolve({
+              kind: NDKKind_Seal,
+              content: "Kind of decrypted event is not 'Seal'",
+              tags: [],
+              pubkey: sealEvent.pubkey,
+              created_at: sealEvent.created_at,
+            })
           )
         }
         return this.decryptPayload(sealEvent.content, sealEvent.pubkey)

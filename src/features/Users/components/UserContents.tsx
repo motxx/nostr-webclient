@@ -3,7 +3,7 @@ import TimelineStandard from '@/components/Timeline/TimelineStandard'
 import ImageCarousel from '@/components/ui-parts/ImageCarousel'
 import { mockImages, mockMerchants, mockPaidContents } from '../types'
 import { User } from '@/domain/entities/User'
-import { useInfiniteNotes } from '@/components/Timeline/hooks/useInfiniteNotes'
+import { useNotesTimeline } from '@/components/Timeline/hooks/useNotesTimeline'
 import { useFetchNotes } from '@/components/Timeline/hooks/useFetchNotes'
 
 interface UserContentsProps {
@@ -12,7 +12,7 @@ interface UserContentsProps {
 }
 
 const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
-  const { notes, isLoading } = useInfiniteNotes({
+  const { notes, isTimelineLoading } = useNotesTimeline({
     authorPubkeys: [user.pubkey],
   })
   const { isFetchingPastNotes, fetchNotes } = useFetchNotes({ limit: 20 })
@@ -57,7 +57,7 @@ const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
           <h2 className="text-lg font-bold mb-8 ml-2">ノート</h2>
           <TimelineStandard notes={notes} onToggleFollow={toggleFollow} />
         </div>
-        {(isLoading || isFetchingPastNotes) && (
+        {(isTimelineLoading || isFetchingPastNotes) && (
           <div className="flex justify-center items-center h-16">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
           </div>

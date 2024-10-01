@@ -5,20 +5,23 @@ import Button from '@/components/ui-elements/Button'
 import Input from '@/components/ui-elements/Input'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 
-interface MessageCreateChatModalProps {
+interface MessageCreateConversationModalProps {
   isOpen: boolean
   onClose: () => void
-  onCreateChat: (chatName: string, participants: string[]) => void
+  onCreateConversation: (
+    chatName: string,
+    otherPartcipantPubkeys: string[]
+  ) => void
 }
 
-const MessageCreateChatModal: React.FC<MessageCreateChatModalProps> = ({
-  isOpen,
-  onClose,
-  onCreateChat,
-}) => {
+const MessageCreateConversationModal: React.FC<
+  MessageCreateConversationModalProps
+> = ({ isOpen, onClose, onCreateConversation }) => {
   const [chatName, setChatName] = useState('')
-  const [participants, setParticipants] = useState<string[]>([])
-  const [participantInput, setParticipantInput] = useState('')
+  const [otherParticipantPubkeys, setOtherParticipantPubkeys] = useState<
+    string[]
+  >([])
+  const [otherParticipantInput, setOtherParticipantInput] = useState('')
 
   const handleBackgroundClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation()
@@ -28,17 +31,23 @@ const MessageCreateChatModal: React.FC<MessageCreateChatModalProps> = ({
   }
 
   const handleAddParticipant = () => {
-    if (participantInput.trim() && !participants.includes(participantInput)) {
-      setParticipants([...participants, participantInput])
-      setParticipantInput('')
+    if (
+      otherParticipantInput.trim() &&
+      !otherParticipantPubkeys.includes(otherParticipantInput)
+    ) {
+      setOtherParticipantPubkeys([
+        ...otherParticipantPubkeys,
+        otherParticipantInput,
+      ])
+      setOtherParticipantInput('')
     }
   }
 
-  const handleCreateChat = () => {
+  const handleCreateConversation = () => {
     if (chatName.trim()) {
-      onCreateChat(chatName, participants)
+      onCreateConversation(chatName, otherParticipantPubkeys)
       setChatName('')
-      setParticipants([])
+      setOtherParticipantPubkeys([])
       onClose()
     }
   }
@@ -62,8 +71,8 @@ const MessageCreateChatModal: React.FC<MessageCreateChatModalProps> = ({
           <h3 className="text-sm font-bold mb-2">参加者を追加</h3>
           <div className="flex items-center gap-x-2">
             <Input
-              value={participantInput}
-              onChange={(e) => setParticipantInput(e.target.value)}
+              value={otherParticipantInput}
+              onChange={(e) => setOtherParticipantInput(e.target.value)}
               placeholder="ユーザーのpubkeyを入力..."
               className="flex-grow bg-transparent border"
             />
@@ -75,19 +84,19 @@ const MessageCreateChatModal: React.FC<MessageCreateChatModalProps> = ({
             </Button>
           </div>
           <ul className="mt-2">
-            {participants.map((participant, index) => (
+            {otherParticipantPubkeys.map((pubkey, index) => (
               <li
                 key={index}
                 className="text-gray-700 dark:text-gray-300 text-sm"
               >
-                {participant}
+                {pubkey}
               </li>
             ))}
           </ul>
         </div>
         <PrimaryButton
           className="w-full mt-2 px-4 py-2 rounded-md"
-          onClick={handleCreateChat}
+          onClick={handleCreateConversation}
         >
           <LuMessageSquarePlus className="mt-1 mr-2 text-2xl" />
           作成
@@ -97,4 +106,4 @@ const MessageCreateChatModal: React.FC<MessageCreateChatModalProps> = ({
   )
 }
 
-export default MessageCreateChatModal
+export default MessageCreateConversationModal

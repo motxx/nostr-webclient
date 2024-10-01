@@ -166,13 +166,18 @@ export class DirectMessage implements DirectMessageType {
     }
   }
 
+  // TODO: Conversationにメソッドをうつす
   createParticipants(): Result<Set<Participant>, Error> {
     return Result.combine(
-      [...new Set([this.sender, ...this.receivers.map((r) => r.user)])].map(
-        (user) =>
-          hexToBech32(user.pubkey).map(
-            (npub) => new Participant(new User({ ...user, npub }))
-          )
+      Array.from(
+        new Set([
+          this.sender.pubkey,
+          ...this.receivers.map((r) => r.user.pubkey),
+        ])
+      ).map((pubkey) =>
+        hexToBech32(pubkey, 'npub').map(
+          (npub) => new Participant(new User({ pubkey, npub }))
+        )
       )
     ).map((participants) => new Set(participants))
   }

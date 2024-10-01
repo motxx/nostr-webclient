@@ -1,11 +1,8 @@
-import {
-  DirectMessageRepository,
-  SubscribeDirectMessagesOptions,
-} from '@/domain/repositories/DirectMessageRepository'
+import { DirectMessageRepository } from '@/domain/repositories/DirectMessageRepository'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '../nostr/nostrClient'
-import { Result, ResultAsync } from 'neverthrow'
+import { ok, Result, ResultAsync } from 'neverthrow'
 import { NDKFilter } from '@nostr-dev-kit/ndk'
 import {
   NDKKind_DirectMessage,
@@ -18,6 +15,7 @@ import { hexToBech32 } from '@/utils/addressConverter'
 export class DirectMessageService implements DirectMessageRepository {
   constructor(private nostrClient: NostrClient) {}
 
+  // TODO: 送信できた相手と出来なかった相手を区別可能にする
   send(message: DirectMessage): ResultAsync<void, Error> {
     return ResultAsync.combine(
       message.receivers.map((receiver) =>
@@ -54,19 +52,6 @@ export class DirectMessageService implements DirectMessageRepository {
           events.map((event) =>
             this.nostrClient
               .decryptGiftWrapNostrEvent(event.rawEvent())
-              .orElse((error) => {
-                console.error('Failed to decrypt gift wrap event', error)
-                return ResultAsync.fromSafePromise(
-                  Promise.resolve({
-                    kind: NDKKind_DirectMessage,
-                    content: 'Error decrypting gift wrap event',
-                    tags: [],
-                    pubkey:
-                      '58f4c2db955531458a1077d97d98216a7443cd440c8df07391d18f721d3e15ca',
-                    created_at: 0,
-                  })
-                )
-              })
               .andThen(DirectMessage.fromNostrEvent)
           )
         )
@@ -77,26 +62,16 @@ export class DirectMessageService implements DirectMessageRepository {
         ): Map<string, Conversation> => {
           return messages.reduce((conversationMap, message) => {
             // TODO: Use message.createParticipants()
-            const participantPubkeys = Array.from(
-              new Set([
-                message.sender.pubkey,
-                ...message.receivers.map((r) => r.user.pubkey),
-              ])
-            )
-
-            const participants = new Set(
-              participantPubkeys.map((pubkey) => {
-                return new Participant(
-                  new User({
-                    pubkey,
-                    npub: hexToBech32(pubkey).unwrapOr(''),
-                  })
-                )
+            const participants = message
+              .createParticipants()
+              .andThen((participants) => {
+                console.error("FIXME: Don't ignore error")
+                return ok(participants)
               })
-            )
+              .unwrapOr(new Set<Participant>())
 
             const id = Conversation.generateId(
-              participantPubkeys,
+              Array.from(participants).map((p) => p.user.pubkey),
               message.subject ?? ''
             )
 
@@ -113,8 +88,7 @@ export class DirectMessageService implements DirectMessageRepository {
   }
 
   subscribeDirectMessages(
-    onConversation: (conversation: Conversation) => void,
-    options?: SubscribeDirectMessagesOptions
+    onConversation: (conversation: Conversation) => void
   ): Result<{ unsubscribe: () => void }, Error> {
     return this.nostrClient.getLoggedInUser().andThen((user) =>
       this.nostrClient.subscribeEvents(
