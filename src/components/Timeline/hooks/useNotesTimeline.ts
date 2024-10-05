@@ -96,7 +96,6 @@ export const useNotesTimeline = ({
     subscribe({ authorPubkeys, limit, hashtag })
 
     return () => {
-      console.log('UNSUBSCRIBE')
       unsubscribe()
     }
   }, [authorPubkeys, authStatus, subscribe, unsubscribe, limit, hashtag])

@@ -49,15 +49,9 @@ export class NotificationService implements NotificationRepository {
       .andThen(({ events, user }) => {
         return ResultAsync.combine(
           events
-            .filter((event: NDKEvent) => event.author.pubkey !== user.pubkey)
-            .map((event: NDKEvent) => {
-              // FIXME: 何故か自分のポストを除外できない check
-              console.log('pubkeys', {
-                eventPubkey: event.author.pubkey,
-                userPubkey: user.pubkey,
-              })
-              return this.createNotificationFromEvent(event)
-            })
+            // Exclude user's own posts
+            .filter((event) => event.author.pubkey !== user.pubkey)
+            .map((event) => this.createNotificationFromEvent(event))
         )
       })
   }
@@ -88,6 +82,7 @@ export class NotificationService implements NotificationRepository {
             .subscribe({
               next: (event) => {
                 if (event.author.pubkey === user.pubkey) {
+                  // Exclude user's own posts
                   return
                 }
                 this.createNotificationFromEvent(event).match(
