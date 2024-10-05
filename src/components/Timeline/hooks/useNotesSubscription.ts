@@ -11,7 +11,7 @@ import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
 export const useNotesSubscription = () => {
   const {
     auth: { nostrClient, status: authStatus },
-    timeline: { notes, status: timelineStatus },
+    timeline: { notes, status: timelineStatus, subscription },
     dispatch,
   } = useContext(AppContext)
 
@@ -40,19 +40,28 @@ export const useNotesSubscription = () => {
         }
       )
 
-      dispatch({ type: OperationType.SubscribeNotes })
+      const subscription = new SubscribeNotes(noteService)
+        .execute(options)
+        .subscribe({
+          next: (note) => {
+            dispatch({ type: OperationType.AddNewNote, note })
+          },
+          error: (error) => {
+            dispatch({ type: OperationType.SubscribeNotesError, error })
+          },
+        })
 
-      new SubscribeNotes(noteService).execute(options).subscribe({
-        next: (note) => {
-          dispatch({ type: OperationType.AddNewNote, note })
-        },
-        error: (error) => {
-          dispatch({ type: OperationType.SubscribeNotesError, error })
-        },
-      })
+      dispatch({ type: OperationType.SubscribeNotes, subscription })
     },
     [nostrClient, dispatch, authStatus, timelineStatus]
   )
 
-  return { subscribe, notes }
+  const unsubscribe = useCallback(() => {
+    if (subscription) {
+      subscription.unsubscribe()
+      dispatch({ type: OperationType.UnsubscribeNotes })
+    }
+  }, [subscription, dispatch])
+
+  return { subscribe, unsubscribe, notes }
 }

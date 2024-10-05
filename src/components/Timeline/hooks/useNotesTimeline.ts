@@ -18,7 +18,7 @@ export const useNotesTimeline = ({
     auth: { status: authStatus },
     timeline: { status: timelineStatus, notes },
   } = useContext(AppContext)
-  const { subscribe } = useNotesSubscription()
+  const { subscribe, unsubscribe } = useNotesSubscription()
 
   const isTimelineLoading =
     timelineStatus !== TimelineStatus.Subscribing || notes.length === 0
@@ -37,7 +37,20 @@ export const useNotesTimeline = ({
     }
     isSubscribing.current = true
     subscribe({ authorPubkeys, limit, hashtag })
-  }, [authorPubkeys, authStatus, timelineStatus, subscribe, limit, hashtag])
+
+    return () => {
+      isSubscribing.current = false
+      unsubscribe()
+    }
+  }, [
+    authorPubkeys,
+    authStatus,
+    timelineStatus,
+    subscribe,
+    unsubscribe,
+    limit,
+    hashtag,
+  ])
 
   return { notes, isTimelineLoading }
 }

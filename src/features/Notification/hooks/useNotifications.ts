@@ -72,6 +72,14 @@ export const useNotifications = () => {
       })
 
     dispatch({ type: OperationType.SubscribeNotifications, subscription })
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe()
+        isSubscribing.current = false
+        dispatch({ type: OperationType.UnsubscribeNotifications })
+      }
+    }
   }, [authStatus, nostrClient, dispatch, notificationsStatus])
 
   return { notifications }

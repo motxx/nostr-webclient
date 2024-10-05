@@ -1,4 +1,4 @@
-import { useCallback, useContext } from 'react'
+import { useCallback, useContext, useRef } from 'react'
 import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
 import { SubscribeDirectMessages } from '@/domain/use_cases/SubscribeDirectMessages'
 import { AppContext } from '@/context/AppContext'
@@ -12,6 +12,8 @@ export const useMessagesSubscription = () => {
     dispatch,
   } = useContext(AppContext)
 
+  const isSubscribing = useRef<boolean>(false)
+
   const subscribe = useCallback(() => {
     if (
       authStatus !== AuthStatus.LoggedIn &&
@@ -23,9 +25,14 @@ export const useMessagesSubscription = () => {
       throw new Error('NostrClient is not ready')
     }
 
-    dispatch({ type: OperationType.SubscribeMessages })
+    if (isSubscribing.current) {
+      return
+    }
+    isSubscribing.current = true
 
-    new SubscribeDirectMessages(new DirectMessageService(nostrClient))
+    const subscription = new SubscribeDirectMessages(
+      new DirectMessageService(nostrClient)
+    )
       .execute()
       .subscribe({
         next: (conversation) => {
@@ -36,7 +43,17 @@ export const useMessagesSubscription = () => {
           dispatch({ type: OperationType.SubscribeMessagesError, error })
         },
       })
-  }, [nostrClient, authStatus, messagesStatus, dispatch])
+
+    dispatch({ type: OperationType.SubscribeMessages, subscription })
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe()
+        isSubscribing.current = false
+        dispatch({ type: OperationType.UnsubscribeMessages })
+      }
+    }
+  }, [nostrClient, authStatus, messagesStatus, dispatch, isSubscribing])
 
   return { subscribe }
 }

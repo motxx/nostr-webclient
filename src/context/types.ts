@@ -6,6 +6,7 @@ import { AppAction } from './actions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { Notification } from '@/domain/entities/Notification'
+import { Subscription } from 'rxjs'
 
 export enum AuthStatus {
   Idle = 'idle',
@@ -43,6 +44,7 @@ export interface AuthState {
 
 export interface TimelineState {
   status: TimelineStatus
+  subscription: Subscription | null
   notes: Note[]
   error: Error | null
   fetchingPastNotes: boolean // 永続subscribeと独立に動くため、statusと別で管理
@@ -50,6 +52,7 @@ export interface TimelineState {
 
 export interface MessagesState {
   status: MessagesStatus
+  subscription: Subscription | null
   conversations: Conversation[]
   temporaryMessages: DirectMessage[] // 送信中のメッセージを一時的に保存
   error: Error | null
@@ -57,6 +60,7 @@ export interface MessagesState {
 
 export interface NotificationsState {
   status: NotificationsStatus
+  subscription: Subscription | null
   notifications: Notification[]
   fetchingPastNotifications: boolean
   error: Error | null

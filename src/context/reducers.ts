@@ -12,18 +12,21 @@ export const initialState: AppState = {
   },
   timeline: {
     status: TimelineStatus.Idle,
+    subscription: null,
     notes: [],
     error: null,
     fetchingPastNotes: false,
   },
   messages: {
     status: MessagesStatus.Idle,
+    subscription: null,
     conversations: [],
     temporaryMessages: [],
     error: null,
   },
   notifications: {
     status: NotificationsStatus.Idle,
+    subscription: null,
     notifications: [],
     fetchingPastNotifications: false,
     error: null,
@@ -103,6 +106,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         timeline: {
           ...state.timeline,
           status: TimelineStatus.Subscribing,
+          subscription: action.subscription,
           notes: [], // Clear notes to prevent stale data (TODO: Implement a more robust solution)
         },
       }
@@ -112,6 +116,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         timeline: {
           ...state.timeline,
           status: TimelineStatus.Idle,
+          subscription: null,
           notes: [],
           error: null,
           fetchingPastNotes: false,
@@ -179,6 +184,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         messages: {
           ...state.messages,
+          subscription: action.subscription,
           status: MessagesStatus.Subscribing,
         },
       }
@@ -196,6 +202,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         messages: {
           ...state.messages,
+          subscription: null,
           status: MessagesStatus.Idle,
           conversations: [],
           temporaryMessages: [],
@@ -281,6 +288,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         notifications: {
           ...state.notifications,
+          subscription: action.subscription,
           status: NotificationsStatus.Subscribing,
         },
       }
@@ -300,6 +308,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
           ...state.notifications,
           status: NotificationsStatus.Idle,
           fetchingPastNotifications: false,
+          subscription: null,
           notifications: [],
           error: null,
         },
