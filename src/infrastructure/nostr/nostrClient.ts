@@ -8,7 +8,6 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
-  NDKSubscription,
 } from '@nostr-dev-kit/ndk'
 import {
   NostrCallZapEndpointError,
@@ -29,11 +28,11 @@ import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
 import { Mutex } from 'async-mutex'
 import { CommonRelays } from './commonRelays'
-import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { KeyPair } from '@/domain/entities/KeyPair'
 import { finalizeEvent, nip44 } from 'nostr-tools'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 import { randomBytes } from 'crypto'
+import { Observable } from 'rxjs'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
 const NDKConnectTimeoutMSec = 1000 // 1 second
@@ -81,8 +80,8 @@ export class NostrClient {
 
   static readonly Relays = [
     'wss://relay.hakua.xyz',
-    //'wss://relay.damus.io',
-    //'wss://relay.nostr.band',
+    'wss://relay.damus.io',
+    'wss://relay.nostr.band',
     //'wss://r.kojira.io',
     //...CommonRelays.Iris,
     //...CommonRelays.JapaneseRelays,
@@ -244,7 +243,7 @@ export class NostrClient {
         JSON.stringify(unsignedKind14)
       ),
       (e: unknown) =>
-        new ErrorWithDetails('Failed to encrypt content', e as Error)
+        new AggregateError([e as Error], 'Failed to encrypt content')
     )
   }
 
@@ -260,7 +259,7 @@ export class NostrClient {
         )
         return JSON.parse(json) as NostrEvent
       },
-      (e) => new ErrorWithDetails('Failed to decryptPayload', e as Error)
+      (e) => new AggregateError([e as Error], 'Failed to decryptPayload')
     )()
   }
 
@@ -284,7 +283,7 @@ export class NostrClient {
 
         return ResultAsync.fromPromise(
           event.sign(),
-          (e) => new ErrorWithDetails('Failed to sign event', e as Error)
+          (e) => new AggregateError([e as Error], 'Failed to sign event')
         ).map((sig) => ({
           ...event.rawEvent(),
           sig,
@@ -340,7 +339,7 @@ export class NostrClient {
           nonce
         )
       },
-      (e) => new ErrorWithDetails('Failed to encryptSealNostrEvent', e as Error)
+      (e) => new AggregateError([e as Error], 'Failed to encryptSealNostrEvent')
     )()
   }
 
@@ -356,7 +355,7 @@ export class NostrClient {
         )
         return JSON.parse(json) as NostrEvent
       },
-      (e) => new ErrorWithDetails('Failed to decryptSealNostrEvent', e as Error)
+      (e) => new AggregateError([e as Error], 'Failed to decryptSealNostrEvent')
     )()
   }
 
@@ -378,7 +377,7 @@ export class NostrClient {
     return ResultAsync.fromPromise(
       Promise.resolve(event),
       (e) =>
-        new ErrorWithDetails('Failed to create gift wrap event', e as Error)
+        new AggregateError([e as Error], 'Failed to create gift wrap event')
     )
   }
 
@@ -395,7 +394,7 @@ export class NostrClient {
         )
         return signedEvent
       })(),
-      (error) => new ErrorWithDetails('Event signing failed', error as Error)
+      (error) => new AggregateError([error as Error], 'Event signing failed')
     )
   }
 
@@ -424,32 +423,27 @@ export class NostrClient {
     )
   }
 
-  subscribeEvents(
-    filters: NDKFilter,
-    onEvent: (event: NDKEvent) => void
-  ): Result<
-    { _subscription: NDKSubscription; unsubscribe: () => void },
-    Error
-  > {
-    return Result.fromThrowable(
-      () => {
+  subscribeEvents(filters: NDKFilter): Observable<NDKEvent> {
+    return new Observable<NDKEvent>((subscriber) => {
+      try {
         const relaySet = NDKRelaySet.fromRelayUrls(
           NostrClient.Relays,
           this.#ndk
         )
         const subscription = this.#ndk
           .subscribe(filters, { closeOnEose: false }, relaySet, true)
-          .on('event', (event: NDKEvent) => onEvent(event))
+          .on('event', (event: NDKEvent) => {
+            subscriber.next(event)
+          })
 
-        return {
-          _subscription: subscription,
-          unsubscribe: () => {
-            subscription.stop()
-          },
+        return () => {
+          subscription.stop()
+          subscriber.unsubscribe()
         }
-      },
-      (error) => new Error(`subscribeEvents: ${error}`)
-    )()
+      } catch (error) {
+        subscriber.error(new Error(`Failed to subscribe events: ${error}`))
+      }
+    })
   }
 
   fetchEvent(eventId: string): ResultAsync<NDKEvent, Error> {
@@ -471,10 +465,7 @@ export class NostrClient {
     return eventFetcher.robustFetchEvent(eventId)
   }
 
-  fetchEvents(
-    filter: NDKFilter,
-    limit: number = 20
-  ): ResultAsync<NDKEvent[], Error> {
+  fetchEvents(filter: NDKFilter): ResultAsync<NDKEvent[], Error> {
     const batchFetchEvents = (batchSize: number): Promise<NDKEvent[]> =>
       new Promise((resolve) => {
         const batchEvents: NDKEvent[] = []
@@ -492,6 +483,7 @@ export class NostrClient {
 
     const fetchAllEvents = async (): Promise<NDKEvent[]> => {
       const events: NDKEvent[] = []
+      const limit = filter.limit ?? 20
       let remainingLimit = limit
 
       while (events.length < limit) {

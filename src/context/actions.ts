@@ -3,6 +3,7 @@ import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { Note } from '@/domain/entities/Note'
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
+import { Notification } from '@/domain/entities/Notification'
 
 export enum OperationType {
   // Auth
@@ -21,7 +22,6 @@ export enum OperationType {
   FetchPastNotesError = 'FetchPastNotesError',
   AddNewNote = 'AddNewNote',
   // Messages
-  InitializeMessageSubscription = 'InitializeMessageSubscription',
   SubscribeMessages = 'SubscribeMessages',
   SubscribeMessagesError = 'SubscribeMessagesError',
   AddNewMessage = 'AddNewMessage',
@@ -30,6 +30,14 @@ export enum OperationType {
   CreateNewConversation = 'CreateNewConversation',
   CreateNewConversationError = 'CreateNewConversationError',
   UnsubscribeMessages = 'UnsubscribeMessages',
+  // Notifications
+  SubscribeNotifications = 'SubscribeNotifications',
+  SubscribeNotificationsError = 'SubscribeNotificationsError',
+  UnsubscribeNotifications = 'UnsubscribeNotifications',
+  FetchPastNotificationsStart = 'FetchPastNotificationsStart',
+  FetchPastNotificationsEnd = 'FetchPastNotificationsEnd',
+  FetchPastNotificationsError = 'FetchPastNotificationsError',
+  AddNewNotification = 'AddNewNotification',
 }
 
 export type AuthAction =
@@ -47,7 +55,6 @@ export type AuthAction =
 export type TimelineAction =
   | {
       type: OperationType.SubscribeNotes
-      subscription: { unsubscribe: () => void }
     }
   | {
       type: OperationType.SubscribeNotesError
@@ -74,11 +81,7 @@ export type TimelineAction =
 
 export type MessagesAction =
   | {
-      type: OperationType.InitializeMessageSubscription
-    }
-  | {
       type: OperationType.SubscribeMessages
-      subscription: { unsubscribe: () => void }
     }
   | {
       type: OperationType.SubscribeMessagesError
@@ -109,4 +112,36 @@ export type MessagesAction =
       type: OperationType.UnsubscribeMessages
     }
 
-export type AppAction = AuthAction | TimelineAction | MessagesAction
+export type NotificationsAction =
+  | {
+      type: OperationType.SubscribeNotifications
+      subscription: { unsubscribe: () => void }
+    }
+  | {
+      type: OperationType.SubscribeNotificationsError
+      error: Error
+    }
+  | {
+      type: OperationType.UnsubscribeNotifications
+    }
+  | {
+      type: OperationType.FetchPastNotificationsStart
+    }
+  | {
+      type: OperationType.FetchPastNotificationsEnd
+      notifications: Notification[]
+    }
+  | {
+      type: OperationType.FetchPastNotificationsError
+      error: Error
+    }
+  | {
+      type: OperationType.AddNewNotification
+      notification: Notification
+    }
+
+export type AppAction =
+  | AuthAction
+  | TimelineAction
+  | MessagesAction
+  | NotificationsAction

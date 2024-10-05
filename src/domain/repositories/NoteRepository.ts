@@ -1,5 +1,6 @@
-import { Result, ResultAsync } from 'neverthrow'
+import { ResultAsync } from 'neverthrow'
 import { Note } from '@/domain/entities/Note'
+import { Observable } from 'rxjs'
 
 export type SubscribeNotesOptions = {
   since?: Date
@@ -15,11 +16,7 @@ export type SubscribeNotesOptions = {
 }
 
 export interface NoteRepository {
-  fetchPastNotes(options?: SubscribeNotesOptions): ResultAsync<Note[], Error>
   postNote(note: Note): ResultAsync<void, Error>
-
-  subscribeNotes(
-    onNote: (note: Note) => void,
-    options?: SubscribeNotesOptions
-  ): Result<{ unsubscribe: () => void }, Error>
+  fetchPastNotes(options?: SubscribeNotesOptions): ResultAsync<Note[], Error>
+  subscribeNotes(options?: SubscribeNotesOptions): Observable<Note>
 }

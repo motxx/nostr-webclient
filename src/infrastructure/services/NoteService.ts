@@ -1,4 +1,4 @@
-import { Result, ResultAsync, ok, okAsync } from 'neverthrow'
+import { Result, ResultAsync, ok } from 'neverthrow'
 import { NDKEvent, NDKKind } from '@nostr-dev-kit/ndk'
 import { isEmoji, Media, Note } from '@/domain/entities/Note'
 import {
@@ -11,6 +11,7 @@ import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { unixtimeOf } from '../nostr/utils'
 import { NoteReactions } from '@/domain/entities/NoteReactions'
 import { bech32ToHex } from '@/utils/addressConverter'
+import { Observable } from 'rxjs'
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
@@ -43,7 +44,6 @@ export class NoteService implements NoteRepository {
         authors: options?.authorPubkeys,
         since: options?.since && unixtimeOf(options.since),
         until: options?.until && unixtimeOf(options.until),
-        limit: options?.limit ?? 20,
         search: options?.image
           ? `http.+(${imageExtensions.join('|')})`
           : undefined,
@@ -56,28 +56,38 @@ export class NoteService implements NoteRepository {
       )
   }
 
-  subscribeNotes(
-    onNote: (note: Note) => void,
-    options?: SubscribeNotesOptions
-  ): Result<{ unsubscribe: () => void }, Error> {
-    return this.#nostrClient.subscribeEvents(
-      {
-        kinds: [NDKKind.Text],
-        authors: options?.authorPubkeys,
-        since: options?.since && unixtimeOf(options.since),
-        until: options?.until && unixtimeOf(options.until),
-        limit: options?.limit ?? 20,
-        search: options?.image
-          ? `http.+(${imageExtensions.join('|')})`
-          : undefined,
-        '#t': options?.hashtag ? [options.hashtag] : undefined,
-      },
-      (event: NDKEvent) =>
-        this.createNoteFromEvent(event).match(
-          (note) => onNote(note),
-          (error) => console.error('subscribeNotes: onEvent', { error, event })
-        )
-    )
+  subscribeNotes(options?: SubscribeNotesOptions): Observable<Note> {
+    return new Observable<Note>((subscriber) => {
+      this.#nostrClient
+        .subscribeEvents({
+          kinds: [NDKKind.Text],
+          authors: options?.authorPubkeys,
+          since: options?.since ? unixtimeOf(options.since) : undefined,
+          until: options?.until ? unixtimeOf(options.until) : undefined,
+          limit: options?.limit ?? 20,
+          search: options?.image
+            ? `http.+(${imageExtensions.join('|')})`
+            : undefined,
+          '#t': options?.hashtag ? [options.hashtag] : undefined,
+        })
+        .subscribe({
+          next: (event) =>
+            this.createNoteFromEvent(event).match(
+              (note) => subscriber.next(note),
+              (error) =>
+                subscriber.error(
+                  new AggregateError(
+                    [error],
+                    'Failed to create note from event'
+                  )
+                )
+            ),
+          error: (error) =>
+            subscriber.error(
+              new AggregateError([error], 'Failed to subscribe notes')
+            ),
+        })
+    })
   }
 
   subscribeZaps(

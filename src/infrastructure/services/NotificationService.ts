@@ -1,4 +1,4 @@
-import { ResultAsync, err } from 'neverthrow'
+import { Result, ResultAsync, err } from 'neverthrow'
 import { NDKEvent, NDKKind } from '@nostr-dev-kit/ndk'
 import {
   Notification,
@@ -11,8 +11,8 @@ import {
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { UserProfileRepository } from '@/domain/repositories/UserProfileRepository'
 import { NoteService } from '@/infrastructure/services/NoteService'
-import { ErrorWithDetails } from '../errors/ErrorWithDetails'
 import { decode } from 'light-bolt11-decoder'
+import { Observable } from 'rxjs'
 
 export class NotificationService implements NotificationRepository {
   constructor(
@@ -21,14 +21,14 @@ export class NotificationService implements NotificationRepository {
     private noteService: NoteService
   ) {}
 
-  subscribeNotifications(
-    onNotification: (notification: Notification) => void,
+  fetchPastNotifications(
     options?: SubscribeNotificationsOptions
-  ): ResultAsync<{ unsubscribe: () => void }, Error> {
-    return ResultAsync.fromPromise(
-      this.nostrClient.getLoggedInUser().match(
-        (user) => {
-          const filter = {
+  ): ResultAsync<Notification[], Error> {
+    return this.nostrClient
+      .getLoggedInUser()
+      .asyncAndThen((user) => {
+        return this.nostrClient
+          .fetchEvents({
             kinds: [
               NDKKind.Reaction,
               NDKKind.Text,
@@ -36,42 +36,86 @@ export class NotificationService implements NotificationRepository {
               NDKKind.Zap,
             ],
             '#p': [user.pubkey],
-            since: options?.since && Math.floor(options.since.getTime() / 1000),
-            until: options?.until && Math.floor(options.until.getTime() / 1000),
-            limit: options?.limit,
-          }
-
-          return this.nostrClient
-            .subscribeEvents(filter, (event: NDKEvent) => {
-              if (event.pubkey === user.pubkey) {
-                // 自己言及のリプライを除外
-                return
-              }
-              this.createNotificationFromEvent(event).match(
-                (notification) => onNotification(notification),
-                (e) => {
-                  console.error('subscribeNotifications: onEvent', {
-                    error: e,
-                    event,
-                  })
-                }
-              )
+            since: options?.since
+              ? Math.floor(options.since.getTime() / 1000)
+              : undefined,
+            until: options?.until
+              ? Math.floor(options.until.getTime() / 1000)
+              : undefined,
+            limit: options?.limit ?? 20,
+          })
+          .map((events) => ({ events, user }))
+      })
+      .andThen(({ events, user }) => {
+        return ResultAsync.combine(
+          events
+            .filter((event: NDKEvent) => event.author.pubkey !== user.pubkey)
+            .map((event: NDKEvent) => {
+              // FIXME: 何故か自分のポストを除外できない check
+              console.log('pubkeys', {
+                eventPubkey: event.author.pubkey,
+                userPubkey: user.pubkey,
+              })
+              return this.createNotificationFromEvent(event)
             })
-            .match(
-              (value) => Promise.resolve(value),
-              (error) =>
-                Promise.reject(
-                  new ErrorWithDetails('subscribeNotifications', error)
+        )
+      })
+  }
+
+  subscribeNotifications(
+    options?: SubscribeNotificationsOptions
+  ): Observable<Notification> {
+    return new Observable<Notification>((subscriber) => {
+      this.nostrClient.getLoggedInUser().match(
+        (user) => {
+          this.nostrClient
+            .subscribeEvents({
+              kinds: [
+                NDKKind.Reaction,
+                NDKKind.Text,
+                NDKKind.Repost,
+                NDKKind.Zap,
+              ],
+              '#p': [user.pubkey],
+              since: options?.since
+                ? Math.floor(options.since.getTime() / 1000)
+                : undefined,
+              until: options?.until
+                ? Math.floor(options.until.getTime() / 1000)
+                : undefined,
+              limit: options?.limit ?? 20,
+            })
+            .subscribe({
+              next: (event) => {
+                if (event.author.pubkey === user.pubkey) {
+                  return
+                }
+                this.createNotificationFromEvent(event).match(
+                  (notification) => subscriber.next(notification),
+                  (error) =>
+                    subscriber.error(
+                      new AggregateError(
+                        [error],
+                        'Failed to create notification from event'
+                      )
+                    )
                 )
-            )
+              },
+              error: (error) =>
+                subscriber.error(
+                  new AggregateError(
+                    [error],
+                    'Failed to subscribe notifications'
+                  )
+                ),
+            })
         },
         (error) =>
-          Promise.reject(
-            new Error('Failed to get logged in user: ' + error.message)
+          subscriber.error(
+            new AggregateError([error], 'Failed to get logged in user')
           )
-      ),
-      (e: unknown) => new ErrorWithDetails('subscribeNotifications', e as Error)
-    )
+      )
+    })
   }
 
   private createNotificationFromEvent(

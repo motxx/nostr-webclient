@@ -1,4 +1,3 @@
-import { ErrorWithDetails } from '@/infrastructure/errors/ErrorWithDetails'
 import { LnurlPay } from '@/infrastructure/nostr/lnurlPay'
 
 export class NostrNoWindowNostrError extends Error {
@@ -7,9 +6,9 @@ export class NostrNoWindowNostrError extends Error {
   }
 }
 
-export class NostrClientConnectError extends ErrorWithDetails {
+export class NostrClientConnectError extends AggregateError {
   constructor(details: Error) {
-    super('Failed to connect NostrClient', details)
+    super([details], 'Failed to connect NostrClient')
   }
 }
 

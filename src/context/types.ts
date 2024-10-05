@@ -5,6 +5,7 @@ import { Note } from '@/domain/entities/Note'
 import { AppAction } from './actions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
+import { Notification } from '@/domain/entities/Notification'
 
 export enum AuthStatus {
   Idle = 'idle',
@@ -26,6 +27,12 @@ export enum MessagesStatus {
   Error = 'error',
 }
 
+export enum NotificationsStatus {
+  Idle = 'idle',
+  Subscribing = 'subscribing',
+  Error = 'error',
+}
+
 export interface AuthState {
   status: AuthStatus
   loggedInUser: User | null
@@ -38,7 +45,6 @@ export interface TimelineState {
   status: TimelineStatus
   notes: Note[]
   error: Error | null
-  subscription: { unsubscribe: () => void } | null
   fetchingPastNotes: boolean // 永続subscribeと独立に動くため、statusと別で管理
 }
 
@@ -46,7 +52,13 @@ export interface MessagesState {
   status: MessagesStatus
   conversations: Conversation[]
   temporaryMessages: DirectMessage[] // 送信中のメッセージを一時的に保存
-  subscription: { unsubscribe: () => void } | null
+  error: Error | null
+}
+
+export interface NotificationsState {
+  status: NotificationsStatus
+  notifications: Notification[]
+  fetchingPastNotifications: boolean
   error: Error | null
 }
 
@@ -54,5 +66,6 @@ export interface AppState {
   auth: AuthState
   timeline: TimelineState
   messages: MessagesState
+  notifications: NotificationsState
   dispatch: Dispatch<AppAction>
 }

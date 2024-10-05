@@ -2,15 +2,12 @@ import { DirectMessageRepository } from '@/domain/repositories/DirectMessageRepo
 import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '../nostr/nostrClient'
-import { ok, Result, ResultAsync } from 'neverthrow'
+import { ok, ResultAsync } from 'neverthrow'
 import { NDKFilter } from '@nostr-dev-kit/ndk'
-import {
-  NDKKind_DirectMessage,
-  NDKKind_GiftWrap,
-} from '../nostr/kindExtensions'
+import { NDKKind_GiftWrap } from '../nostr/kindExtensions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { Participant } from '@/domain/entities/Participant'
-import { hexToBech32 } from '@/utils/addressConverter'
+import { Observable } from 'rxjs'
 
 export class DirectMessageService implements DirectMessageRepository {
   constructor(private nostrClient: NostrClient) {}
@@ -87,47 +84,60 @@ export class DirectMessageService implements DirectMessageRepository {
       })
   }
 
-  subscribeDirectMessages(
-    onConversation: (conversation: Conversation) => void
-  ): Result<{ unsubscribe: () => void }, Error> {
-    return this.nostrClient.getLoggedInUser().andThen((user) =>
-      this.nostrClient.subscribeEvents(
-        {
-          kinds: [NDKKind_GiftWrap as any],
-          '#p': [user.pubkey],
-          limit: 1000,
-        },
-        (event) => {
+  subscribeDirectMessages(): Observable<Conversation> {
+    return new Observable<Conversation>((subscriber) => {
+      this.nostrClient.getLoggedInUser().match(
+        (user) => {
           this.nostrClient
-            .decryptGiftWrapNostrEvent(event.rawEvent())
-            .andThen((decryptedEvent) =>
-              DirectMessage.fromNostrEvent(decryptedEvent)
-            )
-            .match(
-              (message) => {
-                message.createParticipants().match(
-                  (participants) => {
-                    onConversation(
-                      Conversation.create(
-                        participants,
-                        message.subject ?? ''
-                      ).addMessage(message)
-                    )
-                  },
-                  (error) => {
-                    console.error(
-                      'subscribeDirectMessages: onEvent: createParticipants:',
-                      error
-                    )
-                  }
-                )
+            .subscribeEvents({
+              kinds: [NDKKind_GiftWrap as any],
+              '#p': [user.pubkey],
+              limit: 1000,
+            })
+            .subscribe({
+              next: (event) => {
+                this.nostrClient
+                  .decryptGiftWrapNostrEvent(event.rawEvent())
+                  .andThen((decryptedEvent) =>
+                    DirectMessage.fromNostrEvent(decryptedEvent)
+                  )
+                  .andThen((message) =>
+                    message
+                      .createParticipants()
+                      .andThen((participants) =>
+                        ok(
+                          Conversation.create(
+                            participants,
+                            message.subject ?? ''
+                          )
+                        )
+                      )
+                  )
+                  .match(
+                    (conversation) => subscriber.next(conversation),
+                    (error) =>
+                      subscriber.error(
+                        new AggregateError(
+                          [error],
+                          'Failed to create conversation'
+                        )
+                      )
+                  )
               },
-              (error) => {
-                console.error('subscribeDirectMessages: onEvent', error)
-              }
-            )
-        }
+              error: (error) =>
+                subscriber.error(
+                  new AggregateError(
+                    [error],
+                    'Failed to subscribe direct messages'
+                  )
+                ),
+            })
+        },
+        (error) =>
+          subscriber.error(
+            new AggregateError([error], 'Failed to get logged in user')
+          )
       )
-    )
+    })
   }
 }

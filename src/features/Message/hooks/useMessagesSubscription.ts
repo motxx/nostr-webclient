@@ -8,7 +8,7 @@ import { OperationType } from '@/context/actions'
 export const useMessagesSubscription = () => {
   const {
     auth: { nostrClient, status: authStatus },
-    messages: { subscription, status: messagesStatus },
+    messages: { status: messagesStatus },
     dispatch,
   } = useContext(AppContext)
 
@@ -23,28 +23,20 @@ export const useMessagesSubscription = () => {
       throw new Error('NostrClient is not ready')
     }
 
-    dispatch({ type: OperationType.InitializeMessageSubscription })
+    dispatch({ type: OperationType.SubscribeMessages })
 
     new SubscribeDirectMessages(new DirectMessageService(nostrClient))
-      .execute((conversation) => {
-        // TODO: MessageとConversationの包含関係を整理する
-        dispatch({ type: OperationType.AddNewMessage, conversation })
-      })
-      .match(
-        (subscription) => {
-          dispatch({ type: OperationType.SubscribeMessages, subscription })
+      .execute()
+      .subscribe({
+        next: (conversation) => {
+          // TODO: MessageとConversationの包含関係を整理する
+          dispatch({ type: OperationType.AddNewMessage, conversation })
         },
-        (error) => {
+        error: (error) => {
           dispatch({ type: OperationType.SubscribeMessagesError, error })
-        }
-      )
+        },
+      })
   }, [nostrClient, authStatus, messagesStatus, dispatch])
 
-  const unsubscribe = useCallback(() => {
-    if (subscription) {
-      subscription.unsubscribe()
-    }
-  }, [subscription])
-
-  return { subscribe, unsubscribe }
+  return { subscribe }
 }

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { AppContext } from '@/context/AppContext'
 import { AuthStatus, TimelineStatus } from '@/context/types'
 import { useNotesSubscription } from './useNotesSubscription'
@@ -18,29 +18,26 @@ export const useNotesTimeline = ({
     auth: { status: authStatus },
     timeline: { status: timelineStatus, notes },
   } = useContext(AppContext)
-  const { subscribe, unsubscribe } = useNotesSubscription()
+  const { subscribe } = useNotesSubscription()
 
   const isTimelineLoading =
     timelineStatus !== TimelineStatus.Subscribing || notes.length === 0
 
-  const handleSubscription = useCallback(() => {
+  // 再レンダリングを防ぐためにuseRefを使う
+  const isSubscribing = useRef<boolean>(false)
+
+  useEffect(() => {
     if (
       (authStatus !== AuthStatus.ClientReady &&
         authStatus !== AuthStatus.LoggedIn) ||
-      timelineStatus !== TimelineStatus.Idle
+      timelineStatus !== TimelineStatus.Idle ||
+      isSubscribing.current
     ) {
       return
     }
-
+    isSubscribing.current = true
     subscribe({ authorPubkeys, limit, hashtag })
   }, [authorPubkeys, authStatus, timelineStatus, subscribe, limit, hashtag])
-
-  useEffect(() => {
-    handleSubscription()
-    return () => {
-      unsubscribe()
-    }
-  }, [handleSubscription, unsubscribe])
 
   return { notes, isTimelineLoading }
 }

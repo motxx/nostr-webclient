@@ -1,19 +1,10 @@
 import { Conversation } from '@/domain/entities/Conversation'
-import {
-  DirectMessageRepository,
-  SubscribeDirectMessagesOptions,
-} from '@/domain/repositories/DirectMessageRepository'
-import { Result } from 'neverthrow'
+import { DirectMessageRepository } from '@/domain/repositories/DirectMessageRepository'
+import { Observable } from 'rxjs'
 
 export class SubscribeDirectMessages {
   constructor(private directMessageRepository: DirectMessageRepository) {}
-  execute(
-    onConversation: (conversation: Conversation) => void,
-    options?: SubscribeDirectMessagesOptions
-  ): Result<{ unsubscribe: () => void }, Error> {
-    return this.directMessageRepository.subscribeDirectMessages(
-      onConversation,
-      options
-    )
+  execute(): Observable<Conversation> {
+    return this.directMessageRepository.subscribeDirectMessages()
   }
 }

@@ -1,8 +1,6 @@
-import { ErrorWithDetails } from '@/infrastructure/errors/ErrorWithDetails'
-
-export class UserFailedToConnectError extends ErrorWithDetails {
+export class UserFailedToConnectError extends AggregateError {
   constructor(details: Error) {
-    super('User failed to connect', details)
+    super([details], 'User failed to connect')
   }
 }
 
@@ -12,27 +10,27 @@ export class UserNotLoggedInError extends Error {
   }
 }
 
-export class UserFailedToGetSettingsError extends ErrorWithDetails {
+export class UserFailedToGetSettingsError extends AggregateError {
   constructor(details: Error) {
-    super('User failed to get settings', details)
+    super([details], 'User failed to get settings')
   }
 }
 
-export class UserFailedToUpdateSettingsError extends ErrorWithDetails {
+export class UserFailedToUpdateSettingsError extends AggregateError {
   constructor(details: Error) {
-    super('User failed to update settings', details)
+    super([details], 'User failed to update settings')
   }
 }
 
-export class ContentFailedToGetError extends ErrorWithDetails {
+export class ContentFailedToGetError extends AggregateError {
   constructor(details: Error) {
-    super('Content failed to get', details)
+    super([details], 'Content failed to get')
   }
 }
 
-export class ContentFailedToUpdateError extends ErrorWithDetails {
+export class ContentFailedToUpdateError extends AggregateError {
   constructor(details: Error) {
-    super('Content failed to update', details)
+    super([details], 'Content failed to update')
   }
 }
 

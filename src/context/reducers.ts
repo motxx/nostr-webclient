@@ -1,4 +1,4 @@
-import { AppState } from './types'
+import { AppState, NotificationsStatus } from './types'
 import { AppAction, OperationType } from './actions'
 import { AuthStatus, TimelineStatus, MessagesStatus } from './types'
 
@@ -14,14 +14,18 @@ export const initialState: AppState = {
     status: TimelineStatus.Idle,
     notes: [],
     error: null,
-    subscription: null,
     fetchingPastNotes: false,
   },
   messages: {
     status: MessagesStatus.Idle,
-    subscription: null,
     conversations: [],
     temporaryMessages: [],
+    error: null,
+  },
+  notifications: {
+    status: NotificationsStatus.Idle,
+    notifications: [],
+    fetchingPastNotifications: false,
     error: null,
   },
   dispatch: () => {},
@@ -100,7 +104,6 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
           ...state.timeline,
           status: TimelineStatus.Subscribing,
           notes: [], // Clear notes to prevent stale data (TODO: Implement a more robust solution)
-          subscription: action.subscription,
         },
       }
     case OperationType.UnsubscribeNotes:
@@ -111,7 +114,6 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
           status: TimelineStatus.Idle,
           notes: [],
           error: null,
-          subscription: null,
           fetchingPastNotes: false,
         },
       }
@@ -144,11 +146,11 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         timeline: {
           ...state.timeline,
-          notes: state.timeline.notes.some((n) => n.id === action.note.id)
-            ? state.timeline.notes
-            : [...state.timeline.notes, action.note].sort(
-                (a, b) => b.created_at.getTime() - a.created_at.getTime()
-              ),
+          notes: [
+            ...new Map(
+              [...state.timeline.notes, action.note].map((n) => [n.id, n])
+            ).values(),
+          ].sort((a, b) => b.created_at.getTime() - a.created_at.getTime()),
         },
       }
     case OperationType.SubscribeNotesError:
@@ -165,6 +167,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         timeline: {
           ...state.timeline,
+          status: TimelineStatus.Error,
           fetchingPastNotes: false,
           error: action.error,
         },
@@ -177,7 +180,26 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         messages: {
           ...state.messages,
           status: MessagesStatus.Subscribing,
-          subscription: action.subscription,
+        },
+      }
+    case OperationType.SubscribeMessagesError:
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          status: MessagesStatus.Error,
+          error: action.error,
+        },
+      }
+    case OperationType.UnsubscribeMessages:
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          status: MessagesStatus.Idle,
+          conversations: [],
+          temporaryMessages: [],
+          error: null,
         },
       }
     case OperationType.AddNewMessage:
@@ -231,6 +253,7 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         messages: {
           ...state.messages,
+          status: MessagesStatus.Error,
           error: action.error,
         },
       }
@@ -242,8 +265,98 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
           conversations: [...state.messages.conversations, action.conversation],
         },
       }
+    case OperationType.CreateNewConversationError:
+      return {
+        ...state,
+        messages: {
+          ...state.messages,
+          status: MessagesStatus.Error,
+          error: action.error,
+        },
+      }
+
+    // Notifications
+    case OperationType.SubscribeNotifications:
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          status: NotificationsStatus.Subscribing,
+        },
+      }
+    case OperationType.SubscribeNotificationsError:
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          status: NotificationsStatus.Error,
+          error: action.error,
+        },
+      }
+    case OperationType.UnsubscribeNotifications:
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          status: NotificationsStatus.Idle,
+          fetchingPastNotifications: false,
+          notifications: [],
+          error: null,
+        },
+      }
+    case OperationType.FetchPastNotificationsStart:
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          fetchingPastNotifications: true,
+        },
+      }
+    case OperationType.FetchPastNotificationsEnd:
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          fetchingPastNotifications: false,
+          notifications: [
+            ...new Map(
+              [
+                ...state.notifications.notifications,
+                ...action.notifications,
+              ].map((notification) => [notification.id, notification])
+            ).values(),
+          ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+        },
+      }
+    case OperationType.FetchPastNotificationsError:
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          status: NotificationsStatus.Error,
+          fetchingPastNotifications: false,
+          error: action.error,
+        },
+      }
+    case OperationType.AddNewNotification:
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          notifications: [
+            ...new Map(
+              [...state.notifications.notifications, action.notification].map(
+                (n) => [n.id, n]
+              )
+            ).values(),
+          ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+        },
+      }
 
     default:
-      return state
+      const check = (x: never): never => {
+        throw new Error('unknown action: ' + x)
+      }
+      return check(action)
   }
 }
