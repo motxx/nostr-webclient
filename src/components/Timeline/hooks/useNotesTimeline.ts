@@ -26,7 +26,7 @@ export const useNotesTimeline = ({
     dispatch,
   } = useContext(AppContext)
 
-  // 再レンダリングを防ぐためにuseRefを使う(timeline.statusは依存配列に影響すrので使わない)
+  // 再レンダリングを防ぐためにuseRefを使う(timeline.statusは依存配列に影響するので使わない)
   const subscriptionRef = useRef<Subscription | null>(null)
   const isSubscribingRef = useRef<boolean>(false)
 
