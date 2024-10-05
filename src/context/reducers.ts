@@ -210,7 +210,9 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
           conversations: (() => {
             if (action.conversation.messages.length !== 1) {
               // TODO: 例外を実装せずに、Messageを受け取ってConversationにいれるという直感的なフローにする
-              throw new Error('Conversation does not have exactly one message.')
+              throw new Error(
+                'conversations: Conversation does not have exactly one message.'
+              )
             }
             const newMessage = action.conversation.messages[0]
             const existingConversation = state.messages.conversations.find(
@@ -228,7 +230,9 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
           temporaryMessages: (() => {
             if (action.conversation.messages.length !== 1) {
               // TODO: 同上
-              throw new Error('Conversation does not have exactly one message.')
+              throw new Error(
+                'temporaryMessages: Conversation does not have exactly one message.'
+              )
             }
             const newMessage = action.conversation.messages[0]
             return state.messages.temporaryMessages.filter(

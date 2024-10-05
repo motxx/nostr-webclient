@@ -109,7 +109,7 @@ export class DirectMessageService implements DirectMessageRepository {
                           Conversation.create(
                             participants,
                             message.subject ?? ''
-                          )
+                          ).addMessage(message)
                         )
                       )
                   )
