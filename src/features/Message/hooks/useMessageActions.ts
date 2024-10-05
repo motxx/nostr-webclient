@@ -1,7 +1,6 @@
-import { useCallback, useContext, useEffect } from 'react'
-import { useMessagesSubscription } from './useMessagesSubscription'
+import { useCallback, useContext } from 'react'
 import { AppContext } from '@/context/AppContext'
-import { AuthStatus, MessagesStatus } from '@/context/types'
+import { AuthStatus } from '@/context/types'
 import { Conversation } from '@/domain/entities/Conversation'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { ok, Result, ResultAsync } from 'neverthrow'
@@ -14,35 +13,14 @@ import { DirectMessageService } from '@/infrastructure/services/DirectMessageSer
 import { SendDirectMessage } from '@/domain/use_cases/SendDirectMessage'
 import { User } from '@/domain/entities/User'
 
-export const useMessageConversations = () => {
+export const useMessageActions = () => {
   const {
     auth: { status: authStatus, nostrClient, loggedInUser },
-    messages: { status: messagesStatus, conversations },
+    messages: { conversations },
     dispatch,
   } = useContext(AppContext)
-  const { subscribe, unsubscribe } = useMessagesSubscription()
 
-  const handleSubscription = useCallback(() => {
-    console.log('handleSubscription')
-    if (
-      authStatus !== AuthStatus.LoggedIn ||
-      messagesStatus !== MessagesStatus.Idle
-    ) {
-      return
-    }
-    console.log('handleSubscription - 2')
-
-    subscribe()
-  }, [authStatus, messagesStatus, subscribe])
-
-  useEffect(() => {
-    handleSubscription()
-    return () => {
-      unsubscribe()
-    }
-  }, [handleSubscription, unsubscribe])
-
-  const addNewConversation = useCallback(
+  const createNewConversation = useCallback(
     (chatName: string, otherParticipantPubkeys: string[]) => {
       if (authStatus !== AuthStatus.LoggedIn) {
         return
@@ -134,5 +112,5 @@ export const useMessageConversations = () => {
     [authStatus, nostrClient, loggedInUser, dispatch]
   )
 
-  return { conversations, addNewConversation, sendDirectMessage }
+  return { createNewConversation, sendDirectMessage }
 }

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
 import { SubscribeDirectMessages } from '@/domain/use_cases/SubscribeDirectMessages'
 import { AppContext } from '@/context/AppContext'
@@ -6,9 +6,10 @@ import { AuthStatus } from '@/context/types'
 import { OperationType } from '@/context/actions'
 import { Subscription } from 'rxjs'
 
-export const useMessagesSubscription = () => {
+export const useMessageSubscription = () => {
   const {
     auth: { nostrClient, status: authStatus },
+    messages: { conversations },
     dispatch,
   } = useContext(AppContext)
 
@@ -16,7 +17,7 @@ export const useMessagesSubscription = () => {
   const subscriptionRef = useRef<Subscription | null>(null)
   const isSubscribingRef = useRef<boolean>(false)
 
-  const subscribe = useCallback(() => {
+  useEffect(() => {
     if (authStatus !== AuthStatus.LoggedIn) {
       return
     }
@@ -55,5 +56,5 @@ export const useMessagesSubscription = () => {
     }
   }, [nostrClient, authStatus, dispatch])
 
-  return { subscribe }
+  return { conversations }
 }

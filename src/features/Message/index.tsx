@@ -4,14 +4,15 @@ import MessageCreateConversationModal from './components/MessageCreateConversati
 import MessageChatSidebar from './components/MessageChatSidebar'
 import { AppContext } from '@/context/AppContext'
 import { AuthStatus } from '@/context/types'
-import { useMessageConversations } from './hooks/useMessageConversations'
+import { useMessageActions } from './hooks/useMessageActions'
+import { useMessageSubscription } from './hooks/useMessageSubscription'
 
 const MessagePage: React.FC = () => {
   const {
     auth: { status },
   } = useContext(AppContext)
-  const { conversations, addNewConversation, sendDirectMessage } =
-    useMessageConversations()
+  const { createNewConversation, sendDirectMessage } = useMessageActions()
+  const { conversations } = useMessageSubscription()
   const [selectedConversationIndex, setSelectedConversationIndex] = useState<
     number | null
   >(null)
@@ -38,7 +39,7 @@ const MessagePage: React.FC = () => {
     if (status !== AuthStatus.LoggedIn) {
       return
     }
-    addNewConversation(chatName, otherParticipantPubkeys)
+    createNewConversation(chatName, otherParticipantPubkeys)
   }
 
   const filteredConversations = useMemo(
