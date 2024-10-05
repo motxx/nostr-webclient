@@ -1,6 +1,6 @@
 import { useEffect, useContext, useRef } from 'react'
 import { AppContext } from '@/context/AppContext'
-import { AuthStatus, NotificationsStatus } from '@/context/types'
+import { AuthStatus } from '@/context/types'
 import { NotificationService } from '@/infrastructure/services/NotificationService'
 import { OperationType } from '@/context/actions'
 import { FetchPastNotifications } from '@/domain/use_cases/FetchPastNotifications'
