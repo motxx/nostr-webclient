@@ -1,4 +1,4 @@
-import { Result, ResultAsync, err } from 'neverthrow'
+import { ResultAsync, err } from 'neverthrow'
 import { NDKEvent, NDKKind } from '@nostr-dev-kit/ndk'
 import {
   Notification,
