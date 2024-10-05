@@ -12,6 +12,7 @@ import { unixtimeOf } from '../nostr/utils'
 import { NoteReactions } from '@/domain/entities/NoteReactions'
 import { bech32ToHex } from '@/utils/addressConverter'
 import { Observable } from 'rxjs'
+import { joinErrors } from '@/utils/errors'
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi']
@@ -76,15 +77,15 @@ export class NoteService implements NoteRepository {
               (note) => subscriber.next(note),
               (error) =>
                 subscriber.error(
-                  new AggregateError(
-                    [error],
-                    'Failed to create note from event'
+                  joinErrors(
+                    new Error('Failed to create note from event'),
+                    error
                   )
                 )
             ),
           error: (error) =>
             subscriber.error(
-              new AggregateError([error], 'Failed to subscribe notes')
+              joinErrors(new Error('Failed to subscribe notes'), error)
             ),
         })
     })
@@ -125,7 +126,7 @@ export class NoteService implements NoteRepository {
           return media
         }, [])
       },
-      (e) => new Error(`Failed to extract media from event: ${e}`)
+      (e) => joinErrors(new Error('Failed to extract media from event'), e)
     )()
   }
 
@@ -162,7 +163,10 @@ export class NoteService implements NoteRepository {
             })
           }),
         (error) =>
-          new Error(`Failed to create note from non-text event: ${error}`)
+          joinErrors(
+            new Error('Failed to create note from non-text event'),
+            error
+          )
       )
     }
 

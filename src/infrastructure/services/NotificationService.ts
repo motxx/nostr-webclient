@@ -13,6 +13,7 @@ import { UserProfileRepository } from '@/domain/repositories/UserProfileReposito
 import { NoteService } from '@/infrastructure/services/NoteService'
 import { decode } from 'light-bolt11-decoder'
 import { Observable } from 'rxjs'
+import { joinErrors } from '@/utils/errors'
 
 export class NotificationService implements NotificationRepository {
   constructor(
@@ -89,25 +90,25 @@ export class NotificationService implements NotificationRepository {
                   (notification) => subscriber.next(notification),
                   (error) =>
                     subscriber.error(
-                      new AggregateError(
-                        [error],
-                        'Failed to create notification from event'
+                      joinErrors(
+                        new Error('Failed to create notification from event'),
+                        error
                       )
                     )
                 )
               },
               error: (error) =>
                 subscriber.error(
-                  new AggregateError(
-                    [error],
-                    'Failed to subscribe notifications'
+                  joinErrors(
+                    new Error('Failed to subscribe notifications'),
+                    error
                   )
                 ),
             })
         },
         (error) =>
           subscriber.error(
-            new AggregateError([error], 'Failed to get logged in user')
+            joinErrors(new Error('Failed to get logged in user'), error)
           )
       )
     })

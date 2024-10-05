@@ -33,6 +33,7 @@ import { finalizeEvent, nip44 } from 'nostr-tools'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 import { randomBytes } from 'crypto'
 import { Observable } from 'rxjs'
+import { joinErrors } from '@/utils/errors'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
 const NDKConnectTimeoutMSec = 1000 // 1 second
@@ -157,7 +158,7 @@ export class NostrClient {
         )
         return NostrClient.#nostrClient
       }),
-      (error: unknown) => new Error(`Failed to connect: ${error}`)
+      (error) => joinErrors(new Error('Failed to connect'), error)
     )
   }
 
@@ -166,7 +167,7 @@ export class NostrClient {
       NostrClient.#mutex.runExclusive(async () => {
         NostrClient.#nostrClient = undefined
       }),
-      (error) => new Error(`Failed to disconnect: ${error}`)
+      (error) => joinErrors(new Error('Failed to disconnect'), error)
     )
   }
 
@@ -215,13 +216,16 @@ export class NostrClient {
           })
           await ndkEvent.publish(relaySet, PostEventTimeoutMSec)
         } catch (error) {
-          throw new Error(`Failed to post event: ${error}`)
+          throw joinErrors(new Error('Failed to post event'), error)
         }
       })(),
       (error) =>
         error instanceof Error
           ? error
-          : new Error(`Unknown error occurred while posting event: ${error}`)
+          : joinErrors(
+              new Error('Unknown error occurred while posting event'),
+              error
+            )
     )
   }
 
@@ -242,8 +246,7 @@ export class NostrClient {
         receiverPubkey,
         JSON.stringify(unsignedKind14)
       ),
-      (e: unknown) =>
-        new AggregateError([e as Error], 'Failed to encrypt content')
+      (e) => joinErrors(new Error('Failed to encrypt content'), e)
     )
   }
 
@@ -259,7 +262,7 @@ export class NostrClient {
         )
         return JSON.parse(json) as NostrEvent
       },
-      (e) => new AggregateError([e as Error], 'Failed to decryptPayload')
+      (e) => joinErrors(new Error('Failed to decryptPayload'), e)
     )()
   }
 
@@ -281,9 +284,8 @@ export class NostrClient {
           id: generateEventId(unsignedSeal),
         })
 
-        return ResultAsync.fromPromise(
-          event.sign(),
-          (e) => new AggregateError([e as Error], 'Failed to sign event')
+        return ResultAsync.fromPromise(event.sign(), (e) =>
+          joinErrors(new Error('Failed to sign event'), e)
         ).map((sig) => ({
           ...event.rawEvent(),
           sig,
@@ -339,7 +341,7 @@ export class NostrClient {
           nonce
         )
       },
-      (e) => new AggregateError([e as Error], 'Failed to encryptSealNostrEvent')
+      (e) => joinErrors(new Error('Failed to encryptSealNostrEvent'), e)
     )()
   }
 
@@ -355,7 +357,7 @@ export class NostrClient {
         )
         return JSON.parse(json) as NostrEvent
       },
-      (e) => new AggregateError([e as Error], 'Failed to decryptSealNostrEvent')
+      (e) => joinErrors(new Error('Failed to decryptSealNostrEvent'), e)
     )()
   }
 
@@ -374,10 +376,8 @@ export class NostrClient {
       sig: '',
     }
     event.id = generateEventId(event)
-    return ResultAsync.fromPromise(
-      Promise.resolve(event),
-      (e) =>
-        new AggregateError([e as Error], 'Failed to create gift wrap event')
+    return ResultAsync.fromPromise(Promise.resolve(event), (e) =>
+      joinErrors(new Error('Failed to create gift wrap event'), e)
     )
   }
 
@@ -394,7 +394,7 @@ export class NostrClient {
         )
         return signedEvent
       })(),
-      (error) => new AggregateError([error as Error], 'Event signing failed')
+      (error) => joinErrors(new Error('Event signing failed'), error)
     )
   }
 
@@ -441,7 +441,9 @@ export class NostrClient {
           subscriber.unsubscribe()
         }
       } catch (error) {
-        subscriber.error(new Error(`Failed to subscribe events: ${error}`))
+        subscriber.error(
+          joinErrors(new Error('Failed to subscribe events'), error)
+        )
       }
     })
   }
@@ -455,7 +457,7 @@ export class NostrClient {
         }
         return event
       })(),
-      (error) => new Error(`fetchEvent: ${error}`)
+      (error) => joinErrors(new Error('Failed to fetch event'), error)
     )
   }
 
@@ -503,9 +505,8 @@ export class NostrClient {
       return uniqueEvents.slice(0, limit)
     }
 
-    return ResultAsync.fromPromise(
-      fetchAllEvents(),
-      (error) => new Error(`Failed to fetch events: ${error}`)
+    return ResultAsync.fromPromise(fetchAllEvents(), (error) =>
+      joinErrors(new Error('Failed to fetch events'), error)
     )
   }
 
@@ -519,7 +520,7 @@ export class NostrClient {
   getUserFromNip05(nip05Id: string): ResultAsync<NDKUser | undefined, Error> {
     return ResultAsync.fromPromise(
       this.#ndk.getUserFromNip05(nip05Id),
-      (error) => new Error(`Failed to get user from NIP-05: ${error}`)
+      (error) => joinErrors(new Error('Failed to get user from NIP-05'), error)
     )
   }
 
@@ -535,7 +536,11 @@ export class NostrClient {
         await user.fetchProfile()
         return user
       })(),
-      (error) => new Error(`Failed to get user with profile: ${error}`)
+      (error) =>
+        joinErrors(
+          new Error(`Failed to get user with profile. npub: ${npub}`),
+          error
+        )
     )
   }
 
@@ -550,8 +555,9 @@ export class NostrClient {
         return Array.from(follows)
       })(),
       (error) =>
-        new Error(
-          `Failed to get following users. npub: ${npub} error: ${error}`
+        joinErrors(
+          new Error(`Failed to get following users. npub: ${npub}`),
+          error
         )
     )
   }
@@ -562,7 +568,7 @@ export class NostrClient {
         await event.decrypt()
         return event
       })(),
-      (error) => new Error(`Failed to decrypt event: ${error}`)
+      (error) => joinErrors(new Error('Failed to decrypt event'), error)
     )
   }
 
@@ -602,7 +608,9 @@ export class NostrClient {
         )
       }
     } catch (error) {
-      return err(new Error(`Failed to decode bolt11 invoice: ${error}`))
+      return err(
+        joinErrors(new Error('Failed to decode bolt11 invoice'), error)
+      )
     }
 
     return err(new Error('Failed to extract amount from bolt11 invoice'))
@@ -648,10 +656,7 @@ export class NostrClient {
 
         return { pr, verify, successAction } as ZapResponse
       })(),
-      (error): Error =>
-        error instanceof Error
-          ? error
-          : new Error(`Failed to send zap request: ${error}`)
+      (error) => joinErrors(new Error('Failed to send zap request'), error)
     )
   }
 
@@ -667,7 +672,7 @@ export class NostrClient {
         }
         return body
       })(),
-      (error) => new Error(`Failed to request LNURL Pay: ${error}`)
+      (error) => joinErrors(new Error('Failed to request LNURL Pay'), error)
     )
   }
 
@@ -715,10 +720,7 @@ export class NostrClient {
         zapEndpoint.searchParams.append('lnurl', lnurl)
         return zapEndpoint.toString()
       })(),
-      (error) =>
-        error instanceof Error
-          ? error
-          : new Error(`Failed to get zap endpoint: ${error}`)
+      (error) => joinErrors(new Error('Failed to get zap endpoint'), error)
     )
   }
 
@@ -750,10 +752,7 @@ export class NostrClient {
         unsignedEvent.tags.push(['e', eventId])
         return unsignedEvent
       })(),
-      (error) =>
-        error instanceof Error
-          ? error
-          : new Error(`Failed to make zap request: ${error}`)
+      (error) => joinErrors(new Error('Failed to make zap request'), error)
     )
   }
 }

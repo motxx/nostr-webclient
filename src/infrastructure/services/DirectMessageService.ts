@@ -8,6 +8,7 @@ import { NDKKind_GiftWrap } from '../nostr/kindExtensions'
 import { Conversation } from '@/domain/entities/Conversation'
 import { Participant } from '@/domain/entities/Participant'
 import { Observable } from 'rxjs'
+import { joinErrors } from '@/utils/errors'
 
 export class DirectMessageService implements DirectMessageRepository {
   constructor(private nostrClient: NostrClient) {}
@@ -117,25 +118,25 @@ export class DirectMessageService implements DirectMessageRepository {
                     (conversation) => subscriber.next(conversation),
                     (error) =>
                       subscriber.error(
-                        new AggregateError(
-                          [error],
-                          'Failed to create conversation'
+                        joinErrors(
+                          new Error('Failed to create conversation'),
+                          error
                         )
                       )
                   )
               },
               error: (error) =>
                 subscriber.error(
-                  new AggregateError(
-                    [error],
-                    'Failed to subscribe direct messages'
+                  joinErrors(
+                    new Error('Failed to subscribe direct messages'),
+                    error
                   )
                 ),
             })
         },
         (error) =>
           subscriber.error(
-            new AggregateError([error], 'Failed to get logged in user')
+            joinErrors(new Error('Failed to get logged in user'), error)
           )
       )
     })

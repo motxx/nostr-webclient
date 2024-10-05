@@ -2,6 +2,7 @@ import NDK, { NDKEvent } from '@nostr-dev-kit/ndk'
 import { ResultAsync } from 'neverthrow'
 import { CommonRelays } from './commonRelays'
 import shuffle from 'fisher-yates'
+import { joinErrors } from '@/utils/errors'
 
 const relayUrls = [
   ...new Set([
@@ -66,7 +67,7 @@ export class RobustEventFetcher {
 
         throw new Error(`Event not found. eventId: ${eventId}`)
       })(),
-      (error) => new Error(`fetchEvent: ${error}`)
+      (error) => joinErrors(new Error('Failed to fetch event'), error)
     )
   }
 }
