@@ -1,12 +1,13 @@
 import { useCallback, useContext, useEffect, useRef } from 'react'
 import { AppContext } from '@/context/AppContext'
-import { AuthStatus, TimelineStatus } from '@/context/types'
+import { AuthStatus } from '@/context/types'
 import { NoteService } from '@/infrastructure/services/NoteService'
 import { SubscribeNotes } from '@/domain/use_cases/SubscribeNotes'
 import { SubscribeNotesOptions } from '@/domain/repositories/NoteRepository'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { OperationType } from '@/context/actions'
 import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
+import { Subscription } from 'rxjs'
 
 interface UseNotesTimelineOptions {
   authorPubkeys?: string[]
@@ -21,26 +22,31 @@ export const useNotesTimeline = ({
 }: UseNotesTimelineOptions) => {
   const {
     auth: { nostrClient, status: authStatus },
-    timeline: { notes, status: timelineStatus, subscription },
+    timeline: { notes },
     dispatch,
   } = useContext(AppContext)
 
-  const isTimelineLoading =
-    timelineStatus !== TimelineStatus.Subscribing || notes.length === 0
+  // 再レンダリングを防ぐためにuseRefを使う(timeline.statusは依存配列に影響すrので使わない)
+  const subscriptionRef = useRef<Subscription | null>(null)
+  const isSubscribingRef = useRef<boolean>(false)
 
-  // 再レンダリングを防ぐためにuseRefを使う
-  const isSubscribing = useRef<boolean>(false)
+  const isTimelineLoading =
+    isSubscribingRef.current !== null || notes.length === 0
 
   const subscribe = useCallback(
     (options: SubscribeNotesOptions) => {
       if (
-        (authStatus !== AuthStatus.ClientReady &&
-          authStatus !== AuthStatus.LoggedIn) ||
-        timelineStatus !== TimelineStatus.Idle
+        authStatus !== AuthStatus.ClientReady &&
+        authStatus !== AuthStatus.LoggedIn
       ) {
         return
       }
       if (!nostrClient) throw new Error('NostrClient is not ready')
+
+      if (isSubscribingRef.current) {
+        return
+      }
+      isSubscribingRef.current = true
 
       const userProfileService = new UserProfileService(nostrClient)
       const noteService = new NoteService(nostrClient, userProfileService)
@@ -67,43 +73,33 @@ export const useNotesTimeline = ({
           },
         })
 
-      dispatch({ type: OperationType.SubscribeNotes, subscription })
+      subscriptionRef.current = subscription
+
+      dispatch({ type: OperationType.SubscribeNotes })
     },
-    [nostrClient, dispatch, authStatus, timelineStatus]
+    [nostrClient, dispatch, authStatus]
   )
 
   const unsubscribe = useCallback(() => {
-    if (subscription) {
-      subscription.unsubscribe()
+    if (subscriptionRef.current) {
+      subscriptionRef.current.unsubscribe()
+      isSubscribingRef.current = false
       dispatch({ type: OperationType.UnsubscribeNotes })
     }
-  }, [subscription, dispatch])
+  }, [dispatch])
 
   useEffect(() => {
-    if (
-      (authStatus !== AuthStatus.ClientReady &&
-        authStatus !== AuthStatus.LoggedIn) ||
-      timelineStatus !== TimelineStatus.Idle ||
-      isSubscribing.current
-    ) {
+    if (isSubscribingRef.current) {
       return
     }
-    isSubscribing.current = true
+
     subscribe({ authorPubkeys, limit, hashtag })
 
     return () => {
-      isSubscribing.current = false
+      console.log('UNSUBSCRIBE')
       unsubscribe()
     }
-  }, [
-    authorPubkeys,
-    authStatus,
-    timelineStatus,
-    subscribe,
-    unsubscribe,
-    limit,
-    hashtag,
-  ])
+  }, [authorPubkeys, authStatus, subscribe, unsubscribe, limit, hashtag])
 
   return { notes, isTimelineLoading }
 }

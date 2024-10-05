@@ -7,23 +7,23 @@ import { FetchPastNotifications } from '@/domain/use_cases/FetchPastNotification
 import { SubscribeNotifications } from '@/domain/use_cases/SubscribeNotifications'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { NoteService } from '@/infrastructure/services/NoteService'
+import { Subscription } from 'rxjs'
 
 export const useNotifications = () => {
   const {
     auth: { nostrClient, status: authStatus },
-    notifications: { notifications, status: notificationsStatus },
+    notifications: { notifications },
     dispatch,
   } = useContext(AppContext)
 
-  // 再レンダリングを防ぐためにuseRefを使う
-  // TODO: notificationsStatusと区別する
-  const isSubscribing = useRef<boolean>(false)
+  // 再レンダリングを防ぐためにuseRefを使う(notifications.statusは依存配列に影響するので使わない)
+  const subscriptionRef = useRef<Subscription | null>(null)
+  const isSubscribingRef = useRef<boolean>(false)
 
   useEffect(() => {
     if (
-      (authStatus !== AuthStatus.ClientReady &&
-        authStatus !== AuthStatus.LoggedIn) ||
-      notificationsStatus === NotificationsStatus.Subscribing
+      authStatus !== AuthStatus.ClientReady &&
+      authStatus !== AuthStatus.LoggedIn
     ) {
       return
     }
@@ -31,10 +31,10 @@ export const useNotifications = () => {
       return
     }
 
-    if (isSubscribing.current) {
+    if (isSubscribingRef.current) {
       return
     }
-    isSubscribing.current = true
+    isSubscribingRef.current = true
 
     const userProfileRepository = new UserProfileService(nostrClient)
     const noteService = new NoteService(nostrClient, userProfileRepository)
@@ -71,16 +71,17 @@ export const useNotifications = () => {
         },
       })
 
-    dispatch({ type: OperationType.SubscribeNotifications, subscription })
+    subscriptionRef.current = subscription
+    dispatch({ type: OperationType.SubscribeNotifications })
 
     return () => {
-      if (subscription) {
-        subscription.unsubscribe()
-        isSubscribing.current = false
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe()
+        isSubscribingRef.current = false
         dispatch({ type: OperationType.UnsubscribeNotifications })
       }
     }
-  }, [authStatus, nostrClient, dispatch, notificationsStatus])
+  }, [authStatus, nostrClient, dispatch])
 
   return { notifications }
 }

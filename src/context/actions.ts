@@ -4,7 +4,6 @@ import { Note } from '@/domain/entities/Note'
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { Notification } from '@/domain/entities/Notification'
-import { Subscription } from 'rxjs'
 
 export enum OperationType {
   // Auth
@@ -56,7 +55,6 @@ export type AuthAction =
 export type TimelineAction =
   | {
       type: OperationType.SubscribeNotes
-      subscription: Subscription
     }
   | {
       type: OperationType.SubscribeNotesError
@@ -84,7 +82,6 @@ export type TimelineAction =
 export type MessagesAction =
   | {
       type: OperationType.SubscribeMessages
-      subscription: Subscription
     }
   | {
       type: OperationType.SubscribeMessagesError
@@ -118,7 +115,6 @@ export type MessagesAction =
 export type NotificationsAction =
   | {
       type: OperationType.SubscribeNotifications
-      subscription: Subscription
     }
   | {
       type: OperationType.SubscribeNotificationsError

@@ -2,33 +2,32 @@ import { useCallback, useContext, useRef } from 'react'
 import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
 import { SubscribeDirectMessages } from '@/domain/use_cases/SubscribeDirectMessages'
 import { AppContext } from '@/context/AppContext'
-import { AuthStatus, MessagesStatus } from '@/context/types'
+import { AuthStatus } from '@/context/types'
 import { OperationType } from '@/context/actions'
+import { Subscription } from 'rxjs'
 
 export const useMessagesSubscription = () => {
   const {
     auth: { nostrClient, status: authStatus },
-    messages: { status: messagesStatus },
     dispatch,
   } = useContext(AppContext)
 
-  const isSubscribing = useRef<boolean>(false)
+  // 再レンダリングを防ぐためにuseRefを使う(messages.statusは依存配列に影響するので使わない)
+  const subscriptionRef = useRef<Subscription | null>(null)
+  const isSubscribingRef = useRef<boolean>(false)
 
   const subscribe = useCallback(() => {
-    if (
-      authStatus !== AuthStatus.LoggedIn &&
-      messagesStatus !== MessagesStatus.Subscribing
-    ) {
+    if (authStatus !== AuthStatus.LoggedIn) {
       return
     }
     if (!nostrClient) {
       throw new Error('NostrClient is not ready')
     }
 
-    if (isSubscribing.current) {
+    if (isSubscribingRef.current) {
       return
     }
-    isSubscribing.current = true
+    isSubscribingRef.current = true
 
     const subscription = new SubscribeDirectMessages(
       new DirectMessageService(nostrClient)
@@ -44,16 +43,17 @@ export const useMessagesSubscription = () => {
         },
       })
 
-    dispatch({ type: OperationType.SubscribeMessages, subscription })
+    subscriptionRef.current = subscription
+    dispatch({ type: OperationType.SubscribeMessages })
 
     return () => {
-      if (subscription) {
-        subscription.unsubscribe()
-        isSubscribing.current = false
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe()
+        isSubscribingRef.current = false
         dispatch({ type: OperationType.UnsubscribeMessages })
       }
     }
-  }, [nostrClient, authStatus, messagesStatus, dispatch, isSubscribing])
+  }, [nostrClient, authStatus, dispatch])
 
   return { subscribe }
 }
