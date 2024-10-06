@@ -1,15 +1,11 @@
 import { UserProfileRepository } from '@/domain/repositories/UserProfileRepository'
 import { UserProfile } from '@/domain/entities/UserProfile'
+import { Observable } from 'rxjs'
 
 export class FetchUserProfile {
   constructor(private userProfileRepository: UserProfileRepository) {}
 
-  async execute(npub: string): Promise<UserProfile> {
-    const result = await this.userProfileRepository.fetchProfile(npub)
-    if (result.isOk()) {
-      return result.value
-    } else {
-      throw result.error
-    }
+  execute(npub: string): Observable<UserProfile> {
+    return this.userProfileRepository.fetchProfile(npub)
   }
 }

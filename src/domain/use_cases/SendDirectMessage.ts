@@ -1,11 +1,11 @@
 import { DirectMessageRepository } from '@/domain/repositories/DirectMessageRepository'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
-import { ResultAsync } from 'neverthrow'
+import { Observable } from 'rxjs'
 
 export class SendDirectMessage {
   constructor(private directMessageRepository: DirectMessageRepository) {}
 
-  execute(message: DirectMessage): ResultAsync<void, Error> {
+  execute(message: DirectMessage): Observable<void> {
     return this.directMessageRepository.send(message)
   }
 }

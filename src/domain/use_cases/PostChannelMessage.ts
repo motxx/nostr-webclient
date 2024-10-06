@@ -1,15 +1,10 @@
 import { PublicChatRepository } from '@/domain/repositories/PublicChatRepository'
+import { Observable } from 'rxjs'
 
 export class PostChannelMessage {
   constructor(private publicChatRepository: PublicChatRepository) {}
 
-  async execute(channelId: string, content: string): Promise<void> {
-    const result = await this.publicChatRepository.postChannelMessage(
-      channelId,
-      content
-    )
-    if (result.isErr()) {
-      throw result.error
-    }
+  execute(channelId: string, content: string): Observable<void> {
+    return this.publicChatRepository.postChannelMessage(channelId, content)
   }
 }

@@ -1,7 +1,7 @@
-import { ResultAsync } from 'neverthrow'
+import { Observable } from 'rxjs'
 import { UserProfile } from '../entities/UserProfile'
 
 export interface UserProfileRepository {
-  fetchProfile(npub: string): ResultAsync<UserProfile, Error>
-  fetchNpubFromNostrAddress(nostrAddress: string): ResultAsync<string, Error>
+  fetchProfile(npub: string): Observable<UserProfile>
+  fetchNpubFromNostrAddress(nostrAddress: string): Observable<string>
 }

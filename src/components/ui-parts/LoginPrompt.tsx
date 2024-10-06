@@ -12,6 +12,7 @@ import { UserService } from '@/infrastructure/services/UserService'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { FetchDefaultUser } from '@/domain/use_cases/FetchDefaultUser'
 import { AuthStatus } from '@/context/types'
+import { switchMap, tap } from 'rxjs'
 
 const LoginPrompt: React.FC = () => {
   const {
@@ -22,46 +23,38 @@ const LoginPrompt: React.FC = () => {
   const handleLogin = useCallback(() => {
     dispatch({ type: OperationType.InitializeStart })
 
-    return disconnectNostrClient()
-      .andThen(() => connectNostrClient())
-      .match(
-        (client) => {
+    disconnectNostrClient()
+      .pipe(
+        switchMap(() => {
+          return connectNostrClient()
+        }),
+        switchMap((client) => {
           const userService = new UserService(client)
+          const userProfileService = new UserProfileService(client)
 
-          if (client.readOnlyMode()) {
-            new FetchDefaultUser(userService).execute().match(
-              (user) => {
-                dispatch({
-                  type: OperationType.InitializeSuccess,
-                  nostrClient: client,
-                  readOnlyUser: user,
-                })
-              },
-              (error) => {
-                dispatch({ type: OperationType.InitializeFailure, error })
+          return (
+            client.readOnlyMode()
+              ? new FetchDefaultUser(userService).execute()
+              : new LoginMyUser(userService, userProfileService).execute()
+          ).pipe(
+            tap((user) => {
+              dispatch({
+                type: OperationType.InitializeSuccess,
+                nostrClient: client,
+                ...(client.readOnlyMode() ? { readOnlyUser: user } : {}),
+              })
+              if (!client.readOnlyMode()) {
+                dispatch({ type: OperationType.LoginSuccess, user })
               }
-            )
-          } else {
-            dispatch({
-              type: OperationType.InitializeSuccess,
-              nostrClient: client,
             })
-            new LoginMyUser(userService, new UserProfileService(client))
-              .execute()
-              .match(
-                (user) => {
-                  dispatch({ type: OperationType.LoginSuccess, user })
-                },
-                (error) => {
-                  dispatch({ type: OperationType.LoginFailure, error })
-                }
-              )
-          }
-        },
-        (error) => {
-          dispatch({ type: OperationType.InitializeFailure, error })
-        }
+          )
+        })
       )
+      .subscribe({
+        error: (error) => {
+          dispatch({ type: OperationType.InitializeFailure, error })
+        },
+      })
   }, [dispatch])
 
   const openLoginModal = async () => {

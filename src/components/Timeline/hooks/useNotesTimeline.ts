@@ -53,14 +53,19 @@ export const useNotesTimeline = ({
 
       dispatch({ type: OperationType.FetchPastNotesStart })
 
-      new FetchPastNotes(noteService).execute({ ...options, limit: 20 }).match(
-        (notes) => {
-          dispatch({ type: OperationType.FetchPastNotesEnd, notes })
-        },
-        (error) => {
-          dispatch({ type: OperationType.FetchPastNotesError, error })
-        }
-      )
+      new FetchPastNotes(noteService)
+        .execute({ ...options, limit: 20 })
+        .subscribe({
+          next: (note) => {
+            dispatch({ type: OperationType.AddNewNote, note })
+          },
+          error: (error) => {
+            dispatch({ type: OperationType.FetchPastNotesError, error })
+          },
+          complete: () => {
+            dispatch({ type: OperationType.FetchPastNotesEnd })
+          },
+        })
 
       const subscription = new SubscribeNotes(noteService)
         .execute(options)
@@ -74,7 +79,6 @@ export const useNotesTimeline = ({
         })
 
       subscriptionRef.current = subscription
-
       dispatch({ type: OperationType.SubscribeNotes })
     },
     [nostrClient, dispatch, authStatus]

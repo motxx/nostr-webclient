@@ -48,17 +48,17 @@ export const useNotifications = () => {
 
     new FetchPastNotifications(notificationService)
       .execute({ limit: 100 })
-      .match(
-        (notifications) => {
-          dispatch({
-            type: OperationType.FetchPastNotificationsEnd,
-            notifications,
-          })
+      .subscribe({
+        next: (notification) => {
+          dispatch({ type: OperationType.AddNewNotification, notification })
         },
-        (error) => {
+        error: (error) => {
           dispatch({ type: OperationType.FetchPastNotificationsError, error })
-        }
-      )
+        },
+        complete: () => {
+          dispatch({ type: OperationType.FetchPastNotificationsEnd })
+        },
+      })
 
     const subscription = new SubscribeNotifications(notificationService)
       .execute()

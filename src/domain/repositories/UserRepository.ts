@@ -1,8 +1,8 @@
 import { User } from '@/domain/entities/User'
-import { ResultAsync } from 'neverthrow'
+import { Observable } from 'rxjs'
 
 export interface UserRepository {
-  login(): ResultAsync<User, Error>
-  fetchDefaultUser(): ResultAsync<User, Error>
-  fetchLoggedInUserFollows(): ResultAsync<User[], Error>
+  login(): Observable<User>
+  fetchDefaultUser(): Observable<User>
+  fetchLoggedInUserFollows(): Observable<User[]>
 }

@@ -3,7 +3,7 @@ import { AppContext } from '@/context/AppContext'
 import { AuthStatus } from '@/context/types'
 import { Conversation } from '@/domain/entities/Conversation'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { ok, Result, ResultAsync } from 'neverthrow'
+import { ok, Result } from 'neverthrow'
 import { hexToBech32 } from '@/utils/addressConverter'
 import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { Participant } from '@/domain/entities/Participant'
@@ -12,6 +12,7 @@ import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
 import { SendDirectMessage } from '@/domain/use_cases/SendDirectMessage'
 import { User } from '@/domain/entities/User'
+import { Observable, toArray } from 'rxjs'
 
 export const useMessageActions = () => {
   const {
@@ -38,18 +39,26 @@ export const useMessageActions = () => {
       }
 
       const userProfileService = new UserProfileService(nostrClient)
-      const fetchUsers = ResultAsync.combine(
-        otherParticipantPubkeys.map((pubkey) =>
-          hexToBech32(pubkey).asyncAndThen((npub) =>
-            new FetchUser(userProfileService).execute(npub)
-          )
-        )
-      )
 
-      fetchUsers
-        .andThen((users) => {
+      const fetchUsers$: Observable<User> = new Observable((subscriber) => {
+        otherParticipantPubkeys.forEach((pubkey) => {
+          hexToBech32(pubkey).match(
+            (npub) => {
+              new FetchUser(userProfileService).execute(npub).subscribe({
+                next: (user) => subscriber.next(user),
+                error: (error) => subscriber.error(error),
+              })
+            },
+            (error) => subscriber.error(error)
+          )
+        })
+        subscriber.complete()
+      })
+
+      fetchUsers$.pipe(toArray()).subscribe({
+        next: (users) => {
           // TODO: DirectMessage.createParticipants() と共通化し、Conversationに移す
-          return Result.combine(
+          Result.combine(
             Array.from(
               new Set([
                 loggedInUser.pubkey,
@@ -60,21 +69,29 @@ export const useMessageActions = () => {
                 (npub) => new Participant(new User({ pubkey, npub }))
               )
             })
-          ).andThen((participants) =>
-            ok(Conversation.create(new Set(participants), chatName))
           )
-        })
-        .match(
-          (newConversation) => {
-            dispatch({
-              type: OperationType.CreateNewConversation,
-              conversation: newConversation,
-            })
-          },
-          (error) => {
-            dispatch({ type: OperationType.CreateNewConversationError, error })
-          }
-        )
+            .andThen((participants) =>
+              ok(Conversation.create(new Set(participants), chatName))
+            )
+            .match(
+              (newConversation) => {
+                dispatch({
+                  type: OperationType.CreateNewConversation,
+                  conversation: newConversation,
+                })
+              },
+              (error) => {
+                dispatch({
+                  type: OperationType.CreateNewConversationError,
+                  error,
+                })
+              }
+            )
+        },
+        error: (error) => {
+          dispatch({ type: OperationType.CreateNewConversationError, error })
+        },
+      })
     },
     [nostrClient, dispatch, authStatus, conversations, loggedInUser]
   )
@@ -97,17 +114,17 @@ export const useMessageActions = () => {
 
       new SendDirectMessage(new DirectMessageService(nostrClient))
         .execute(directMessage)
-        .match(
-          () => {
+        .subscribe({
+          next: () => {
             dispatch({
               type: OperationType.SendMessage,
               message: directMessage,
             })
           },
-          (error) => {
+          error: (error) => {
             dispatch({ type: OperationType.SendMessageError, error })
-          }
-        )
+          },
+        })
     },
     [authStatus, nostrClient, loggedInUser, dispatch]
   )

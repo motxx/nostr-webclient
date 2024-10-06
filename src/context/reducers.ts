@@ -103,7 +103,6 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         timeline: {
           ...state.timeline,
           status: TimelineStatus.Subscribing,
-          notes: [], // Clear notes to prevent stale data (TODO: Implement a more robust solution)
         },
       }
     case OperationType.UnsubscribeNotes:
@@ -131,14 +130,6 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         timeline: {
           ...state.timeline,
           fetchingPastNotes: false,
-          notes: [
-            ...new Map(
-              [...state.timeline.notes, ...action.notes].map((note) => [
-                note.id,
-                note,
-              ])
-            ).values(),
-          ].sort((a, b) => b.created_at.getTime() - a.created_at.getTime()),
         },
       }
     case OperationType.AddNewNote:
@@ -322,14 +313,6 @@ export const appReducer = (state: AppState, action: AppAction): AppState => {
         notifications: {
           ...state.notifications,
           fetchingPastNotifications: false,
-          notifications: [
-            ...new Map(
-              [
-                ...state.notifications.notifications,
-                ...action.notifications,
-              ].map((notification) => [notification.id, notification])
-            ).values(),
-          ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
         },
       }
     case OperationType.FetchPastNotificationsError:

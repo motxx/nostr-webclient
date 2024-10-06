@@ -1,7 +1,7 @@
 import { User } from '@/domain/entities/User'
 import { UserRepository } from '@/domain/repositories/UserRepository'
-import { ok, ResultAsync } from 'neverthrow'
-import { UserProfileRepository } from '../repositories/UserProfileRepository'
+import { UserProfileRepository } from '@/domain/repositories/UserProfileRepository'
+import { map, Observable, switchMap, zip } from 'rxjs'
 
 export class LoginMyUser {
   constructor(
@@ -9,19 +9,20 @@ export class LoginMyUser {
     private userProfileRepository: UserProfileRepository
   ) {}
 
-  execute(): ResultAsync<User, Error> {
-    return this.userRepository.login().andThen((user) => {
-      return this.userProfileRepository
-        .fetchProfile(user.npub)
-        .andThen((profile) => {
-          user.profile = profile
-          return this.userRepository
-            .fetchLoggedInUserFollows()
-            .andThen((follows) => {
-              user.followingUsers = follows
-              return ok(user)
-            })
-        })
-    })
+  execute(): Observable<User> {
+    return this.userRepository.login().pipe(
+      switchMap((user) =>
+        zip(
+          this.userProfileRepository.fetchProfile(user.npub),
+          this.userRepository.fetchLoggedInUserFollows()
+        ).pipe(
+          map(([profile, follows]) => ({
+            ...user,
+            profile,
+            followingUsers: follows,
+          }))
+        )
+      )
+    )
   }
 }

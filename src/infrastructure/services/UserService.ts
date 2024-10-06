@@ -1,9 +1,19 @@
-import { errAsync, ok, ResultAsync } from 'neverthrow'
 import { User } from '@/domain/entities/User'
 import { UserRepository } from '@/domain/repositories/UserRepository'
 import { NostrClient } from '@/infrastructure/nostr/nostrClient'
 import { NDKUser } from '@nostr-dev-kit/ndk'
 import { hexToBech32 } from '@/utils/addressConverter'
+import {
+  catchError,
+  EMPTY,
+  filter,
+  forkJoin,
+  map,
+  Observable,
+  of,
+  switchMap,
+  throwError,
+} from 'rxjs'
 
 export interface SendZapRequestResponse {
   pr: string
@@ -21,11 +31,11 @@ export class UserService implements UserRepository {
     this.#nostrClient = nostrClient
   }
 
-  private createUserFromNDKUser(ndkUser: NDKUser): ResultAsync<User, Error> {
-    return this.#nostrClient.getUserWithProfile(ndkUser.npub).andThen((_) => {
-      const userName = ndkUser.profile?.displayName || ndkUser.profile?.name
-      return ok(
-        new User({
+  private createUserFromNDKUser(ndkUser: NDKUser): Observable<User> {
+    return this.#nostrClient.getUserWithProfile(ndkUser.npub).pipe(
+      map((_) => {
+        const userName = ndkUser.profile?.displayName || ndkUser.profile?.name
+        return new User({
           npub: ndkUser.npub,
           pubkey: ndkUser.pubkey,
           profile: {
@@ -34,62 +44,82 @@ export class UserService implements UserRepository {
             nostrAddress: ndkUser.profile?.nip05,
           },
         })
-      )
-    })
+      })
+    )
   }
 
-  login(): ResultAsync<User, Error> {
+  login(): Observable<User> {
     const ndkUserResult = this.#nostrClient.getLoggedInUser()
     if (ndkUserResult.isErr()) {
-      return errAsync(ndkUserResult.error)
+      return throwError(() => ndkUserResult.error)
     }
     const ndkUser = ndkUserResult.value
     return this.createUserFromNDKUser(ndkUser)
   }
 
-  fetchLoggedInUserFollows(): ResultAsync<User[], Error> {
+  fetchLoggedInUserFollows(): Observable<User[]> {
     return this.login()
-      .andThen((user) => this.#nostrClient.fetchFollowingUsers(user.npub))
-      .andThen((users) =>
-        ResultAsync.combine(
-          users.map((user) => this.createUserFromNDKUser(user))
+      .pipe(
+        switchMap((user) => this.#nostrClient.fetchFollowingUsers(user.npub))
+      )
+      .pipe(
+        switchMap((users) =>
+          forkJoin(users.map((user) => this.createUserFromNDKUser(user)))
         )
       )
   }
 
-  fetchDefaultUser(): ResultAsync<User, Error> {
-    return hexToBech32(NostrClient.JapaneseUserBot, 'npub').asyncAndThen(
-      (npub) => {
-        return this.#nostrClient
-          .getUserWithProfile(npub)
-          .andThen((ndkUser) => {
-            return this.createUserFromNDKUser(ndkUser)
-          })
-          .andThen((user) => {
-            return this.#nostrClient
-              .fetchFollowingUsers(user.npub)
-              .andThen((followingNDKUsers) => {
-                return ResultAsync.combine(
-                  followingNDKUsers.map((ndkUser) =>
-                    this.createUserFromNDKUser(ndkUser)
-                  )
+  fetchDefaultUser(): Observable<User> {
+    const npubResult = hexToBech32(NostrClient.JapaneseUserBot, 'npub')
+    if (npubResult.isErr()) {
+      return throwError(() => npubResult.error)
+    }
+    const npub = npubResult.value
+    return of(npub).pipe(
+      switchMap((npub) => this.#nostrClient.getUserWithProfile(npub)),
+      switchMap((ndkUser) => this.createUserFromNDKUser(ndkUser)),
+      switchMap((user) =>
+        this.#nostrClient.fetchFollowingUsers(user.npub).pipe(
+          switchMap((followingNDKUsers: NDKUser[]) =>
+            forkJoin(
+              followingNDKUsers.map((ndkUser) =>
+                this.createUserFromNDKUser(ndkUser).pipe(
+                  catchError(() => EMPTY)
                 )
-              })
-              .andThen((users) => {
-                user.followingUsers = users
-                return ok(user)
-              })
+              )
+            )
+          ),
+          map((users: User[]) => users.filter(Boolean)), // 取得できたユーザのみを残す
+          map((users: User[]) => {
+            user.followingUsers = users
+            return user
           })
-      }
+        )
+      ),
+      catchError((error) => {
+        console.log('Failed to fetch default user:', error)
+        return of(
+          new User({
+            npub: NostrClient.JapaneseUserBot,
+            pubkey: '',
+            profile: {
+              name: 'Unknown User',
+              image: '',
+              nostrAddress: '',
+            },
+          })
+        )
+      })
     )
   }
 
   sendZapRequest(
     nip05Id: string,
     sats: number
-  ): ResultAsync<SendZapRequestResponse, Error> {
-    return this.login().andThen(() =>
-      this.#nostrClient.sendZapRequest(nip05Id, sats)
+  ): Observable<SendZapRequestResponse> {
+    return this.login().pipe(
+      switchMap(() => this.#nostrClient.sendZapRequest(nip05Id, sats)),
+      map((result) => ({ pr: result.pr, verify: result.verify }))
     )
   }
 }

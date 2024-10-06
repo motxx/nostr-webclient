@@ -7,9 +7,9 @@ import { User } from '@/domain/entities/User'
 import { FetchNpubFromNostrAddress } from '@/domain/use_cases/FetchNpubFromNostrAddress'
 import { FetchUser } from '@/domain/use_cases/FetchUser'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { ResultAsync } from 'neverthrow'
 import { AppContext } from '@/context/AppContext'
 import { AuthStatus } from '@/context/types'
+import { Observable, of, switchMap, throwError } from 'rxjs'
 
 interface UserPageProps {
   isFollowing: boolean
@@ -36,16 +36,14 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
       const npubPattern = new RegExp('/user/(npub[^/]+)/?')
       const npubMatch = location.pathname.match(npubPattern)
 
-      const getNpub = (): ResultAsync<string, Error> => {
+      const getNpub = (): Observable<string> => {
         if (npubMatch) {
-          return ResultAsync.fromSafePromise(Promise.resolve(npubMatch[1]))
+          return of(npubMatch[1])
         } else {
           const nostrAddressPattern = new RegExp('/user/([^/]*@[^/]+)/?')
           const nostrAddressMatch = location.pathname.match(nostrAddressPattern)
           if (!nostrAddressMatch) {
-            return ResultAsync.fromSafePromise(
-              Promise.reject(new Error('Invalid URL'))
-            )
+            return throwError(() => new Error('Invalid URL'))
           }
 
           let nostrAddress = nostrAddressMatch[1]
@@ -59,15 +57,13 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
       }
 
       getNpub()
-        .andThen((npub) => new FetchUser(userProfileService).execute(npub))
-        .match(
-          (user) => {
-            setUser(user)
-          },
-          (error) => {
-            console.error('Failed to fetch user data:', error)
-          }
+        .pipe(
+          switchMap((npub) => new FetchUser(userProfileService).execute(npub))
         )
+        .subscribe({
+          next: (user) => setUser(user),
+          error: (error) => console.error('Failed to fetch user data:', error),
+        })
     }
 
     fetchUserData()

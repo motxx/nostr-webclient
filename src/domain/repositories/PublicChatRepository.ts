@@ -1,22 +1,16 @@
-import { Result, ResultAsync } from 'neverthrow'
 import { PublicChannel, PublicChatMessage } from '../entities/PublicChat'
+import { Observable } from 'rxjs'
 
 export interface PublicChatRepository {
-  fetchChannels(): ResultAsync<PublicChannel[], Error>
-  fetchChannelMessages(
-    channelId: string
-  ): ResultAsync<PublicChatMessage[], Error>
-  postChannelMessage(
-    channelId: string,
-    content: string
-  ): ResultAsync<void, Error>
+  fetchChannels(): Observable<PublicChannel>
+  fetchChannelMessages(channelId: string): Observable<PublicChatMessage>
+  postChannelMessage(channelId: string, content: string): Observable<void>
   subscribeToChannelMessages(
     channelId: string,
-    onMessage: (message: PublicChatMessage) => void,
     options?: {
       limit?: number
       until?: Date
       isForever?: boolean
     }
-  ): Result<{ unsubscribe: () => void }, Error>
+  ): Observable<PublicChatMessage>
 }

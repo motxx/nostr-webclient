@@ -2,143 +2,148 @@ import { DirectMessageRepository } from '@/domain/repositories/DirectMessageRepo
 import { DirectMessage } from '@/domain/entities/DirectMessage'
 import { User } from '@/domain/entities/User'
 import { NostrClient } from '../nostr/nostrClient'
-import { ok, ResultAsync } from 'neverthrow'
+import { ok } from 'neverthrow'
 import { NDKFilter } from '@nostr-dev-kit/ndk'
 import { NDKKind_GiftWrap } from '../nostr/kindExtensions'
 import { Conversation } from '@/domain/entities/Conversation'
-import { Participant } from '@/domain/entities/Participant'
-import { Observable } from 'rxjs'
+import { forkJoin, map, Observable, of, switchMap, throwError } from 'rxjs'
 import { joinErrors } from '@/utils/errors'
 
 export class DirectMessageService implements DirectMessageRepository {
   constructor(private nostrClient: NostrClient) {}
 
   // TODO: 送信できた相手と出来なかった相手を区別可能にする
-  send(message: DirectMessage): ResultAsync<void, Error> {
-    return ResultAsync.combine(
+  send(message: DirectMessage): Observable<void> {
+    return forkJoin(
       message.receivers.map((receiver) =>
         this.nostrClient
           .createGiftWrapNostrEvent(
             message.toNostrEvent(),
             receiver.user.pubkey
           )
-          .andThen((giftWrap) => this.nostrClient.postSignedEvent(giftWrap))
+          .pipe(
+            switchMap((giftWrap) => this.nostrClient.postSignedEvent(giftWrap))
+          )
       )
-    ).map(() => void 0)
+    ).pipe(map(() => void 0))
   }
 
-  fetch(id: string): ResultAsync<DirectMessage, Error> {
+  fetch(id: string): Observable<DirectMessage> {
     return this.nostrClient
       .fetchEvent(id)
-      .andThen((event) =>
-        this.nostrClient.decryptGiftWrapNostrEvent(event.rawEvent())
+      .pipe(
+        switchMap((event) =>
+          this.nostrClient.decryptGiftWrapNostrEvent(event.rawEvent())
+        )
       )
-      .andThen((decryptedEvent) => DirectMessage.fromNostrEvent(decryptedEvent))
+      .pipe(
+        switchMap((decryptedEvent) => {
+          const result = DirectMessage.fromNostrEvent(decryptedEvent)
+          if (result.isErr()) {
+            return throwError(() => result.error)
+          }
+          return of(result.value)
+        })
+      )
   }
 
-  fetchUserConversations(user: User): ResultAsync<Conversation[], Error> {
+  fetchUserConversations(user: User): Observable<Conversation> {
     const filter: NDKFilter = {
       kinds: [NDKKind_GiftWrap as any],
       '#p': [user.pubkey],
       limit: 1000,
     }
 
-    return this.nostrClient
-      .fetchEvents(filter)
-      .andThen((events) =>
-        ResultAsync.combine(
-          events.map((event) =>
-            this.nostrClient
-              .decryptGiftWrapNostrEvent(event.rawEvent())
-              .andThen(DirectMessage.fromNostrEvent)
-          )
+    return this.nostrClient.fetchEvents(filter).pipe(
+      switchMap((event) =>
+        this.nostrClient.decryptGiftWrapNostrEvent(event.rawEvent()).pipe(
+          switchMap((decryptedEvent) => {
+            const message = DirectMessage.fromNostrEvent(decryptedEvent)
+            return message.match(
+              (message) => {
+                const participants = message.createParticipants()
+                return participants.match(
+                  (participants) => {
+                    const conversation = Conversation.create(
+                      participants,
+                      message.subject ?? ''
+                    )
+                    conversation.addMessage(message)
+                    return of(conversation)
+                  },
+                  (error) => {
+                    return throwError(() =>
+                      joinErrors(
+                        new Error('Failed to create participants'),
+                        error
+                      )
+                    )
+                  }
+                )
+              },
+              (error) => {
+                return throwError(() =>
+                  joinErrors(new Error('Failed to parse nostr event'), error)
+                )
+              }
+            )
+          })
         )
       )
-      .map((messages) => {
-        const groupMessagesByConversation = (
-          messages: DirectMessage[]
-        ): Map<string, Conversation> => {
-          return messages.reduce((conversationMap, message) => {
-            // TODO: Use message.createParticipants()
-            const participants = message
-              .createParticipants()
-              .andThen((participants) => {
-                console.error("FIXME: Don't ignore error")
-                return ok(participants)
-              })
-              .unwrapOr(new Set<Participant>())
-
-            const id = Conversation.generateId(
-              Array.from(participants).map((p) => p.user.pubkey),
-              message.subject ?? ''
-            )
-
-            const conversation =
-              conversationMap.get(id) ||
-              Conversation.create(participants, message.subject ?? '')
-
-            return conversationMap.set(id, conversation.addMessage(message))
-          }, new Map<string, Conversation>())
-        }
-
-        return Array.from(groupMessagesByConversation(messages).values())
-      })
+    )
   }
 
   subscribeDirectMessages(): Observable<Conversation> {
-    return new Observable<Conversation>((subscriber) => {
-      this.nostrClient.getLoggedInUser().match(
-        (user) => {
-          this.nostrClient
-            .subscribeEvents({
-              kinds: [NDKKind_GiftWrap as any],
-              '#p': [user.pubkey],
-              limit: 1000,
-            })
-            .subscribe({
-              next: (event) => {
-                this.nostrClient
-                  .decryptGiftWrapNostrEvent(event.rawEvent())
-                  .andThen((decryptedEvent) =>
-                    DirectMessage.fromNostrEvent(decryptedEvent)
-                  )
-                  .andThen((message) =>
-                    message
-                      .createParticipants()
-                      .andThen((participants) =>
-                        ok(
-                          Conversation.create(
-                            participants,
-                            message.subject ?? ''
-                          ).addMessage(message)
+    return this.nostrClient.getLoggedInUser().match(
+      (user) => {
+        return this.nostrClient
+          .subscribeEvents({
+            kinds: [NDKKind_GiftWrap as any],
+            '#p': [user.pubkey],
+            limit: 1000,
+          })
+          .pipe(
+            switchMap((ndkEvent) => {
+              return this.nostrClient
+                .decryptGiftWrapNostrEvent(ndkEvent.rawEvent())
+                .pipe(
+                  switchMap((decryptedEvent) => {
+                    return DirectMessage.fromNostrEvent(decryptedEvent).match(
+                      (message) => {
+                        return message.createParticipants().match(
+                          (participants) => {
+                            const conversation = Conversation.create(
+                              participants,
+                              message.subject ?? ''
+                            )
+                            return of(conversation.addMessage(message))
+                          },
+                          (error) =>
+                            throwError(() =>
+                              joinErrors(
+                                new Error('Failed to create participants'),
+                                error
+                              )
+                            )
                         )
-                      )
-                  )
-                  .match(
-                    (conversation) => subscriber.next(conversation),
-                    (error) =>
-                      subscriber.error(
-                        joinErrors(
-                          new Error('Failed to create conversation'),
-                          error
+                      },
+                      (error) =>
+                        throwError(() =>
+                          joinErrors(
+                            new Error('Failed to parse nostr event'),
+                            error
+                          )
                         )
-                      )
-                  )
-              },
-              error: (error) =>
-                subscriber.error(
-                  joinErrors(
-                    new Error('Failed to subscribe direct messages'),
-                    error
-                  )
-                ),
+                    )
+                  })
+                )
             })
-        },
-        (error) =>
-          subscriber.error(
-            joinErrors(new Error('Failed to get logged in user'), error)
           )
-      )
-    })
+      },
+      (error) =>
+        throwError(() =>
+          joinErrors(new Error('Failed to get logged-in user'), error)
+        )
+    )
   }
 }

@@ -1,4 +1,3 @@
-import { ResultAsync } from 'neverthrow'
 import { Notification } from '@/domain/entities/Notification'
 import { Observable } from 'rxjs'
 
@@ -11,7 +10,7 @@ export type SubscribeNotificationsOptions = {
 export interface NotificationRepository {
   fetchPastNotifications(
     options?: SubscribeNotificationsOptions
-  ): ResultAsync<Notification[], Error>
+  ): Observable<Notification>
   subscribeNotifications(
     options?: SubscribeNotificationsOptions
   ): Observable<Notification>

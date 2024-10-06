@@ -39,22 +39,26 @@ export class NostrRequestLnurlPayError extends Error {
 }
 
 export class NostrGetZapEndpointCallbackUrlError extends Error {
-  constructor(metadata: any, lnurlPay: LnurlPay) {
+  constructor(lnurlPay: LnurlPay) {
     super(
-      `Failed to get zap endpoint callback url. metadata:${JSON.stringify(metadata)} lnurlPay:${JSON.stringify(lnurlPay)}`
+      `Failed to get zap endpoint callback url. lnurlPay:${JSON.stringify(lnurlPay)}`
     )
   }
 }
 
 export class NostrMinSendableConstraintError extends Error {
-  constructor(amount: number, minSendable: number) {
-    super(`Amount too small. amount:${amount} minSendable:${minSendable}`)
+  constructor(amount: number, minSendable?: number) {
+    super(
+      `Amount too small. amount:${amount} minSendable:${minSendable ?? '(undefined)'}`
+    )
   }
 }
 
 export class NostrMaxSendableConstraintError extends Error {
-  constructor(amount: number, maxSendable: number) {
-    super(`Amount too large. amount:${amount} maxSendable:${maxSendable}`)
+  constructor(amount: number, maxSendable?: number) {
+    super(
+      `Amount too large. amount:${amount} maxSendable:${maxSendable ?? '(undefined)'}`
+    )
   }
 }
 

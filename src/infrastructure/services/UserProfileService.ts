@@ -1,4 +1,3 @@
-import { ResultAsync, ok, err } from 'neverthrow'
 import { UserProfileRepository } from '@/domain/repositories/UserProfileRepository'
 import { UserProfile } from '@/domain/entities/UserProfile'
 import { UserExternalLinks } from '@/domain/entities/UserExternalLinks'
@@ -9,6 +8,7 @@ import {
   setNpubFromNostrAddressCache,
   setUserProfileCache,
 } from '@/state/actions'
+import { catchError, Observable, of, switchMap, throwError } from 'rxjs'
 
 export class UserProfileService implements UserProfileRepository {
   nostrClient: NostrClient
@@ -17,18 +17,14 @@ export class UserProfileService implements UserProfileRepository {
     this.nostrClient = nostrClient
   }
 
-  fetchProfile(npub: string): ResultAsync<UserProfile, Error> {
+  fetchProfile(npub: string): Observable<UserProfile> {
     const cachedProfile = getUserProfileCache(npub)
     if (cachedProfile) {
-      return ResultAsync.fromPromise(
-        Promise.resolve(cachedProfile),
-        () => new Error('Failed to retrieve cached profile')
-      )
+      return of(cachedProfile)
     }
 
-    return this.nostrClient
-      .getUserWithProfile(npub)
-      .andThen((user) => {
+    return this.nostrClient.getUserWithProfile(npub).pipe(
+      switchMap((user) => {
         const profile = user.profile
         const userProfile = new UserProfile({
           name: profile?.displayName || profile?.name,
@@ -47,11 +43,11 @@ export class UserProfileService implements UserProfileRepository {
         }
         setUserProfileCache(npub, userProfile)
 
-        return ok(userProfile)
-      })
-      .orElse((error) => {
+        return of(userProfile)
+      }),
+      catchError((error) => {
         console.error('Failed to fetch user profile:', error)
-        return ok(
+        return of(
           new UserProfile({
             name: 'Unknown User',
             nostrAddress: '',
@@ -63,23 +59,25 @@ export class UserProfileService implements UserProfileRepository {
           })
         )
       })
+    )
   }
 
-  fetchNpubFromNostrAddress(nostrAddress: string): ResultAsync<string, Error> {
+  fetchNpubFromNostrAddress(nostrAddress: string): Observable<string> {
     const cachedNpub = getNpubFromNostrAddressCache(nostrAddress)
     if (cachedNpub) {
-      return ResultAsync.fromPromise(
-        Promise.resolve(cachedNpub),
-        () => new Error('Failed to retrieve cached npub')
-      )
+      return of(cachedNpub)
     }
 
-    return this.nostrClient.getUserFromNip05(nostrAddress).andThen((user) => {
-      if (!user) {
-        return err(new Error('User not found'))
-      }
-      setNpubFromNostrAddressCache(nostrAddress, user.npub)
-      return ok(user.npub)
-    })
+    return this.nostrClient.getUserFromNip05(nostrAddress).pipe(
+      switchMap((user) => {
+        if (!user) {
+          return throwError(
+            () => new Error('fetchNpubFromNostrAddress. User not found')
+          )
+        }
+        setNpubFromNostrAddressCache(nostrAddress, user.npub)
+        return of(user.npub)
+      })
+    )
   }
 }

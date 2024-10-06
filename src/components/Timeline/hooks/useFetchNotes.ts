@@ -37,20 +37,18 @@ export const useFetchNotes = ({
     new FetchPastNotes(
       new NoteService(nostrClient, new UserProfileService(nostrClient))
     )
-      .execute({
-        authorPubkeys,
-        until: oldestNote.created_at,
-        limit,
-        hashtag,
-      })
-      .match(
-        (notes) => {
-          dispatch({ type: OperationType.FetchPastNotesEnd, notes })
+      .execute({ authorPubkeys, until: oldestNote.created_at, limit, hashtag })
+      .subscribe({
+        next: (note) => {
+          dispatch({ type: OperationType.AddNewNote, note })
         },
-        (error) => {
+        error: (error) => {
           dispatch({ type: OperationType.FetchPastNotesError, error })
-        }
-      )
+        },
+        complete: () => {
+          dispatch({ type: OperationType.FetchPastNotesEnd })
+        },
+      })
   }, [status, nostrClient, dispatch, notes, authorPubkeys, limit, hashtag])
 
   return {

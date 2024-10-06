@@ -1,10 +1,10 @@
 import { UserProfileRepository } from '@/domain/repositories/UserProfileRepository'
-import { ResultAsync } from 'neverthrow'
+import { Observable } from 'rxjs'
 
 export class FetchNpubFromNostrAddress {
   constructor(private userProfileRepository: UserProfileRepository) {}
 
-  execute(nostrAddress: string): ResultAsync<string, Error> {
+  execute(nostrAddress: string): Observable<string> {
     return this.userProfileRepository.fetchNpubFromNostrAddress(nostrAddress)
   }
 }

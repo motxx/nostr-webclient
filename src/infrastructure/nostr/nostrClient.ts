@@ -25,15 +25,26 @@ import {
 } from '@/infrastructure/nostr/lnurlPay'
 import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 import { decode } from 'light-bolt11-decoder'
-import { RobustEventFetcher } from './robustEventFetcher'
 import { Mutex } from 'async-mutex'
 import { CommonRelays } from './commonRelays'
 import { KeyPair } from '@/domain/entities/KeyPair'
-import { finalizeEvent, nip44 } from 'nostr-tools'
+import { finalizeEvent, nip44, VerifiedEvent } from 'nostr-tools'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
 import { randomBytes } from 'crypto'
-import { Observable } from 'rxjs'
+import {
+  catchError,
+  from,
+  map,
+  Observable,
+  of,
+  reduce,
+  switchMap,
+  throwError,
+  mergeMap,
+  defer,
+} from 'rxjs'
 import { joinErrors } from '@/utils/errors'
+import { safeJsonParse } from '@/utils/safeJsonParser'
 
 const NIP07TimeoutMSec = 3000 // 3 seconds
 const NDKConnectTimeoutMSec = 1000 // 1 second
@@ -119,11 +130,13 @@ export class NostrClient {
   static #nostrClient?: NostrClient
   static #mutex = new Mutex()
 
-  static connect(): ResultAsync<NostrClient, Error> {
-    return ResultAsync.fromPromise(
+  static connect(): Observable<NostrClient> {
+    return new Observable<NostrClient>((subscriber) => {
       NostrClient.#mutex.runExclusive(async () => {
         if (NostrClient.#nostrClient) {
-          return NostrClient.#nostrClient
+          subscriber.next(NostrClient.#nostrClient)
+          subscriber.complete()
+          return
         }
 
         let readOnlyMode = false
@@ -156,19 +169,20 @@ export class NostrClient {
           window.nostr as any,
           readOnlyMode
         )
-        return NostrClient.#nostrClient
-      }),
-      (error) => joinErrors(new Error('Failed to connect'), error)
-    )
+        subscriber.next(NostrClient.#nostrClient)
+        subscriber.complete()
+      })
+    })
   }
 
   static disconnect() {
-    return ResultAsync.fromPromise(
+    return new Observable<void>((subscriber) => {
       NostrClient.#mutex.runExclusive(async () => {
         NostrClient.#nostrClient = undefined
-      }),
-      (error) => joinErrors(new Error('Failed to disconnect'), error)
-    )
+        subscriber.next()
+        subscriber.complete()
+      })
+    })
   }
 
   readOnlyMode(): boolean {
@@ -187,12 +201,9 @@ export class NostrClient {
     return connectedRelays
   }
 
-  #postEvent(
-    event: NostrEvent,
-    alreadySigned: boolean
-  ): ResultAsync<void, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
+  #postEvent(event: NostrEvent, alreadySigned: boolean): Observable<void> {
+    return new Observable<void>((subscriber) => {
+      ;(async () => {
         if (this.#readOnlyMode) {
           throw new NostrReadOnlyError()
         }
@@ -215,63 +226,49 @@ export class NostrClient {
             event: ndkEvent.rawEvent(),
           })
           await ndkEvent.publish(relaySet, PostEventTimeoutMSec)
+          subscriber.complete()
         } catch (error) {
-          throw joinErrors(new Error('Failed to post event'), error)
+          subscriber.error(joinErrors(new Error('Failed to post event'), error))
         }
-      })(),
-      (error) =>
-        error instanceof Error
-          ? error
-          : joinErrors(
-              new Error('Unknown error occurred while posting event'),
-              error
-            )
-    )
+      })()
+    })
   }
 
-  postEvent(event: NostrEvent): ResultAsync<void, Error> {
+  postEvent(event: NostrEvent): Observable<void> {
     return this.#postEvent(event, false)
   }
 
-  postSignedEvent(event: NostrEvent): ResultAsync<void, Error> {
+  postSignedEvent(event: VerifiedEvent): Observable<void> {
     return this.#postEvent(event, true)
   }
 
   private encryptPayload(
     unsignedKind14: NostrEvent,
     receiverPubkey: string
-  ): ResultAsync<string, Error> {
-    return ResultAsync.fromPromise(
+  ): Observable<string> {
+    return from(
       this.#nostrLoginWindowNostr.nip44.encrypt(
         receiverPubkey,
         JSON.stringify(unsignedKind14)
-      ),
-      (e) => joinErrors(new Error('Failed to encrypt content'), e)
+      )
     )
   }
 
   private decryptPayload(
     encryptedContent: string,
     senderPubkey: string
-  ): ResultAsync<NostrEvent, Error> {
-    return ResultAsync.fromThrowable(
-      async () => {
-        const json = await this.#nostrLoginWindowNostr.nip44.decrypt(
-          senderPubkey,
-          encryptedContent
-        )
-        return JSON.parse(json) as NostrEvent
-      },
-      (e) => joinErrors(new Error('Failed to decryptPayload'), e)
-    )()
+  ): Observable<NostrEvent> {
+    return from(
+      this.#nostrLoginWindowNostr.nip44.decrypt(senderPubkey, encryptedContent)
+    ).pipe(map((json) => JSON.parse(json) as NostrEvent))
   }
 
   private createSealNostrEvent(
     unsignedKind14: NostrEvent,
     receiverPubkey: string
-  ): ResultAsync<NostrEvent, Error> {
-    return this.encryptPayload(unsignedKind14, receiverPubkey).andThen(
-      (encryptedContent) => {
+  ): Observable<NostrEvent> {
+    return this.encryptPayload(unsignedKind14, receiverPubkey).pipe(
+      map((encryptedContent) => {
         const unsignedSeal: NostrEvent = {
           pubkey: this.#user.pubkey,
           created_at: this.randomTimeUpTo2DaysInThePast(),
@@ -283,14 +280,11 @@ export class NostrClient {
           ...unsignedSeal,
           id: generateEventId(unsignedSeal),
         })
-
-        return ResultAsync.fromPromise(event.sign(), (e) =>
-          joinErrors(new Error('Failed to sign event'), e)
-        ).map((sig) => ({
-          ...event.rawEvent(),
-          sig,
-        }))
-      }
+        return event
+      }),
+      switchMap((event) =>
+        from(event.sign()).pipe(map((sig) => ({ ...event.rawEvent(), sig })))
+      )
     )
   }
 
@@ -301,26 +295,30 @@ export class NostrClient {
   createGiftWrapNostrEvent(
     unsignedKind14: NostrEvent,
     receiverPubkey: string
-  ): ResultAsync<NostrEvent, Error> {
+  ): Observable<VerifiedEvent> {
     const randomKeyPair = KeyPair.generate()
-    return this.createSealNostrEvent(unsignedKind14, receiverPubkey)
-      .andThen((sealNostrEvent) =>
+    return this.createSealNostrEvent(unsignedKind14, receiverPubkey).pipe(
+      switchMap((sealNostrEvent) =>
         this.encryptSealNostrEvent(
           sealNostrEvent,
           randomKeyPair,
           receiverPubkey
+        ).match(
+          (content) => {
+            const unsignedEvent = this.createGiftWrapUnsignedNostrEvent(
+              content,
+              randomKeyPair,
+              receiverPubkey
+            )
+            return this.signNostrEvent(unsignedEvent, randomKeyPair).match(
+              (verifiedEvent) => of(verifiedEvent),
+              (error) => throwError(() => error)
+            )
+          },
+          (error) => throwError(() => error)
         )
       )
-      .andThen((giftWrappedContent) =>
-        this.createGiftWrapUnsignedNostrEvent(
-          giftWrappedContent,
-          randomKeyPair,
-          receiverPubkey
-        )
-      )
-      .andThen((unsignedEvent) =>
-        this.signNostrEvent(unsignedEvent, randomKeyPair)
-      )
+    )
   }
 
   private encryptSealNostrEvent(
@@ -348,24 +346,20 @@ export class NostrClient {
   private decryptSealNostrEvent(
     giftWrappedContent: string,
     randomPubkeyHex: string
-  ): ResultAsync<NostrEvent, Error> {
-    return ResultAsync.fromThrowable(
-      async () => {
-        const json = await this.#nostrLoginWindowNostr.nip44.decrypt(
-          randomPubkeyHex,
-          giftWrappedContent
-        )
-        return JSON.parse(json) as NostrEvent
-      },
-      (e) => joinErrors(new Error('Failed to decryptSealNostrEvent'), e)
-    )()
+  ): Observable<NostrEvent> {
+    return from(
+      this.#nostrLoginWindowNostr.nip44.decrypt(
+        randomPubkeyHex,
+        giftWrappedContent
+      )
+    ).pipe(map((json) => JSON.parse(json) as NostrEvent))
   }
 
   private createGiftWrapUnsignedNostrEvent(
     giftWrappedContent: string,
     randomKeyPair: KeyPair,
     receiverPubkey: string
-  ): ResultAsync<NostrEvent, Error> {
+  ): NostrEvent {
     const event: NostrEvent = {
       kind: NDKKind_GiftWrap,
       pubkey: randomKeyPair.publicKeyHex,
@@ -376,50 +370,40 @@ export class NostrClient {
       sig: '',
     }
     event.id = generateEventId(event)
-    return ResultAsync.fromPromise(Promise.resolve(event), (e) =>
-      joinErrors(new Error('Failed to create gift wrap event'), e)
-    )
+    return event
   }
 
   private signNostrEvent(
     event: NostrEvent,
     randomKeyPair: KeyPair
-  ): ResultAsync<NostrEvent, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        const kind = event.kind as number
-        const signedEvent = finalizeEvent(
-          { ...event, kind },
-          randomKeyPair.privateKey
-        )
-        return signedEvent
-      })(),
-      (error) => joinErrors(new Error('Event signing failed'), error)
-    )
+  ): Result<VerifiedEvent, Error> {
+    const kind = event.kind as number
+    return Result.fromThrowable(
+      () => finalizeEvent({ ...event, kind }, randomKeyPair.privateKey),
+      (e) => joinErrors(new Error('Failed to signNostrEvent'), e)
+    )()
   }
 
-  decryptGiftWrapNostrEvent(event: NostrEvent): ResultAsync<NostrEvent, Error> {
+  decryptGiftWrapNostrEvent(event: NostrEvent): Observable<NostrEvent> {
     const giftWrappedContent = event.content
-    return this.decryptSealNostrEvent(giftWrappedContent, event.pubkey).andThen(
-      (sealEvent) => {
+    return this.decryptSealNostrEvent(giftWrappedContent, event.pubkey).pipe(
+      switchMap((sealEvent) => {
         if (sealEvent.kind !== NDKKind_Seal) {
           console.error("Kind of decrypted event is not 'Seal'", {
             kind: sealEvent.kind,
             pubkey: sealEvent.pubkey,
             created_at: sealEvent.created_at,
           })
-          return ResultAsync.fromSafePromise(
-            Promise.resolve({
-              kind: NDKKind_Seal,
-              content: "Kind of decrypted event is not 'Seal'",
-              tags: [],
-              pubkey: sealEvent.pubkey,
-              created_at: sealEvent.created_at,
-            })
-          )
+          return of({
+            kind: NDKKind_Seal,
+            content: "Kind of decrypted event is not 'Seal'",
+            tags: [],
+            pubkey: sealEvent.pubkey,
+            created_at: sealEvent.created_at,
+          })
         }
         return this.decryptPayload(sealEvent.content, sealEvent.pubkey)
-      }
+      })
     )
   }
 
@@ -430,16 +414,15 @@ export class NostrClient {
           NostrClient.Relays,
           this.#ndk
         )
-        const subscription = this.#ndk
+        this.#ndk
           .subscribe(filters, { closeOnEose: false }, relaySet, true)
           .on('event', (event: NDKEvent) => {
             subscriber.next(event)
           })
-
-        return () => {
-          subscription.stop()
-          subscriber.unsubscribe()
-        }
+          .on('eose', (sub) => {
+            sub.stop()
+            subscriber.complete()
+          })
       } catch (error) {
         subscriber.error(
           joinErrors(new Error('Failed to subscribe events'), error)
@@ -448,66 +431,29 @@ export class NostrClient {
     })
   }
 
-  fetchEvent(eventId: string): ResultAsync<NDKEvent, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        const event = await this.#ndk.fetchEvent(eventId)
+  fetchEvent(eventId: string): Observable<NDKEvent> {
+    return from(this.#ndk.fetchEvent(eventId)).pipe(
+      map((event) => {
         if (event === null) {
           throw new Error(`Event not found. eventId: ${eventId}`)
         }
         return event
-      })(),
-      (error) => joinErrors(new Error('Failed to fetch event'), error)
-    )
-  }
-
-  robustFetchEvent(eventId: string): ResultAsync<NDKEvent, Error> {
-    // Experimental: リクエストが増えすぎないように注意する
-    const eventFetcher = new RobustEventFetcher(this.#ndk)
-    return eventFetcher.robustFetchEvent(eventId)
-  }
-
-  fetchEvents(filter: NDKFilter): ResultAsync<NDKEvent[], Error> {
-    const batchFetchEvents = (batchSize: number): Promise<NDKEvent[]> =>
-      new Promise((resolve) => {
-        const batchEvents: NDKEvent[] = []
-        const subscription = this.#ndk.subscribe(
-          { ...filter, limit: batchSize },
-          { closeOnEose: true }
-        )
-
-        subscription.on('event', (event: NDKEvent) => batchEvents.push(event))
-        subscription.on('eose', () => {
-          subscription.stop()
-          resolve(batchEvents)
-        })
       })
-
-    const fetchAllEvents = async (): Promise<NDKEvent[]> => {
-      const events: NDKEvent[] = []
-      const limit = filter.limit ?? 20
-      let remainingLimit = limit
-
-      while (events.length < limit) {
-        const batchSize = Math.min(remainingLimit, 100)
-        const batchEvents = await batchFetchEvents(batchSize)
-
-        events.push(...batchEvents)
-
-        if (batchEvents.length < batchSize) break
-        remainingLimit -= batchEvents.length
-      }
-
-      const uniqueEvents = Array.from(
-        new Map(events.map((event) => [event.id, event])).values()
-      )
-
-      return uniqueEvents.slice(0, limit)
-    }
-
-    return ResultAsync.fromPromise(fetchAllEvents(), (error) =>
-      joinErrors(new Error('Failed to fetch events'), error)
     )
+  }
+
+  fetchEvents(filter: NDKFilter): Observable<NDKEvent> {
+    return new Observable<NDKEvent>((subscriber) => {
+      this.#ndk
+        .subscribe(filter, { closeOnEose: true })
+        .on('event', (event: NDKEvent) => {
+          subscriber.next(event)
+        })
+        .on('eose', (sub) => {
+          sub.stop()
+          subscriber.complete()
+        })
+    })
   }
 
   getUser(npub: string): Result<NDKUser, Error> {
@@ -517,30 +463,38 @@ export class NostrClient {
     return ok(this.#ndk.getUser({ npub }))
   }
 
-  getUserFromNip05(nip05Id: string): ResultAsync<NDKUser | undefined, Error> {
-    return ResultAsync.fromPromise(
-      this.#ndk.getUserFromNip05(nip05Id),
-      (error) => joinErrors(new Error('Failed to get user from NIP-05'), error)
-    )
+  getUserFromNip05(nip05Id: string): Observable<NDKUser | undefined> {
+    return new Observable<NDKUser | undefined>((subscriber) => {
+      this.#ndk
+        .getUserFromNip05(nip05Id)
+        .then((user) => {
+          subscriber.next(user)
+          subscriber.complete()
+        })
+        .catch((error) =>
+          subscriber.error(
+            joinErrors(new Error('Failed to get user from nip05'), error)
+          )
+        )
+    })
   }
 
-  getUserWithProfile(npub: string): ResultAsync<NDKUser, Error> {
+  getUserWithProfile(npub: string): Observable<NDKUser> {
     if (npub.length !== 63 || !npub.startsWith('npub')) {
-      return ResultAsync.fromSafePromise(
-        Promise.reject(new Error(`Invalid npub: ${npub}`))
-      )
+      return new Observable<NDKUser>((subscriber) => {
+        subscriber.error(new Error(`Invalid npub: ${npub}`))
+      })
     }
-    return ResultAsync.fromPromise(
-      (async () => {
-        const user = this.#ndk.getUser({ npub })
-        await user.fetchProfile()
-        return user
-      })(),
-      (error) =>
-        joinErrors(
-          new Error(`Failed to get user with profile. npub: ${npub}`),
-          error
-        )
+    const user = this.#ndk.getUser({ npub })
+    return from(user.fetchProfile()).pipe(
+      switchMap((profile) => {
+        if (!profile) {
+          // NDKProfileが取得できずにNDKUserのみ取得できた場合
+          console.warn(`Profile not found for user: ${npub}`)
+          return of(user)
+        }
+        return of(user)
+      })
     )
   }
 
@@ -548,46 +502,42 @@ export class NostrClient {
     return ok(this.#user)
   }
 
-  fetchFollowingUsers(npub: string): ResultAsync<NDKUser[], Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        const follows = await this.#ndk.getUser({ npub }).follows()
-        return Array.from(follows)
-      })(),
-      (error) =>
-        joinErrors(
-          new Error(`Failed to get following users. npub: ${npub}`),
-          error
+  fetchFollowingUsers(npub: string): Observable<NDKUser[]> {
+    return new Observable<NDKUser[]>((subscriber) => {
+      this.#ndk
+        .getUser({ npub })
+        .follows()
+        .then((follows) => {
+          subscriber.next(Array.from(follows))
+          subscriber.complete()
+        })
+        .catch((error) =>
+          subscriber.error(
+            joinErrors(new Error('Failed to fetch following users'), error)
+          )
         )
-    )
+    })
   }
 
-  decryptEvent(event: NDKEvent): ResultAsync<NDKEvent, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        await event.decrypt()
-        return event
-      })(),
-      (error) => joinErrors(new Error('Failed to decrypt event'), error)
-    )
+  decryptEvent(event: NDKEvent): Observable<NDKEvent> {
+    return from(event.decrypt()).pipe(map(() => event))
   }
 
-  calculateZapsAmount(eventId: string): ResultAsync<number, Error> {
+  calculateZapsAmount(eventId: string): Observable<number> {
     const zapFilter: NDKFilter = {
       kinds: [NDKKind.Zap],
       '#e': [eventId],
     }
 
-    return this.fetchEvents(zapFilter).andThen((zapEvents) => {
-      let totalZapAmount = 0
-      for (const zapEvent of zapEvents) {
+    return this.fetchEvents(zapFilter).pipe(
+      reduce((totalZapAmount, zapEvent) => {
         const zapAmount = this.extractZapAmount(zapEvent)
         if (zapAmount.isOk()) {
-          totalZapAmount += zapAmount.value
+          return totalZapAmount + zapAmount.value
         }
-      }
-      return ok(totalZapAmount)
-    })
+        return totalZapAmount
+      }, 0)
+    )
   }
 
   private extractZapAmount(zapEvent: NDKEvent): Result<number, Error> {
@@ -616,101 +566,86 @@ export class NostrClient {
     return err(new Error('Failed to extract amount from bolt11 invoice'))
   }
 
-  sendZapRequest(
-    nip05Id: string,
-    sat: number
-  ): ResultAsync<ZapResponse, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        const millisats = sat * 1000
-        const unsignedEventResult = await this.#makeZapRequest(
-          nip05Id,
-          millisats
+  sendZapRequest(nip05Id: string, sat: number): Observable<ZapResponse> {
+    return this.#makeZapRequest(nip05Id, sat * 1000).pipe(
+      switchMap((unsignedEvent) => {
+        return from(this.#ndk.signer!.sign(unsignedEvent)).pipe(
+          switchMap((sig) => {
+            return this.#getZapEndpointWithParams(unsignedEvent, sig, nip05Id)
+          }),
+          switchMap((zapEndpoint) => {
+            return from(axios.get(zapEndpoint)).pipe(
+              switchMap((response) => {
+                if (!response.data || response.data.status !== 'OK') {
+                  return throwError(
+                    () => new NostrCallZapEndpointError(response)
+                  )
+                }
+                const { pr, verify, successAction } = response.data
+                if (!pr) {
+                  return throwError(
+                    () => new NostrInvoiceNotFoundError(response)
+                  )
+                }
+
+                return of({ pr, verify, successAction } as ZapResponse)
+              })
+            )
+          })
         )
-        if (unsignedEventResult.isErr()) {
-          throw unsignedEventResult.error
-        }
-        const unsignedEvent = unsignedEventResult.value
-
-        const sig = await this.#ndk.signer!.sign(unsignedEvent)
-
-        const zapEndpointResult = await this.#getZapEndpointWithParams(
-          unsignedEvent,
-          sig,
-          nip05Id
-        )
-        if (zapEndpointResult.isErr()) {
-          throw zapEndpointResult.error
-        }
-        const zapEndpoint = zapEndpointResult.value
-
-        const response = await axios.get(zapEndpoint)
-        if (!response.data || response.data.status !== 'OK') {
-          throw new NostrCallZapEndpointError(response)
-        }
-
-        const { pr, verify, successAction } = response.data
-        if (!pr) {
-          throw new NostrInvoiceNotFoundError(response)
-        }
-
-        return { pr, verify, successAction } as ZapResponse
-      })(),
-      (error) => joinErrors(new Error('Failed to send zap request'), error)
+      })
     )
   }
 
-  #requestLnurlPay(metadata: NostrEvent): ResultAsync<LnurlPay, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        const { lud16 } = JSON.parse(metadata.content)
-        const lnurlPayUrl = toLnurlPayUrl(lud16)
-        const res = await axios.get(lnurlPayUrl)
-        const body: LnurlPay = await res.data
+  // TODO: Change to Observable
+  #requestLnurlPay(metadata: NostrEvent): Observable<LnurlPay> {
+    const { lud16 } = JSON.parse(metadata.content)
+    const lnurlPayUrl = toLnurlPayUrl(lud16)
+    return from(axios.get(lnurlPayUrl)).pipe(
+      switchMap((res) => {
+        const body: LnurlPay = res.data
         if (!body.allowsNostr || !body.nostrPubkey) {
-          throw new Error(`${lud16} doesn't support Nostr. body: ${body}`)
+          return throwError(
+            () => new Error(`${lud16} doesn't support Nostr. body: ${body}`)
+          )
         }
-        return body
-      })(),
-      (error) => joinErrors(new Error('Failed to request LNURL Pay'), error)
+        return of(body)
+      })
     )
   }
 
+  // TODO: Change to Observable
   #getZapEndpointWithParams(
     unsignedEvent: NostrEvent,
     sig: string,
     lud16: string
-  ): ResultAsync<string, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        const metadata: NostrEvent = {
-          ...unsignedEvent,
-          id: unsignedEvent.tags[4][1],
-          kind: 0,
-          sig,
-          content: JSON.stringify({ lud16 }),
-        }
-        const lnurlPayResult = await this.#requestLnurlPay(metadata)
-        if (lnurlPayResult.isErr()) {
-          throw lnurlPayResult.error
-        }
-        const lnurlPay = lnurlPayResult.value
+  ): Observable<string> {
+    return this.#requestLnurlPay({
+      ...unsignedEvent,
+      id: unsignedEvent.tags[4][1],
+      kind: 0,
+      sig,
+      content: JSON.stringify({ lud16 }),
+    }).pipe(
+      switchMap((lnurlPay) => {
         const callbackUrl = lnurlPay.callback
         if (!callbackUrl) {
-          throw new NostrGetZapEndpointCallbackUrlError(metadata, lnurlPay)
+          return throwError(
+            () => new NostrGetZapEndpointCallbackUrlError(lnurlPay)
+          )
         }
         const nostr = encodeURI(JSON.stringify(unsignedEvent))
         const amount = +unsignedEvent.tags[1][1]
         if (lnurlPay.minSendable && amount < lnurlPay.minSendable) {
-          throw new NostrMinSendableConstraintError(
-            amount,
-            lnurlPay.minSendable
+          return throwError(
+            () =>
+              new NostrMinSendableConstraintError(amount, lnurlPay.minSendable)
           )
         }
         if (lnurlPay.maxSendable && amount > lnurlPay.maxSendable) {
-          throw new NostrMaxSendableConstraintError(
-            amount,
-            lnurlPay.maxSendable
+          return throwError(
+            () =>
+              new NostrMaxSendableConstraintError(amount, lnurlPay.maxSendable)
           )
         }
         const lnurl = unsignedEvent.tags[2][1]
@@ -718,23 +653,17 @@ export class NostrClient {
         zapEndpoint.searchParams.append('amount', amount.toString())
         zapEndpoint.searchParams.append('nostr', nostr)
         zapEndpoint.searchParams.append('lnurl', lnurl)
-        return zapEndpoint.toString()
-      })(),
-      (error) => joinErrors(new Error('Failed to get zap endpoint'), error)
+        return of(zapEndpoint.toString())
+      })
     )
   }
 
-  #makeZapRequest(
-    nip05Id: string,
-    msat: number
-  ): ResultAsync<NostrEvent, Error> {
-    return ResultAsync.fromPromise(
-      (async () => {
-        const toResult = await NDKUser.fromNip05(nip05Id, this.#ndk)
-        if (!toResult) {
-          throw new NostrUnknownUserError(nip05Id)
+  #makeZapRequest(nip05Id: string, msat: number): Observable<NostrEvent> {
+    return from(NDKUser.fromNip05(nip05Id, this.#ndk)).pipe(
+      switchMap((to) => {
+        if (!to) {
+          return throwError(() => new NostrUnknownUserError(nip05Id))
         }
-        const to = toResult
 
         const unsignedEvent: NostrEvent = {
           kind: NDKKind.ZapRequest,
@@ -748,19 +677,25 @@ export class NostrClient {
           ],
           content: 'zap request',
         }
+
         const eventId = generateEventId(unsignedEvent)
         unsignedEvent.tags.push(['e', eventId])
-        return unsignedEvent
-      })(),
-      (error) => joinErrors(new Error('Failed to make zap request'), error)
+
+        return of(unsignedEvent)
+      }),
+      catchError((error) =>
+        throwError(() =>
+          joinErrors(new Error('Failed to make zap request'), error)
+        )
+      )
     )
   }
 }
 
-export const connectNostrClient = (): ResultAsync<NostrClient, Error> => {
+export const connectNostrClient = (): Observable<NostrClient> => {
   return NostrClient.connect()
 }
 
-export const disconnectNostrClient = (): ResultAsync<void, Error> => {
+export const disconnectNostrClient = (): Observable<void> => {
   return NostrClient.disconnect()
 }

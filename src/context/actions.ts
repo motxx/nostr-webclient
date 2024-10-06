@@ -65,7 +65,6 @@ export type TimelineAction =
     }
   | {
       type: OperationType.FetchPastNotesEnd
-      notes: Note[]
     }
   | {
       type: OperationType.FetchPastNotesError
@@ -128,7 +127,6 @@ export type NotificationsAction =
     }
   | {
       type: OperationType.FetchPastNotificationsEnd
-      notifications: Notification[]
     }
   | {
       type: OperationType.FetchPastNotificationsError
