@@ -489,6 +489,7 @@ export class NostrClient {
       let remainingLimit = limit
 
       while (events.length < limit) {
+        // FIXME: pagenationが正しく実装されていないため、100件より多いデータの取得ができない(繰り返し同じデータを取得してしまう)
         const batchSize = Math.min(remainingLimit, 100)
         const batchEvents = await batchFetchEvents(batchSize)
 
