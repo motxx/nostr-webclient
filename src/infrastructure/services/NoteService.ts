@@ -43,8 +43,8 @@ export class NoteService implements NoteRepository {
       .fetchEvents({
         kinds: [NDKKind.Text],
         authors: options?.authorPubkeys,
-        since: options?.since && unixtimeOf(options.since),
-        until: options?.until && unixtimeOf(options.until),
+        since: options?.since ? unixtimeOf(options.since) : undefined,
+        until: options?.until ? unixtimeOf(options.until) : undefined,
         search: options?.image
           ? `http.+(${imageExtensions.join('|')})`
           : undefined,
