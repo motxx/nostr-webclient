@@ -1,4 +1,4 @@
-import { Result, ResultAsync, ok } from 'neverthrow'
+import { Result, ResultAsync, ok, Ok } from 'neverthrow'
 import { NDKEvent, NDKKind } from '@nostr-dev-kit/ndk'
 import { isEmoji, Media, Note } from '@/domain/entities/Note'
 import {
@@ -119,12 +119,13 @@ export class NoteService implements NoteRepository {
       () => {
         const urlPattern = /(https?:\/\/[^\s]+)/g
         const matches = event.content.match(urlPattern) || []
-        return matches.reduce<Media[]>((media: Media[], url: string) => {
-          if (this.isImageUrl(url)) media.push({ type: 'image', url })
-          else if (this.isVideoUrl(url)) media.push({ type: 'video', url })
-          else if (this.isYouTubeUrl(url)) media.push({ type: 'youtube', url })
-          return media
-        }, [])
+        const mediaArray: Media[] = []
+        for (const url of matches) {
+          if (this.isImageUrl(url)) mediaArray.push({ type: 'image', url })
+          else if (this.isVideoUrl(url)) mediaArray.push({ type: 'video', url })
+          else if (this.isYouTubeUrl(url)) mediaArray.push({ type: 'youtube', url })
+        }
+        return mediaArray
       },
       (e) => joinErrors(new Error('Failed to extract media from event'), e)
     )()
@@ -228,7 +229,7 @@ export class NoteService implements NoteRepository {
           ...(depth === 0
             ? Array.from(event.content.matchAll(new RegExp(noteIdPattern, 'g')))
                 .map((match) => bech32ToHex(match[1]))
-                .filter((eventId) => eventId.isOk())
+                .filter((eventId): eventId is Ok<string, Error> => eventId.isOk())
                 .filter((eventId) => eventId.value !== replyEventId)
             : []),
           ...(event.content
@@ -238,7 +239,7 @@ export class NoteService implements NoteRepository {
 
         const fetchMentionedNotes = ResultAsync.combine(
           mentionedEventIds
-            .filter((eventId) => eventId.isOk())
+            .filter((eventId): eventId is Ok<string, Error> => eventId.isOk())
             .map((eventId) => this.#nostrClient.fetchEvent(eventId.value))
             .map((eventResult) =>
               eventResult.andThen((event) => this.createNoteFromEvent(event, 1))

@@ -53,10 +53,10 @@ export class DirectMessage implements DirectMessageType {
     subject?: string,
     replyTo?: string
   ): DirectMessage {
-    const tags = receivers.map((receiver) => [
+    const tags: string[][] = receivers.map((receiver) => [
       'p',
       receiver.user.pubkey,
-      receiver.relay,
+      receiver.relay || '',
     ])
     if (subject) {
       tags.push(['subject', subject])
@@ -143,10 +143,10 @@ export class DirectMessage implements DirectMessageType {
   }
 
   toNostrEvent(): NostrEvent {
-    const tags = this.receivers.map((receiver) => [
+    const tags: string[][] = this.receivers.map((receiver) => [
       'p',
       receiver.user.pubkey,
-      receiver.relay,
+      receiver.relay || '',
     ])
     if (this.subject) {
       tags.push(['subject', this.subject])

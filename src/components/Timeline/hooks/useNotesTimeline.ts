@@ -7,7 +7,7 @@ import { SubscribeNotesOptions } from '@/domain/repositories/NoteRepository'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { Subscription } from 'rxjs'
 import { useAppDispatch, useAppSelector } from '@/state/hooks'
-import { addNote, fetchPastNotes, setStatus, TimelineStatus } from '../timelineSlice'
+import { addNote, fetchPastNotes, setStatus, TimelineStatus } from '@/state/features/timeline/timelineSlice'
 
 interface UseNotesTimelineOptions {
   authorPubkeys?: string[]

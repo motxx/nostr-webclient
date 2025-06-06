@@ -4,7 +4,7 @@ export const useScrollPosition = (
   ref: React.RefObject<HTMLDivElement>,
   channelId: string,
   scrollPositions: Record<string, number>,
-  setScrollPositions: (value: Record<string, number>) => void
+  setScrollPositions: (value: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)) => void
 ) => {
   useEffect(() => {
     if (ref.current) {

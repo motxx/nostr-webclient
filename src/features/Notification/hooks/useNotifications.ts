@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs'
 export const useNotifications = () => {
   const {
     auth: { nostrClient, status: authStatus },
-    notifications: { notifications },
+    notifications: { notifications, fetchingPastNotifications },
     dispatch,
   } = useContext(AppContext)
 
@@ -83,5 +83,5 @@ export const useNotifications = () => {
     }
   }, [authStatus, nostrClient, dispatch])
 
-  return { notifications }
+  return { notifications, isNotificationLoading: fetchingPastNotifications }
 }

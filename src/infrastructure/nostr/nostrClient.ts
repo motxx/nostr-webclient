@@ -27,7 +27,6 @@ import { generateEventId, unixtime } from '@/infrastructure/nostr/utils'
 import { decode } from 'light-bolt11-decoder'
 import { RobustEventFetcher } from './robustEventFetcher'
 import { Mutex } from 'async-mutex'
-import { CommonRelays } from './commonRelays'
 import { KeyPair } from '@/domain/entities/KeyPair'
 import { finalizeEvent, nip44 } from 'nostr-tools'
 import { NDKKind_Seal, NDKKind_GiftWrap } from './kindExtensions'
@@ -87,7 +86,7 @@ export class NostrClient {
     'wss://relay.snort.social',
     'wss://relay.primal.net',
     'wss://nostr.wine',
-    
+
     // Japanese relays
     'wss://relay.nostr.wirednet.jp',
     'wss://relay-jp.nostr.wirednet.jp',

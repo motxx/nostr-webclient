@@ -218,7 +218,7 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
                   playlist: videoId,
                 },
                 events: {
-                  onReady: (event) => {
+                  onReady: (event: any) => {
                     if (index === currentIndex) {
                       event.target.playVideo()
                     }

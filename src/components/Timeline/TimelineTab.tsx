@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { TimelineTabId, TimelineTabType } from './Timeline'
+import { TimelineTabId, TimelineTabType } from './types'
 
 interface TimelineTabProps {
   onTabItemClick: (tabId: TimelineTabId) => void

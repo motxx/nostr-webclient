@@ -79,9 +79,9 @@ const timelineSlice = createSlice({
         (state, action: PayloadAction<Note[]>) => {
           state.fetchingPastNotes = false
           // 重複を防ぐためにMapを使用
-          const notesMap = new Map([
-            ...state.notes.map((note) => [note.id, note]),
-            ...action.payload.map((note) => [note.id, note]),
+          const notesMap = new Map<string, Note>([
+            ...state.notes.map((note): [string, Note] => [note.id, note]),
+            ...action.payload.map((note): [string, Note] => [note.id, note]),
           ])
           state.notes = [...notesMap.values()].sort(
             (a, b) => b.created_at.getTime() - a.created_at.getTime()

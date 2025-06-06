@@ -1,4 +1,4 @@
-import { generateSecretKey, getPublicKey } from 'nostr-tools'
+const { generateSecretKey, getPublicKey } = require('nostr-tools')
 
 export class KeyPair {
   constructor(

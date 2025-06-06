@@ -26,6 +26,7 @@ const replyData: NoteType[] = [
     created_at: new Date('2024-06-01T00:00:00Z'),
     following: true,
     json: '{}',
+    relays: [],
   },
   {
     id: '102',
@@ -49,6 +50,7 @@ const replyData: NoteType[] = [
     created_at: new Date('2024-06-02T00:00:00Z'),
     following: false,
     json: '{}',
+    relays: [],
   },
 ]
 
