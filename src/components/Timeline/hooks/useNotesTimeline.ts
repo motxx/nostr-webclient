@@ -5,9 +5,9 @@ import { NoteService } from '@/infrastructure/services/NoteService'
 import { SubscribeNotes } from '@/domain/use_cases/SubscribeNotes'
 import { SubscribeNotesOptions } from '@/domain/repositories/NoteRepository'
 import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { OperationType } from '@/context/actions'
-import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
 import { Subscription } from 'rxjs'
+import { useAppDispatch, useAppSelector } from '@/state/hooks'
+import { addNote, fetchPastNotes, setStatus, TimelineStatus } from '../timelineSlice'
 
 interface UseNotesTimelineOptions {
   authorPubkeys?: string[]
@@ -22,16 +22,16 @@ export const useNotesTimeline = ({
 }: UseNotesTimelineOptions) => {
   const {
     auth: { nostrClient, status: authStatus },
-    timeline: { notes },
-    dispatch,
   } = useContext(AppContext)
+  
+  const dispatch = useAppDispatch()
+  const { notes, status } = useAppSelector((state) => state.timeline)
 
   // 再レンダリングを防ぐためにuseRefを使う(timeline.statusは依存配列に影響するので使わない)
   const subscriptionRef = useRef<Subscription | null>(null)
   const isSubscribingRef = useRef<boolean>(false)
 
-  const isTimelineLoading =
-    isSubscribingRef.current !== null || notes.length === 0
+  const isTimelineLoading = status === TimelineStatus.Subscribing || (status === TimelineStatus.Idle && notes.length === 0)
 
   const subscribe = useCallback(
     (options: SubscribeNotesOptions) => {
@@ -51,31 +51,22 @@ export const useNotesTimeline = ({
       const userProfileService = new UserProfileService(nostrClient)
       const noteService = new NoteService(nostrClient, userProfileService)
 
-      dispatch({ type: OperationType.FetchPastNotesStart })
-
-      new FetchPastNotes(noteService).execute({ ...options, limit: 20 }).match(
-        (notes) => {
-          dispatch({ type: OperationType.FetchPastNotesEnd, notes })
-        },
-        (error) => {
-          dispatch({ type: OperationType.FetchPastNotesError, error })
-        }
-      )
+      dispatch(fetchPastNotes({ options: { ...options, limit: 20 }, noteService }))
 
       const subscription = new SubscribeNotes(noteService)
         .execute(options)
         .subscribe({
           next: (note) => {
-            dispatch({ type: OperationType.AddNewNote, note })
+            dispatch(addNote(note))
           },
           error: (error) => {
-            dispatch({ type: OperationType.SubscribeNotesError, error })
+            dispatch(setStatus(TimelineStatus.Error))
+            console.error('Error subscribing to notes:', error)
           },
         })
 
       subscriptionRef.current = subscription
-
-      dispatch({ type: OperationType.SubscribeNotes })
+      dispatch(setStatus(TimelineStatus.Subscribing))
     },
     [nostrClient, dispatch, authStatus]
   )
@@ -84,7 +75,7 @@ export const useNotesTimeline = ({
     if (subscriptionRef.current) {
       subscriptionRef.current.unsubscribe()
       isSubscribingRef.current = false
-      dispatch({ type: OperationType.UnsubscribeNotes })
+      dispatch(setStatus(TimelineStatus.Idle))
     }
   }, [dispatch])
 

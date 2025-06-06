@@ -51,7 +51,7 @@ export const useFetchNotes = ({
           dispatch({ type: OperationType.FetchPastNotesError, error })
         }
       )
-  }, [status, nostrClient, dispatch, notes, authorPubkeys, limit, hashtag])
+  }, [status, nostrClient, dispatch, notes.length, authorPubkeys, limit, hashtag])
 
   return {
     fetchNotes,

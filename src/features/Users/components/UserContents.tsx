@@ -15,7 +15,10 @@ const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
   const { notes, isTimelineLoading } = useNotesTimeline({
     authorPubkeys: [user.pubkey],
   })
-  const { isFetchingPastNotes, fetchNotes } = useFetchNotes({ limit: 20 })
+  const { isFetchingPastNotes, fetchNotes } = useFetchNotes({ 
+    authorPubkeys: [user.pubkey],
+    limit: 20 
+  })
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleScroll = useCallback(() => {
