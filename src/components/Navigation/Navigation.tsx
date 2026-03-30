@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { IconType } from 'react-icons'
 import {
@@ -15,11 +15,9 @@ import NavigationBottomTab from '@/components/Navigation/NavigationBottomTab'
 import NavigationSidebar from '@/components/Navigation/NavigationSidebar'
 import PostNoteModal from '@/components/NoteItem/PostNoteModal'
 import { Note } from '@/domain/entities/Note'
-import { PostNote } from '@/domain/use_cases/PostNote'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { NoteService } from '@/infrastructure/services/NoteService'
-import { AuthStatus } from '@/context/types'
-import { AppContext } from '@/context/AppContext'
+import { useAtomValue } from 'jotai'
+import { AuthStatus, authStatusAtom, loggedInUserAtom } from '@/state/auth'
+import { noteServiceAtom } from '@/state/services'
 
 export type NavigationItemId =
   | 'home'
@@ -76,9 +74,9 @@ const Navigation: React.FC<NavigationProps> = ({
   shouldFocusBottomTab,
   focusBottomTab,
 }) => {
-  const {
-    auth: { nostrClient, loggedInUser, status },
-  } = useContext(AppContext)
+  const authStatus = useAtomValue(authStatusAtom)
+  const loggedInUser = useAtomValue(loggedInUserAtom)
+  const noteService = useAtomValue(noteServiceAtom)
   const [isPostModalOpen, setIsPostModalOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const navigate = useNavigate()
@@ -133,16 +131,12 @@ const Navigation: React.FC<NavigationProps> = ({
   }
 
   const handlePostSubmit = async (text: string, media?: File) => {
-    if (status !== AuthStatus.LoggedIn) return
-    if (!nostrClient || !loggedInUser) {
+    if (authStatus !== AuthStatus.LoggedIn) return
+    if (!noteService || !loggedInUser) {
       throw new Error('Not logged in')
     }
 
-    const userProfileService = new UserProfileService(nostrClient)
-    const noteService = new NoteService(nostrClient, userProfileService)
-    await new PostNote(noteService).execute(
-      Note.createNoteByUser(loggedInUser, text)
-    )
+    await noteService.postNote(Note.createNoteByUser(loggedInUser, text))
   }
 
   return (

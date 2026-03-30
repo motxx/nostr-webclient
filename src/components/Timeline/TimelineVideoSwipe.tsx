@@ -8,13 +8,11 @@ import { convertToEmbedUrl } from '@/utils/contentConverter'
 
 interface TimelineVideoSwipeProps {
   notes: NoteType[]
-  onToggleFollow: (userId: string) => boolean
   className?: string
 }
 
 const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
   notes,
-  onToggleFollow,
   className,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -270,7 +268,6 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 space-y-1">
             <NoteItemHeader
               note={note}
-              onToggleFollow={onToggleFollow}
               onShowJSON={() => {}}
               className="text-white"
             />
@@ -291,7 +288,6 @@ const TimelineVideoSwipe: React.FC<TimelineVideoSwipeProps> = ({
           onClose={closeDetails}
           originalNote={videoNotes[currentIndex]}
           onClickAction={handleClickAction}
-          onToggleFollow={onToggleFollow}
         />
       )}
     </div>

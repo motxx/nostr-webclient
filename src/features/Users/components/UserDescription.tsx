@@ -12,15 +12,9 @@ import {
 
 interface UserDescriptionProps {
   user: User
-  isFollowing: boolean
-  toggleFollow: (userId: string) => boolean
 }
 
-const UserDescription: React.FC<UserDescriptionProps> = ({
-  user,
-  isFollowing,
-  toggleFollow,
-}) => {
+const UserDescription: React.FC<UserDescriptionProps> = ({ user }) => {
   const isUserMe =
     user.profile?.nostrAddress &&
     user.profile?.nostrAddress === '_@motxx.pages.dev'
@@ -45,9 +39,8 @@ const UserDescription: React.FC<UserDescriptionProps> = ({
             </TertiaryButton>
           ) : (
             <FollowButton
+              pubkey={user.pubkey}
               userId={user.profile?.nostrAddress || user.npub}
-              isFollowing={isFollowing}
-              toggleFollow={toggleFollow}
             />
           )}
         </div>

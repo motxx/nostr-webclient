@@ -1,28 +1,28 @@
 import React, { useRef } from 'react'
 import { FiInfo, FiUserPlus, FiUserX, FiVolumeX } from 'react-icons/fi'
 import { useClickAway } from 'react-use'
+import { useFollow } from '@/hooks/useFollow'
 
 interface NoteItemMenuProps {
   userName: string
-  following: boolean
-  onToggleFollow: (userId: string) => boolean
+  pubkey: string
   onClose: () => void
   onShowJSON: () => void
 }
 
 const NoteItemMenu: React.FC<NoteItemMenuProps> = ({
   userName,
-  following,
-  onToggleFollow,
+  pubkey,
   onClose,
   onShowJSON,
 }) => {
   const ref = useRef<HTMLDivElement>(null)
+  const { isFollowing, toggleFollow } = useFollow(pubkey)
 
   useClickAway(ref, onClose)
 
   const handleClickToggleFollow = () => {
-    onToggleFollow(userName)
+    toggleFollow(userName)
     onClose()
   }
 
@@ -40,12 +40,12 @@ const NoteItemMenu: React.FC<NoteItemMenuProps> = ({
         className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-800 dark:text-gray-300"
         onClick={handleClickToggleFollow}
       >
-        {following ? (
+        {isFollowing ? (
           <FiUserX className="w-5 h-5 mt-1 mr-2" />
         ) : (
           <FiUserPlus className="w-5 h-5 mt-1 mr-2" />
         )}
-        {following
+        {isFollowing
           ? `${userName}さんのフォローを解除`
           : `${userName}さんをフォロー`}
       </div>

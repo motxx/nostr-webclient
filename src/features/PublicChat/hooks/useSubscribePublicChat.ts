@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useContext } from 'react'
-import { PublicChatService } from '@/infrastructure/services/PublicChatService'
+import { useCallback, useEffect } from 'react'
 import { PublicChatMessage } from '@/domain/entities/PublicChat'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AppContext } from '@/context/AppContext'
-import { AuthStatus } from '@/context/types'
+import { useAtomValue } from 'jotai'
+import { AuthStatus, authStatusAtom } from '@/state/auth'
+import { publicChatServiceAtom } from '@/state/services'
 
 const subscriptions: Array<{
   isForever?: boolean
@@ -11,9 +10,8 @@ const subscriptions: Array<{
 }> = []
 
 export const useSubscribePublicChat = () => {
-  const {
-    auth: { nostrClient, status },
-  } = useContext(AppContext)
+  const authStatus = useAtomValue(authStatusAtom)
+  const publicChatService = useAtomValue(publicChatServiceAtom)
 
   const subscribe = useCallback(
     async (
@@ -25,18 +23,13 @@ export const useSubscribePublicChat = () => {
         isForever?: boolean
       }
     ) => {
-      if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
+      if (
+        authStatus !== AuthStatus.ClientReady &&
+        authStatus !== AuthStatus.LoggedIn
+      ) {
         return
       }
-      if (!nostrClient) {
-        throw new Error('NostrClient is not ready')
-      }
-
-      const userProfileRepository = new UserProfileService(nostrClient)
-      const publicChatService = new PublicChatService(
-        nostrClient,
-        userProfileRepository
-      )
+      if (!publicChatService) return
 
       const subscriptionResult = publicChatService.subscribeToChannelMessages(
         channelId,
@@ -55,7 +48,7 @@ export const useSubscribePublicChat = () => {
         console.error('Failed to subscribe:', subscriptionResult.error)
       }
     },
-    [nostrClient, status]
+    [authStatus, publicChatService]
   )
 
   const unsubscribe = useCallback(

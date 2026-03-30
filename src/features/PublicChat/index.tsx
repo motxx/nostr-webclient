@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import PublicChatList from './components/PublicChatList'
 import PublicChatMessageWindow from './components/PublicChatMessageWindow'
 import { PublicChannel } from '@/domain/entities/PublicChat'
-import { FetchChannels } from '@/domain/use_cases/FetchChannels'
-import { PublicChatService } from '@/infrastructure/services/PublicChatService'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AppContext } from '@/context/AppContext'
+import { useAtomValue } from 'jotai'
+import { publicChatServiceAtom } from '@/state/services'
 
 const PublicChatPage: React.FC = () => {
   const { channelId } = useParams()
@@ -15,21 +13,16 @@ const PublicChatPage: React.FC = () => {
     null
   )
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const {
-    auth: { nostrClient },
-  } = useContext(AppContext)
+  const publicChatService = useAtomValue(publicChatServiceAtom)
 
   useEffect(() => {
-    if (nostrClient) {
-      const userProfileRepository = new UserProfileService(nostrClient)
-      const publicChatService = new PublicChatService(
-        nostrClient,
-        userProfileRepository
+    if (publicChatService) {
+      publicChatService.fetchChannels().match(
+        (channels) => setChannels(channels),
+        (error) => console.error(error)
       )
-      const fetchChannels = new FetchChannels(publicChatService)
-      fetchChannels.execute().then(setChannels).catch(console.error)
     }
-  }, [nostrClient])
+  }, [publicChatService])
 
   useEffect(() => {
     if (channelId && channels.length > 0) {

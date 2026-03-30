@@ -1,50 +1,45 @@
-import { useEffect, useState, useContext } from 'react'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { NoteService } from '@/infrastructure/services/NoteService'
-import { NotificationService } from '@/infrastructure/services/NotificationService'
-import { SubscribeNotifications } from '@/domain/use_cases/SubscribeNotifications'
+import { useEffect } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { Notification } from '@/domain/entities/Notification'
-import { AppContext } from '@/context/AppContext'
-import { AuthStatus } from '@/context/types'
+import { AuthStatus, authStatusAtom } from '@/state/auth'
+import { notificationServiceAtom } from '@/state/services'
+import {
+  notificationsAtom,
+  notificationsLoadingAtom,
+} from '@/state/notifications'
 
 export const useNotifications = () => {
-  const {
-    auth: { nostrClient, status },
-  } = useContext(AppContext)
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const authStatus = useAtomValue(authStatusAtom)
+  const notificationService = useAtomValue(notificationServiceAtom)
+  const notifications = useAtomValue(notificationsAtom)
+  const isLoading = useAtomValue(notificationsLoadingAtom)
+  const setNotifications = useSetAtom(notificationsAtom)
+  const setIsLoading = useSetAtom(notificationsLoadingAtom)
 
   useEffect(() => {
-    if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
+    if (
+      authStatus !== AuthStatus.ClientReady &&
+      authStatus !== AuthStatus.LoggedIn
+    ) {
       return
     }
-    if (!nostrClient) {
-      throw new Error('NostrClient is not ready')
-    }
+    if (!notificationService) return
 
-    const userProfileRepository = new UserProfileService(nostrClient)
-    const noteService = new NoteService(nostrClient!, userProfileRepository)
-    const notificationService = new NotificationService(
-      nostrClient,
-      userProfileRepository,
-      noteService
-    )
-    const subscribeNotifications = new SubscribeNotifications(
-      notificationService
-    )
-
-    const unsubscribePromise = subscribeNotifications.execute(
+    const unsubscribeResult = notificationService.subscribeNotifications(
       (notification: Notification) => {
-        setNotifications((prev: Notification[]) => [...prev, notification])
+        setNotifications((prev) => [...prev, notification])
         setIsLoading(false)
       },
       { limit: 1000 }
     )
 
     return () => {
-      unsubscribePromise.then(({ unsubscribe }) => unsubscribe())
+      unsubscribeResult.match(
+        (sub) => sub.unsubscribe(),
+        () => {}
+      )
     }
-  }, [nostrClient, status])
+  }, [authStatus, notificationService, setNotifications, setIsLoading])
 
   return { notifications, isLoading }
 }

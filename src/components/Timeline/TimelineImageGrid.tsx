@@ -106,7 +106,6 @@ const TimelineImageGrid: React.FC<TimelineImageGridProps> = ({
             onClose={closeDetails}
             originalNote={selectedNote}
             onClickAction={() => {}}
-            onToggleFollow={() => false}
             onClickPrevPost={selectPrevPost}
             onClickNextPost={selectNextPost}
           />

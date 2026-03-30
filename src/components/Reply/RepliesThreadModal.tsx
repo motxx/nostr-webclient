@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSpring, animated } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
 import { FiMessageCircle } from 'react-icons/fi'
-import replyData from '@/data/dummy-reply-data'
 import NoteItem from '@/components/NoteItem/NoteItem'
-import { createDummyNewReply } from '@/utils/mock'
 import './RepliesThreadModal.css'
 import { NoteType } from '@/domain/entities/Note'
 
@@ -12,7 +10,6 @@ interface RepliesThreadModalProps {
   originalNote: NoteType
   showModal: boolean
   onClose: () => void
-  onToggleFollow: (userId: string) => boolean
 }
 
 const frameHeight = (window.innerHeight * 4) / 5
@@ -21,7 +18,6 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   originalNote,
   onClose,
   showModal,
-  onToggleFollow,
 }) => {
   const [newReply, setNewReply] = useState('')
 
@@ -32,7 +28,7 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
   const handleNewReplySubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (newReply.trim()) {
-      replyData.push(createDummyNewReply(newReply))
+      // TODO: Implement actual reply posting
       setNewReply('')
     }
   }
@@ -114,7 +110,6 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
                     ...originalNote,
                     media: undefined,
                   }}
-                  onToggleFollow={onToggleFollow}
                   onReply={handleReplyToReply}
                 />
               </div>
@@ -122,13 +117,9 @@ const RepliesThreadModal: React.FC<RepliesThreadModalProps> = ({
               <hr className="border-gray-200 dark:border-gray-800 mb-4" />
 
               <div className="text-gray-700 dark:text-gray-300">
-                {replyData.map((reply, index) => (
+                {(originalNote.receivedReplyNotes ?? []).map((reply, index) => (
                   <div key={index} className="mb-4">
-                    <NoteItem
-                      note={reply}
-                      onToggleFollow={onToggleFollow}
-                      onReply={handleReplyToReply}
-                    />
+                    <NoteItem note={reply} onReply={handleReplyToReply} />
                   </div>
                 ))}
               </div>

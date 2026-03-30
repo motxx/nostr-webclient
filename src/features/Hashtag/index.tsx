@@ -6,13 +6,11 @@ import Timeline from '@/components/Timeline/Timeline'
 interface HashtagPageProps {
   focusBottomTab: () => void
   unfocusBottomTab: () => void
-  toggleFollow: (userId: string) => boolean
 }
 
 const HashtagPage: React.FC<HashtagPageProps> = ({
   focusBottomTab,
   unfocusBottomTab,
-  toggleFollow,
 }) => {
   const { hashtag } = useParams<{ hashtag: string }>()
 
@@ -21,7 +19,6 @@ const HashtagPage: React.FC<HashtagPageProps> = ({
       <Timeline
         onScrollUp={focusBottomTab}
         onScrollDown={unfocusBottomTab}
-        onToggleFollow={toggleFollow}
         hashtag={hashtag}
         showTabs={false}
       />

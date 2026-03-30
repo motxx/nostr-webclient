@@ -15,14 +15,12 @@ import UserAvatar from '@/components/ui-elements/UserAvatar'
 
 interface NoteItemHeaderProps {
   note: NoteType
-  onToggleFollow: (userId: string) => boolean
   onShowJSON: () => void
   className?: string
 }
 
 const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
   note,
-  onToggleFollow,
   onShowJSON,
   className,
 }) => {
@@ -37,6 +35,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
     fullName: note.author.profile?.name || note.author.npub,
     nostrAddress: note.author.profile?.nostrAddress,
     npub: note.author.npub,
+    pubkey: note.author.pubkey,
     id: userIdForDisplay(note.author),
     verified: User.verified(note.author),
   }
@@ -78,8 +77,7 @@ const NoteItemHeader: React.FC<NoteItemHeaderProps> = ({
       {showMenu && (
         <NoteItemMenu
           userName={author.name}
-          following={note.following ?? false /* TODO: author.following */}
-          onToggleFollow={onToggleFollow}
+          pubkey={author.pubkey}
           onClose={closeMenu}
           onShowJSON={onShowJSON}
         />

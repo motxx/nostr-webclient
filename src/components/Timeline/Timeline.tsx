@@ -1,11 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useContext,
-} from 'react'
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import TimelineTab from './TimelineTab'
 import TimelineStandard from './TimelineStandard'
 import TimelineImageGrid from './TimelineImageGrid'
@@ -14,12 +7,12 @@ import { useInfiniteNotes } from './hooks/useInfiniteNotes'
 import { HomeTimelineTabs, TimelineTabId } from './types'
 import Spinner from '../ui-elements/Spinner'
 import { useFetchNotes } from './hooks/useFetchNotes'
-import { AppContext } from '@/context/AppContext'
+import { useAtomValue } from 'jotai'
+import { loggedInUserAtom, readOnlyUserAtom } from '@/state/auth'
 
 interface TimelineProps {
   onScrollUp: () => void
   onScrollDown: () => void
-  onToggleFollow: (userId: string) => boolean
   hashtag?: string
   showTabs?: boolean
 }
@@ -27,13 +20,11 @@ interface TimelineProps {
 const Timeline: React.FC<TimelineProps> = ({
   onScrollUp,
   onScrollDown,
-  onToggleFollow,
   hashtag,
   showTabs = true,
 }) => {
-  const {
-    auth: { loggedInUser, readOnlyUser },
-  } = useContext(AppContext)
+  const loggedInUser = useAtomValue(loggedInUserAtom)
+  const readOnlyUser = useAtomValue(readOnlyUserAtom)
   const tabRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
@@ -46,7 +37,7 @@ const Timeline: React.FC<TimelineProps> = ({
     () =>
       loggedInUser
         ? loggedInUser.followingUsers?.map((user) => user.pubkey)
-        : readOnlyUser?.followingUsers?.map((user) => user.pubkey) ?? [],
+        : (readOnlyUser?.followingUsers?.map((user) => user.pubkey) ?? []),
     [loggedInUser, readOnlyUser]
   )
 
@@ -127,23 +118,11 @@ const Timeline: React.FC<TimelineProps> = ({
     const activeTab = HomeTimelineTabs.find((tab) => tab.id === activeTabId)
     switch (activeTab?.feedType) {
       case 'standard':
-        return (
-          <TimelineStandard
-            className="pt-4 sm:pt-8"
-            notes={notes}
-            onToggleFollow={onToggleFollow}
-          />
-        )
+        return <TimelineStandard className="pt-4 sm:pt-8" notes={notes} />
       case 'image-grid':
         return <TimelineImageGrid className="pt-0 sm:pt-4" notes={notes} />
       case 'video-swipe':
-        return (
-          <TimelineVideoSwipe
-            className="pt-0 sm:pt-4"
-            notes={notes}
-            onToggleFollow={onToggleFollow}
-          />
-        )
+        return <TimelineVideoSwipe className="pt-0 sm:pt-4" notes={notes} />
       default:
         return null
     }

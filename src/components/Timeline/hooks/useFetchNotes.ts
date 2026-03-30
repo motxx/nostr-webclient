@@ -1,15 +1,17 @@
-import { useCallback, useContext } from 'react'
-import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
-import { NoteService } from '@/infrastructure/services/NoteService'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AuthStatus } from '@/context/types'
-import { AppContext } from '@/context/AppContext'
-import { OperationType } from '@/context/actions'
+import { useCallback } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { AuthStatus, authStatusAtom } from '@/state/auth'
+import { noteServiceAtom } from '@/state/services'
+import {
+  timelineNotesAtom,
+  timelineFetchingAtom,
+  timelineErrorAtom,
+} from '@/state/timeline'
 
 interface UseFetchNotesOptions {
   authorPubkeys?: string[]
   limit?: number
-  hashtag?: string // TODO: implement hashtag filtering
+  hashtag?: string
 }
 
 export const useFetchNotes = ({
@@ -17,41 +19,63 @@ export const useFetchNotes = ({
   limit = 20,
   hashtag,
 }: UseFetchNotesOptions) => {
-  const {
-    auth: { nostrClient, status },
-    subscription: { notes, fetchingPastNotes },
-    dispatch,
-  } = useContext(AppContext)
+  const authStatus = useAtomValue(authStatusAtom)
+  const noteService = useAtomValue(noteServiceAtom)
+  const notes = useAtomValue(timelineNotesAtom)
+  const fetchingPastNotes = useAtomValue(timelineFetchingAtom)
+  const setNotes = useSetAtom(timelineNotesAtom)
+  const setFetching = useSetAtom(timelineFetchingAtom)
+  const setError = useSetAtom(timelineErrorAtom)
 
   const fetchNotes = useCallback(() => {
-    if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
+    if (
+      authStatus !== AuthStatus.ClientReady &&
+      authStatus !== AuthStatus.LoggedIn
+    ) {
       return
     }
-    if (!nostrClient) {
-      throw new Error('Nostr client not found')
-    }
+    if (!noteService) return
 
-    dispatch({ type: OperationType.FetchPastNotesStart })
+    setFetching(true)
 
     const oldestNote = notes[notes.length - 1]
-    new FetchPastNotes(
-      new NoteService(nostrClient, new UserProfileService(nostrClient))
-    )
-      .execute({
+    noteService
+      .fetchPastNotes({
         authorPubkeys,
-        until: oldestNote.created_at,
+        until: oldestNote?.created_at,
         limit,
         hashtag,
       })
       .match(
-        (notes) => {
-          dispatch({ type: OperationType.FetchPastNotesEnd, notes })
+        (fetchedNotes) => {
+          setNotes((prev) => {
+            const merged = [
+              ...new Map(
+                [...prev, ...fetchedNotes].map((n) => [n.id, n])
+              ).values(),
+            ]
+            return merged.sort(
+              (a, b) => b.created_at.getTime() - a.created_at.getTime()
+            )
+          })
+          setFetching(false)
         },
         (error) => {
-          dispatch({ type: OperationType.FetchPastNotesError, error })
+          setError(error)
+          setFetching(false)
         }
       )
-  }, [status, nostrClient, dispatch, notes, authorPubkeys, limit, hashtag])
+  }, [
+    authStatus,
+    noteService,
+    notes,
+    authorPubkeys,
+    limit,
+    hashtag,
+    setNotes,
+    setFetching,
+    setError,
+  ])
 
   return {
     fetchNotes,

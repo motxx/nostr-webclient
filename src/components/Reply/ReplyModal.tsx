@@ -9,7 +9,6 @@ interface ReplyModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (replyContent: string) => void
-  onToggleFollow: (userId: string) => boolean
 }
 
 const ReplyModal: React.FC<ReplyModalProps> = ({
@@ -17,7 +16,6 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
   onClose,
   originalNote,
   onSubmit,
-  onToggleFollow,
 }) => {
   const [replyContent, setReplyContent] = useState('')
 
@@ -49,7 +47,6 @@ const ReplyModal: React.FC<ReplyModalProps> = ({
             ...originalNote,
             media: undefined,
           }}
-          onToggleFollow={onToggleFollow}
         />
         <textarea
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent mt-4"

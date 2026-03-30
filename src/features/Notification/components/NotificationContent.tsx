@@ -95,7 +95,7 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
   )
 
   const renderReplyNotification = () => (
-    <NoteItem note={majorNotification.target} onToggleFollow={() => false} />
+    <NoteItem note={majorNotification.target} />
   )
 
   const renderDislikeNotification = () => (

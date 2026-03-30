@@ -1,30 +1,25 @@
-import { FormEvent, useContext } from 'react'
-import { PublicChatService } from '@/infrastructure/services/PublicChatService'
-import { PostChannelMessage } from '@/domain/use_cases/PostChannelMessage'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AppContext } from '@/context/AppContext'
+import { FormEvent } from 'react'
+import { useAtomValue } from 'jotai'
+import { publicChatServiceAtom } from '@/state/services'
 
 export const useMessageSubmission = (
   channelId: string,
   newMessage: string,
   setNewMessage: (value: string) => void
 ) => {
-  const {
-    auth: { nostrClient },
-  } = useContext(AppContext)
+  const publicChatService = useAtomValue(publicChatServiceAtom)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (newMessage.trim() !== '' && nostrClient) {
-      const userProfileRepository = new UserProfileService(nostrClient)
-      const publicChatService = new PublicChatService(
-        nostrClient,
-        userProfileRepository
-      )
-      const postChannelMessage = new PostChannelMessage(publicChatService)
-
+    if (newMessage.trim() !== '' && publicChatService) {
       try {
-        await postChannelMessage.execute(channelId, newMessage)
+        const result = await publicChatService.postChannelMessage(
+          channelId,
+          newMessage
+        )
+        if (result.isErr()) {
+          throw result.error
+        }
         setNewMessage('')
       } catch (error) {
         console.error('Failed to post message:', error)

@@ -11,14 +11,12 @@ import { isEmoji, NoteType, PostActionType } from '@/domain/entities/Note'
 type NoteItemProps = {
   note: NoteType
   noteDepth?: number
-  onToggleFollow: (userId: string) => boolean
   onReply?: (userId: string) => void
 }
 
 const NoteItem: React.FC<NoteItemProps> = ({
   note,
   noteDepth = 0,
-  onToggleFollow,
   onReply,
 }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
@@ -91,7 +89,6 @@ const NoteItem: React.FC<NoteItemProps> = ({
       <NoteItemHeader
         className="ml-2 sm:ml-0 pb-2"
         note={note}
-        onToggleFollow={onToggleFollow}
         onShowJSON={() => setShowJSONModal(true)}
       />
       {note.media && (
@@ -110,12 +107,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
             key={index}
             className="ml-4 sm:ml-2 mr-2 mt-2 sm:mr-0 p-2 bg-gray-100 dark:bg-gray-800 rounded-md"
           >
-            <NoteItem
-              note={note}
-              noteDepth={noteDepth + 1}
-              onToggleFollow={onToggleFollow}
-              onReply={onReply}
-            />
+            <NoteItem note={note} noteDepth={noteDepth + 1} onReply={onReply} />
           </div>
         ))}
       <div className="ml-2 sm:ml-0 space-y-2 sm:space-y-4">
@@ -137,13 +129,11 @@ const NoteItem: React.FC<NoteItemProps> = ({
         onClose={closeDetails}
         originalNote={note}
         onClickAction={onClickAction}
-        onToggleFollow={onToggleFollow}
       />
       <RepliesThreadModal
         originalNote={note}
         onClose={closeRepliesThreadModal}
         showModal={isRepliesThreadModalOpen}
-        onToggleFollow={onToggleFollow}
       />
       <AlertModal
         show={showJSONModal}

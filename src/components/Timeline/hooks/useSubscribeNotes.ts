@@ -1,68 +1,110 @@
-import { useCallback, useContext } from 'react'
-import { NoteService } from '@/infrastructure/services/NoteService'
-import { SubscribeNotes } from '@/domain/use_cases/SubscribeNotes'
+import { useCallback } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { Note } from '@/domain/entities/Note'
 import { SubscribeNotesOptions } from '@/domain/repositories/NoteRepository'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
-import { AuthStatus, SubscriptionStatus } from '@/context/types'
-import { AppContext } from '@/context/AppContext'
-import { OperationType } from '@/context/actions'
-import { FetchPastNotes } from '@/domain/use_cases/FetchPastNotes'
+import { AuthStatus, authStatusAtom } from '@/state/auth'
+import { noteServiceAtom } from '@/state/services'
+import {
+  SubscriptionStatus,
+  timelineNotesAtom,
+  timelineSubscriptionAtom,
+  timelineSubscriptionStatusAtom,
+  timelineFetchingAtom,
+  timelineErrorAtom,
+} from '@/state/timeline'
 
 export const useSubscribeNotes = () => {
-  const {
-    auth: { nostrClient, status },
-    subscription: { notes, subscription, status: subscriptionStatus },
-    dispatch,
-  } = useContext(AppContext)
+  const authStatus = useAtomValue(authStatusAtom)
+  const noteService = useAtomValue(noteServiceAtom)
+  const notes = useAtomValue(timelineNotesAtom)
+  const subscription = useAtomValue(timelineSubscriptionAtom)
+  const subscriptionStatus = useAtomValue(timelineSubscriptionStatusAtom)
+  const setNotes = useSetAtom(timelineNotesAtom)
+  const setSubscription = useSetAtom(timelineSubscriptionAtom)
+  const setSubscriptionStatus = useSetAtom(timelineSubscriptionStatusAtom)
+  const setFetching = useSetAtom(timelineFetchingAtom)
+  const setError = useSetAtom(timelineErrorAtom)
 
   const subscribe = useCallback(
-    (options: SubscribeNotesOptions, callbackWhenFinished?: () => void) => {
-      if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
+    (options: SubscribeNotesOptions) => {
+      if (
+        authStatus !== AuthStatus.ClientReady &&
+        authStatus !== AuthStatus.LoggedIn
+      ) {
         return
       }
-      if (!nostrClient) throw new Error('NostrClient is not ready')
+      if (!noteService) return
+      if (subscriptionStatus !== SubscriptionStatus.Idle) return
 
-      if (subscriptionStatus !== SubscriptionStatus.Idle) {
-        return
-      }
+      setFetching(true)
 
-      const userProfileService = new UserProfileService(nostrClient)
-      const noteService = new NoteService(nostrClient, userProfileService)
-
-      dispatch({ type: OperationType.FetchPastNotesStart })
-
-      new FetchPastNotes(noteService).execute({ ...options, limit: 20 }).match(
-        (notes) => {
-          dispatch({ type: OperationType.FetchPastNotesEnd, notes })
+      noteService.fetchPastNotes({ ...options, limit: 20 }).match(
+        (fetchedNotes) => {
+          setNotes((prev) => {
+            const merged = [
+              ...new Map(
+                [...prev, ...fetchedNotes].map((n) => [n.id, n])
+              ).values(),
+            ]
+            return merged.sort(
+              (a, b) => b.created_at.getTime() - a.created_at.getTime()
+            )
+          })
+          setFetching(false)
         },
         (error) => {
-          dispatch({ type: OperationType.FetchPastNotesError, error })
+          setError(error)
+          setFetching(false)
         }
       )
 
-      new SubscribeNotes(noteService)
-        .execute((note: Note) => {
-          dispatch({ type: OperationType.AddNewNote, note })
+      noteService
+        .subscribeNotes((note: Note) => {
+          setNotes((prev) => {
+            if (prev.some((n) => n.id === note.id)) return prev
+            return [...prev, note].sort(
+              (a, b) => b.created_at.getTime() - a.created_at.getTime()
+            )
+          })
         }, options)
         .match(
-          (subscription) => {
-            console.log('options', options)
-            dispatch({ type: OperationType.SubscribeNotes, subscription })
+          (sub) => {
+            setSubscription(sub)
+            setSubscriptionStatus(SubscriptionStatus.Subscribing)
           },
           (error) => {
-            dispatch({ type: OperationType.SubscriptionError, error })
+            setError(error)
           }
         )
     },
-    [nostrClient, dispatch, status, subscriptionStatus]
+    [
+      authStatus,
+      noteService,
+      subscriptionStatus,
+      setNotes,
+      setSubscription,
+      setSubscriptionStatus,
+      setFetching,
+      setError,
+    ]
   )
 
   const unsubscribe = useCallback(() => {
     if (!subscription) return
     subscription.unsubscribe()
-    dispatch({ type: OperationType.UnsubscribeNotes })
-  }, [subscription, dispatch])
+    setSubscriptionStatus(SubscriptionStatus.Idle)
+    setSubscription(null)
+    setNotes([])
+    setFetching(false)
+    setError(null)
+  }, [
+    subscription,
+    setSubscriptionStatus,
+    setSubscription,
+    setNotes,
+    setFetching,
+    setError,
+  ])
 
   return { subscribe, unsubscribe, notes }
 }

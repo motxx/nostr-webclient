@@ -10,7 +10,6 @@ interface NoteDetailsProps {
   onClose: () => void
   originalNote: NoteType
   onClickAction: (type: PostActionType) => void
-  onToggleFollow: (userId: string) => boolean
   onClickPrevPost?: () => void
   onClickNextPost?: () => void
 }
@@ -20,7 +19,6 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({
   onClose,
   originalNote,
   onClickAction,
-  onToggleFollow,
   onClickPrevPost,
   onClickNextPost,
 }) => {
@@ -72,7 +70,6 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({
             originalNote={originalNote}
             onBackgroundClick={handleBackgroundClick}
             onClickAction={onClickAction}
-            onToggleFollow={onToggleFollow}
           />
         </div>
         {onClickNextPost && (
@@ -85,10 +82,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({
         )}
       </div>
       <div className="hidden md:block w-[35%] h-full z-10 overflow-y-auto">
-        <RepliesThread
-          originalNote={originalNote}
-          onToggleFollow={onToggleFollow}
-        />
+        <RepliesThread originalNote={originalNote} />
       </div>
     </div>
   )

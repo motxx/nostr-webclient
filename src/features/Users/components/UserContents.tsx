@@ -8,10 +8,9 @@ import { useFetchNotes } from '@/components/Timeline/hooks/useFetchNotes'
 
 interface UserContentsProps {
   user: User
-  toggleFollow: (userId: string) => boolean
 }
 
-const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
+const UserContents: React.FC<UserContentsProps> = ({ user }) => {
   const { notes, isLoading } = useInfiniteNotes({
     authorPubkeys: [user.pubkey],
   })
@@ -55,7 +54,7 @@ const UserContents: React.FC<UserContentsProps> = ({ user, toggleFollow }) => {
         )}
         <div>
           <h2 className="text-lg font-bold mb-8 ml-2">ノート</h2>
-          <TimelineStandard notes={notes} onToggleFollow={toggleFollow} />
+          <TimelineStandard notes={notes} />
         </div>
         {(isLoading || isFetchingPastNotes) && (
           <div className="flex justify-center items-center h-16">

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { users } from '@/data/dummy-users'
 import HashSearchInput from './HashSearchInput'
 
 const HashSearchBar: React.FC<{
@@ -12,16 +11,8 @@ const HashSearchBar: React.FC<{
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (hashtags.length === 0 && searchTerm.length > 0) {
-      const filteredUsers = users.filter(
-        (user) =>
-          user.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.userName.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      setSuggestions(filteredUsers)
-    } else {
-      setSuggestions([])
-    }
+    // TODO: Implement actual user search
+    setSuggestions([])
   }, [searchTerm, hashtags.length])
 
   const handleSuggestionClick = (userId: string) => {

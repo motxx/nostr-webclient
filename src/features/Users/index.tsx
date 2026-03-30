@@ -1,38 +1,27 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import UserHeader from './components/UserHeader'
 import UserDescription from './components/UserDescription'
 import UserContents from './components/UserContents'
 import { User } from '@/domain/entities/User'
-import { FetchNpubFromNostrAddress } from '@/domain/use_cases/FetchNpubFromNostrAddress'
-import { FetchUser } from '@/domain/use_cases/FetchUser'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
 import { ResultAsync } from 'neverthrow'
-import { AppContext } from '@/context/AppContext'
-import { AuthStatus } from '@/context/types'
+import { bech32ToHex } from '@/utils/addressConverter'
+import { useAtomValue } from 'jotai'
+import { AuthStatus, authStatusAtom, loggedInUserAtom } from '@/state/auth'
+import { userProfileServiceAtom } from '@/state/services'
 
-interface UserPageProps {
-  isFollowing: boolean
-  toggleFollow: (userId: string) => boolean
-}
-
-const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
-  const {
-    auth: { nostrClient, loggedInUser, status },
-  } = useContext(AppContext)
+const UserPage: React.FC = () => {
+  const authStatus = useAtomValue(authStatusAtom)
+  const loggedInUser = useAtomValue(loggedInUserAtom)
+  const userProfileService = useAtomValue(userProfileServiceAtom)
   const [user, setUser] = useState<User | null>(null)
   const location = useLocation()
 
   useEffect(() => {
-    if (status !== AuthStatus.LoggedIn) {
-      return
-    }
-    if (!nostrClient || !loggedInUser) {
-      throw new Error('NostrClient or loggedInUser is not ready')
-    }
+    if (authStatus !== AuthStatus.LoggedIn) return
+    if (!userProfileService || !loggedInUser) return
 
     const fetchUserData = () => {
-      const userProfileService = new UserProfileService(nostrClient)
       const npubPattern = new RegExp('/user/(npub[^/]+)/?')
       const npubMatch = location.pathname.match(npubPattern)
 
@@ -52,26 +41,28 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
           if (nostrAddress.startsWith('@')) {
             nostrAddress = `_${nostrAddress}`
           }
-          return new FetchNpubFromNostrAddress(userProfileService).execute(
-            nostrAddress
-          )
+          return userProfileService.fetchNpubFromNostrAddress(nostrAddress)
         }
       }
 
       getNpub()
-        .andThen((npub) => new FetchUser(userProfileService).execute(npub))
+        .andThen((npub) =>
+          userProfileService
+            .fetchProfile(npub)
+            .andThen((profile) =>
+              bech32ToHex(npub).map(
+                (pubkey) => new User({ npub, pubkey, profile })
+              )
+            )
+        )
         .match(
-          (user) => {
-            setUser(user)
-          },
-          (error) => {
-            console.error('Failed to fetch user data:', error)
-          }
+          (user) => setUser(user),
+          (error) => console.error('Failed to fetch user data:', error)
         )
     }
 
     fetchUserData()
-  }, [nostrClient, loggedInUser, status, location.pathname])
+  }, [authStatus, userProfileService, loggedInUser, location.pathname])
 
   if (!user) return <div>Loading...</div>
 
@@ -80,14 +71,10 @@ const UserPage: React.FC<UserPageProps> = ({ isFollowing, toggleFollow }) => {
       <UserHeader user={user} />
       <div className="w-full">
         <div className="px-2 sm:px-6 pt-2 pb-10 sm:pt-6">
-          <UserDescription
-            user={user}
-            isFollowing={isFollowing}
-            toggleFollow={toggleFollow}
-          />
+          <UserDescription user={user} />
         </div>
         <div className="w-full flex flex-col items-start">
-          <UserContents user={user} toggleFollow={toggleFollow} />
+          <UserContents user={user} />
         </div>
       </div>
     </div>

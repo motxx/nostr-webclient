@@ -21,12 +21,7 @@ const ExploreOutput: React.FC<ExploreOutputProps> = ({
       case 'timeline':
         return (
           <div className="pt-4 sm:pt-8">
-            <TimelineStandard
-              notes={sortedNotes}
-              onToggleFollow={() => {
-                return true
-              }}
-            />
+            <TimelineStandard notes={sortedNotes} />
           </div>
         )
       case 'image-grid':

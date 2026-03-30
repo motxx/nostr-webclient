@@ -1,12 +1,17 @@
-import { useCallback, useContext, useEffect } from 'react'
-import { AppContext } from '@/context/AppContext'
+import { useCallback, useEffect } from 'react'
+import { useAtomValue } from 'jotai'
 import { useSubscribeNotes } from './useSubscribeNotes'
-import { AuthStatus, SubscriptionStatus } from '@/context/types'
+import { AuthStatus, authStatusAtom } from '@/state/auth'
+import {
+  SubscriptionStatus,
+  timelineSubscriptionStatusAtom,
+  timelineNotesAtom,
+} from '@/state/timeline'
 
 interface UseInfiniteNotesOptions {
   authorPubkeys?: string[]
   limit?: number
-  hashtag?: string // TODO: implement hashtag filtering
+  hashtag?: string
 }
 
 export const useInfiniteNotes = ({
@@ -14,10 +19,9 @@ export const useInfiniteNotes = ({
   limit = 20,
   hashtag,
 }: UseInfiniteNotesOptions) => {
-  const {
-    auth: { status: authStatus },
-    subscription: { status: subscriptionStatus, notes },
-  } = useContext(AppContext)
+  const authStatus = useAtomValue(authStatusAtom)
+  const subscriptionStatus = useAtomValue(timelineSubscriptionStatusAtom)
+  const notes = useAtomValue(timelineNotesAtom)
   const { subscribe, unsubscribe } = useSubscribeNotes()
 
   const isLoading =

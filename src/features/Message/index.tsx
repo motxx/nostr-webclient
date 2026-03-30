@@ -1,24 +1,32 @@
-import React, { useState, useEffect, useMemo, useContext } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import MessageConversation from './components/MessageConversation'
 import MessageCreateChatModal from './components/MessageCreateChatModal'
 import MessageChatSidebar from './components/MessageChatSidebar'
 import { Conversation } from '@/domain/entities/Conversation'
 import { DirectMessage } from '@/domain/entities/DirectMessage'
-import { SendDirectMessage } from '@/domain/use_cases/SendDirectMessage'
-import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
 import { ResultAsync } from 'neverthrow'
-import { FetchUser } from '@/domain/use_cases/FetchUser'
-import { hexToBech32 } from '@/utils/addressConverter'
-import { UserProfileService } from '@/infrastructure/services/UserProfileService'
+import { bech32ToHex, hexToBech32 } from '@/utils/addressConverter'
+import { User } from '@/domain/entities/User'
 import { Participant } from '@/domain/entities/Participant'
 import { useSubscribeMessages } from './hooks/useSubscribeMessages'
-import { AppContext } from '@/context/AppContext'
-import { AuthStatus } from '@/context/types'
+import { useAtomValue } from 'jotai'
+import {
+  AuthStatus,
+  authStatusAtom,
+  nostrClientAtom,
+  loggedInUserAtom,
+} from '@/state/auth'
+import {
+  directMessageServiceAtom,
+  userProfileServiceAtom,
+} from '@/state/services'
 
 const MessagePage: React.FC = () => {
-  const {
-    auth: { nostrClient, loggedInUser, status },
-  } = useContext(AppContext)
+  const authStatus = useAtomValue(authStatusAtom)
+  const nostrClient = useAtomValue(nostrClientAtom)
+  const loggedInUser = useAtomValue(loggedInUserAtom)
+  const directMessageService = useAtomValue(directMessageServiceAtom)
+  const userProfileService = useAtomValue(userProfileServiceAtom)
   const { subscribe, anySubscriptionsExist } = useSubscribeMessages()
   const [selectedConversationIndex, setSelectedConversationIndex] = useState<
     number | null
@@ -38,14 +46,12 @@ const MessagePage: React.FC = () => {
             (conv) => conv.id === conversation.id
           )
           if (existingConversation) {
-            // TODO: Implement Conversations.merge()
             return conversations.map((conv) =>
               conv.id === conversation.id
                 ? conv.addMessage(conversation.messages[0])
                 : conv
             )
           }
-          console.log('conversation', conversation)
           return [...conversations, conversation]
         })
       })
@@ -58,11 +64,14 @@ const MessagePage: React.FC = () => {
   }
 
   const handleSendMessage = (content: string) => {
-    if (selectedConversationIndex === null || status !== AuthStatus.LoggedIn) {
+    if (
+      selectedConversationIndex === null ||
+      authStatus !== AuthStatus.LoggedIn
+    ) {
       return
     }
-    if (!nostrClient || !loggedInUser) {
-      throw new Error('NostrClient or loggedInUser is not ready')
+    if (!directMessageService || !loggedInUser) {
+      throw new Error('Not ready')
     }
 
     const selectedConversation = conversations[selectedConversationIndex]
@@ -74,8 +83,7 @@ const MessagePage: React.FC = () => {
       selectedConversation.subject
     )
 
-    const directMessageService = new DirectMessageService(nostrClient)
-    new SendDirectMessage(directMessageService).execute(newMessage).match(
+    directMessageService.send(newMessage).match(
       () => {},
       (error) => {
         console.error('Failed to send message:', error)
@@ -87,11 +95,9 @@ const MessagePage: React.FC = () => {
     chatName: string,
     participantsPubkeys: string[]
   ) => {
-    if (status !== AuthStatus.LoggedIn) {
-      return
-    }
-    if (!nostrClient || !loggedInUser) {
-      throw new Error('NostrClient or loggedInUser is not ready')
+    if (authStatus !== AuthStatus.LoggedIn) return
+    if (!userProfileService || !loggedInUser) {
+      throw new Error('Not ready')
     }
 
     const conversationId = Conversation.generateId(
@@ -103,11 +109,16 @@ const MessagePage: React.FC = () => {
     )
     if (conversationExists) return
 
-    const userProfileService = new UserProfileService(nostrClient)
     const fetchUsers = ResultAsync.combine(
       participantsPubkeys.map((pubkey) =>
         hexToBech32(pubkey).asyncAndThen((npub) =>
-          new FetchUser(userProfileService).execute(npub)
+          userProfileService
+            .fetchProfile(npub)
+            .andThen((profile) =>
+              bech32ToHex(npub).map(
+                (pk) => new User({ npub, pubkey: pk, profile })
+              )
+            )
         )
       )
     )

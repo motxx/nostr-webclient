@@ -1,19 +1,14 @@
 import React, { useState } from 'react'
 import { FiSend } from 'react-icons/fi'
-import replyData from '@/data/dummy-reply-data'
 import NoteItem from '@/components/NoteItem/NoteItem'
 import PrimaryButton from '@/components/ui-parts/PrimaryButton'
 import { NoteType } from '@/domain/entities/Note'
 
 interface RepliesThreadProps {
   originalNote: NoteType
-  onToggleFollow: (userId: string) => boolean
 }
 
-const RepliesThread: React.FC<RepliesThreadProps> = ({
-  originalNote,
-  onToggleFollow,
-}) => {
+const RepliesThread: React.FC<RepliesThreadProps> = ({ originalNote }) => {
   const [newReply, setNewReply] = useState('')
 
   const handleNewReplyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -26,31 +21,12 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
 
   const handleNewReplySubmit = () => {
     if (newReply.trim()) {
-      replyData.push({
-        id: '109',
-        author: {
-          npub: 'npubexample',
-          pubkey: 'pubkeyexample',
-          profile: {
-            name: 'moti',
-            image: 'https://randomuser.me/api/portraits/men/5.jpg',
-            nostrAddress: '_@motxx.pages.dev',
-          },
-        },
-        text: newReply,
-        created_at: new Date(),
-        replyChildNotes: [],
-        reactions: {
-          likesCount: 0,
-          repostsCount: 0,
-          zapsAmount: 0,
-        },
-        following: true,
-        json: '{"example":"json"}',
-      })
+      // TODO: Implement actual reply posting
       setNewReply('')
     }
   }
+
+  const replies = originalNote.receivedReplyNotes ?? []
 
   return (
     <div className="h-full p-4 overflow-y-auto bg-white dark:bg-black border-gray-200 dark:border-gray-700 border-l">
@@ -60,7 +36,6 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
             ...originalNote,
             media: undefined,
           }}
-          onToggleFollow={onToggleFollow}
           onReply={handleReplyToReply}
         />
       </div>
@@ -82,13 +57,9 @@ const RepliesThread: React.FC<RepliesThreadProps> = ({
       </div>
 
       <div className="text-gray-700 dark:text-gray-300">
-        {replyData.map((reply, index) => (
+        {replies.map((reply, index) => (
           <div key={index} className="mb-4">
-            <NoteItem
-              note={reply}
-              onToggleFollow={onToggleFollow}
-              onReply={handleReplyToReply}
-            />
+            <NoteItem note={reply} onReply={handleReplyToReply} />
           </div>
         ))}
       </div>

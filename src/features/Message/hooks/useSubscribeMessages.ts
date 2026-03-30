@@ -1,37 +1,38 @@
-import { useCallback, useEffect, useContext } from 'react'
-import { DirectMessageService } from '@/infrastructure/services/DirectMessageService'
-import { SubscribeDirectMessages } from '@/domain/use_cases/SubscribeDirectMessages'
+import { useCallback, useEffect } from 'react'
 import { Conversation } from '@/domain/entities/Conversation'
 import { SubscribeDirectMessagesOptions } from '@/domain/repositories/DirectMessageRepository'
-import { AppContext } from '@/context/AppContext'
-import { AuthStatus } from '@/context/types'
+import { useAtomValue } from 'jotai'
+import { AuthStatus, authStatusAtom } from '@/state/auth'
+import { directMessageServiceAtom } from '@/state/services'
+
 const subscriptions: Array<{
   isForever: boolean
   unsubscribe: () => void
 }> = []
 
 export const useSubscribeMessages = () => {
-  const {
-    auth: { nostrClient, status },
-  } = useContext(AppContext)
+  const authStatus = useAtomValue(authStatusAtom)
+  const directMessageService = useAtomValue(directMessageServiceAtom)
 
   const subscribe = useCallback(
     (
       onConversation: (conversation: Conversation) => void,
       options?: SubscribeDirectMessagesOptions
     ) => {
-      if (status !== AuthStatus.ClientReady && status !== AuthStatus.LoggedIn) {
+      if (
+        authStatus !== AuthStatus.ClientReady &&
+        authStatus !== AuthStatus.LoggedIn
+      ) {
         return
       }
-      if (!nostrClient) {
-        throw new Error('NostrClient is not ready')
-      }
+      if (!directMessageService) return
 
-      const subscription = new SubscribeDirectMessages(
-        new DirectMessageService(nostrClient)
-      ).execute(onConversation, {
-        isForever: options?.isForever ?? false,
-      })
+      const subscription = directMessageService.subscribeDirectMessages(
+        onConversation,
+        {
+          isForever: options?.isForever ?? false,
+        }
+      )
       if (subscription.isOk()) {
         subscriptions.push({
           isForever: options?.isForever ?? false,
@@ -45,7 +46,7 @@ export const useSubscribeMessages = () => {
       }
       return subscription
     },
-    [nostrClient, status]
+    [authStatus, directMessageService]
   )
 
   const unsubscribe = useCallback(

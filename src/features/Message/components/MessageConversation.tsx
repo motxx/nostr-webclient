@@ -1,19 +1,18 @@
-import React, { useState, useContext } from 'react'
+import React, { useState } from 'react'
 import { IoMdSend } from 'react-icons/io'
 import { FiArrowLeft } from 'react-icons/fi'
 import Button from '@/components/ui-elements/Button'
 import Input from '@/components/ui-elements/Input'
 import { Conversation } from '@/domain/entities/Conversation'
-import { AppContext } from '@/context/AppContext'
+import { useAtomValue } from 'jotai'
+import { loggedInUserAtom } from '@/state/auth'
 
 const MessageConversation: React.FC<{
   conversation: Conversation
   onSendMessage: (content: string) => void
   onBack: () => void
 }> = ({ conversation, onSendMessage, onBack }) => {
-  const {
-    auth: { loggedInUser },
-  } = useContext(AppContext)
+  const loggedInUser = useAtomValue(loggedInUserAtom)
   const [newMessage, setNewMessage] = useState('')
 
   const handleSend = () => {

@@ -1,12 +1,11 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userIdForDisplay } from '@/utils/addressConverter'
-import { AppContext } from '@/context/AppContext'
+import { useAtomValue } from 'jotai'
+import { loggedInUserAtom } from '@/state/auth'
 
 const NavigationSidebarUserSection: React.FC = () => {
-  const {
-    auth: { loggedInUser },
-  } = useContext(AppContext)
+  const loggedInUser = useAtomValue(loggedInUserAtom)
   const navigate = useNavigate()
 
   return (

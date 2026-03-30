@@ -9,14 +9,12 @@ interface NoteDetailsActionsProps {
   originalNote: NoteType
   onBackgroundClick?: (event: React.MouseEvent<HTMLDivElement>) => void
   onClickAction: (type: PostActionType) => void
-  onToggleFollow: (userId: string) => boolean
 }
 
-const NoteDetails: React.FC<NoteDetailsActionsProps> = ({
+const NoteDetailsActions: React.FC<NoteDetailsActionsProps> = ({
   onBackgroundClick,
   onClickAction,
   originalNote,
-  onToggleFollow,
 }) => {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false)
   const [isRepliesThreadModalOpen, setIsRepliesThreadModalOpen] =
@@ -40,7 +38,6 @@ const NoteDetails: React.FC<NoteDetailsActionsProps> = ({
 
   const handleReplySubmit = (replyContent: string) => {
     console.log('New reply content:', replyContent)
-    // ここで返信の処理を実装します。
   }
 
   return (
@@ -103,16 +100,14 @@ const NoteDetails: React.FC<NoteDetailsActionsProps> = ({
         isOpen={isReplyModalOpen}
         onClose={() => setIsReplyModalOpen(false)}
         onSubmit={handleReplySubmit}
-        onToggleFollow={onToggleFollow}
       />
       <RepliesThreadModal
         originalNote={originalNote}
         onClose={() => setIsRepliesThreadModalOpen(false)}
         showModal={isRepliesThreadModalOpen}
-        onToggleFollow={onToggleFollow}
       />
     </div>
   )
 }
 
-export default NoteDetails
+export default NoteDetailsActions

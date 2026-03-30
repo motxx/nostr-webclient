@@ -2,6 +2,18 @@ const webpack = require('webpack')
 const path = require('path')
 
 module.exports = {
+  jest: {
+    configure: {
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@nostr-dev-kit/ndk$': '<rootDir>/src/test/mocks/ndk.ts',
+        '^nostr-tools$': '<rootDir>/src/test/mocks/nostr-tools.ts',
+        '^nostr-login$': '<rootDir>/src/test/mocks/nostr-login.ts',
+        '^node-emoji$': '<rootDir>/src/test/mocks/node-emoji.ts',
+        '^vis-network/(.*)$': '<rootDir>/src/test/mocks/vis-network.ts',
+      },
+    },
+  },
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
