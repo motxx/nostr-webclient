@@ -30,7 +30,3 @@ This project follows a clean architecture approach, separating concerns into dis
 - `src/utils/`: Utility functions and helpers
 
 The business logic is encapsulated within the domain layer, specifically in `src/domain/use_cases`, which abstracts away the infrastructure layer for better separation of concerns.
-
-## Notes
-
-This project was originally licensed under the MIT License. As of 2024-06-22 (after commit 0efec96), the license has been changed to the AGPL.
